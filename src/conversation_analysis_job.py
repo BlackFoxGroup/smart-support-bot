@@ -19,7 +19,7 @@ from src.config import Settings
 from src.storage.bot_settings import BotSettingsStore
 
 IRAN_TZ = ZoneInfo("Asia/Tehran")
-log = logging.getLogger("smart-support-bot.convo-analysis")
+log = logging.getLogger("blackfox-agent-bot.convo-analysis")
 
 
 async def _resolve_test_chat(
@@ -470,6 +470,28 @@ async def run_conversation_analysis_once(
         return False
 
     target = insights[0]
+    from src.knowledge.source_catalog.questions import fingerprint, is_duplicate_post, record_post
+
+    qfp = fingerprint(target.topic + " ".join(target.sample_needs[:2]))
+    if is_duplicate_post(settings.data_dir, qfp, qfp):
+        await bot.send_message(
+            chat_id=chat_id,
+            text="🧪 Repeated topic already published (fingerprint match). Skipped duplicate.",
+            disable_notification=True,
+        )
+        return False
+
+    from src.knowledge.product_catalogs import get_product, load_product_catalogs
+
+    load_product_catalogs(settings.knowledge_root)
+    inst = get_product("vpn-installer")
+    if inst is not None and not inst.catalog_enabled:
+        await bot.send_message(
+            chat_id=chat_id,
+            text="Product Catalog AI is disabled for vpn-installer. Educational generation skipped.",
+            disable_notification=True,
+        )
+        return False
     if (
         target.occurrences < settings.convo_min_occurrences
         or target.users < settings.convo_min_users
@@ -515,6 +537,8 @@ async def run_conversation_analysis_once(
             success=False,
         )
         return False
+
+    record_post(settings.data_dir, question_fp=qfp, content_fp=qfp, langs=["fa", "en", "ru", "zh"])
 
     summary = (
         "🧪 [تست ۳] خلاصه تحلیل مکالمات کاربران\n\n"

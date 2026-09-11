@@ -151,6 +151,21 @@ class KnowledgeLoader:
         self.index.loaded_files += 1
 
     def _load_faq_markdown(self) -> None:
+        from src.knowledge.source_catalog.faq_canonical import load_canonical, render_faq
+
+        canonical = load_canonical(self.settings.knowledge_root)
+        if canonical and canonical.get("entries"):
+            for lang in LANG_FOLDER:
+                chunks: list[tuple[str, str, str | None]] = []
+                for entry in canonical["entries"]:
+                    if not isinstance(entry, dict):
+                        continue
+                    q, a = render_faq(entry, lang)
+                    if q and a:
+                        chunks.append((q, a, "vpn-installer"))
+                self.index.faq_chunks[lang] = chunks
+            self.index.loaded_files += 1
+            return
         root = self.settings.kb_multilingual_dir
         if not root.is_dir():
             logger.warning("KB dir missing: %s", root)
@@ -244,6 +259,12 @@ class KnowledgeLoader:
         limit = limit_chars or self.settings.knowledge_snippet_chars
         q_tokens = tokenize(query)
         scope = (product_id or "").strip() or None
+        if scope:
+            from src.knowledge.product_catalogs import get_product
+
+            prod = get_product(scope)
+            if prod is not None and not prod.catalog_enabled:
+                return ""
         raw_chunks = list(self.index.faq_chunks.get(lang) or [])
         # Fallback: also search English KB if sparse (only when not product-scoped)
         if not scope and lang != "en" and self.index.faq_chunks.get("en"):

@@ -1032,7 +1032,7 @@ async def _prepare_news_content(
     system_prompt = (
         (rules_prompt or "").strip()
         or (
-            "تو ویراستار خبری کانال تلگرام Black Fox VPN هستی. "
+            "تو ویراستار خبری کانال تلگرام Black Fox Group (محصول VPS to VPN) هستی. "
             "خبر را برای مخاطب فارسی، رسمی و خوانا ادیت کن. "
             "فقط از اطلاعات موجود در متن منبع استفاده کن؛ ادعا اضافه نکن. "
             "هر نکته باید یک جملهٔ کامل و مستقل باشد؛ جملهٔ ناقص ممنوع است. "
@@ -1166,7 +1166,7 @@ def _render_news_caption(news: CandidateNews) -> str:
             "",
             f"🔗 منبع: {html.escape(source_name)} | {ref}",
             "",
-            "🦊 Black Fox VPN | @blackFoxVPNN",
+            "🦊 Black Fox Group | VPS to VPN | @blackFoxVPNN",
         ]
     )
     caption = "\n".join(lines)
@@ -1341,7 +1341,7 @@ async def run_social_news_job(
     bot: Bot,
     bot_settings: BotSettingsStore | None = None,
 ) -> None:
-    log = logging.getLogger("smart-support-bot.social-news")
+    log = logging.getLogger("blackfox-agent-bot.social-news")
     sources = _load_sources(settings.project_root)
     catchup_done = False
 
@@ -1450,7 +1450,7 @@ async def run_social_news_once(
     bot_settings: BotSettingsStore | None = None,
 ) -> bool:
     """One-shot publish attempt (manual/ops). Returns True if a post was sent."""
-    log = logging.getLogger("smart-support-bot.social-news")
+    log = logging.getLogger("blackfox-agent-bot.social-news")
     sources = _load_sources(settings.project_root)
     chat_id = settings.social_news_chat_id
     rules = None

@@ -32,6 +32,13 @@ def test_validate_media_same_product_and_ref(tmp_path) -> None:
         path=str(img),
         product_id="project-agent-hub",
         unit_id="media:project-agent-hub:script",
+        feature_ids=["script_cli"],
+        score=14.0,
+    )
+    weak = MediaRef(
+        path=str(img),
+        product_id="project-agent-hub",
+        unit_id="media:project-agent-hub:script",
         score=3.0,
     )
     bad = MediaRef(
@@ -43,22 +50,49 @@ def test_validate_media_same_product_and_ref(tmp_path) -> None:
     assert validate_media_for_response(
         ok,
         product_id="project-agent-hub",
+        knowledge_refs=["feature:project-agent-hub:script_cli"],
+        project_root=tmp_path,
+    )
+    # Media unit ids in knowledge_refs alone must not auto-pass low scores.
+    assert not validate_media_for_response(
+        weak,
+        product_id="project-agent-hub",
         knowledge_refs=["media:project-agent-hub:script"],
         project_root=tmp_path,
     )
     assert not validate_media_for_response(
         bad,
         product_id="project-agent-hub",
-        knowledge_refs=["media:project-agent-hub:script"],
+        knowledge_refs=["feature:project-agent-hub:script_cli"],
         project_root=tmp_path,
     )
     paths = existing_media_paths(
         [ok, bad],
         product_id="project-agent-hub",
-        knowledge_refs=["media:project-agent-hub:script"],
+        knowledge_refs=["feature:project-agent-hub:script_cli"],
         project_root=tmp_path,
     )
     assert paths == [img]
+
+
+def test_ambiguous_backup_no_media() -> None:
+    from pathlib import Path
+
+    from src.knowledge.catalog_rag import retrieve_catalog_context
+    from src.knowledge.product_catalogs import load_product_catalogs
+
+    root = Path(__file__).resolve().parents[1]
+    load_product_catalogs(root / "knowledge")
+    r = retrieve_catalog_context(
+        "برنامه سیستم backup هم داره؟",
+        lang="fa",
+        project_root=root,
+        product_id="vpn-installer",
+    )
+    assert r.needs_clarification is True
+    assert r.attach_media is False
+    assert r.media_paths == []
+    assert r.clarifying_question
 
 
 def test_append_and_replace(tmp_path) -> None:

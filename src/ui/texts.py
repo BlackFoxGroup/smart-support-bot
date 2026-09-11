@@ -344,7 +344,7 @@ def help_text(lang: Lang) -> str:
     name = get_bot_display_name()
     table = {
         "fa": (
-            f"من {name} هستم — پشتیبانی محصول Black Fox VPN.\n\n"
+            f"من {name} هستم — پشتیبانی محصول VPS to VPN از Black Fox Group.\n\n"
             "• از منو کاتالوگ محصول را انتخاب کنید\n"
             "• داخل همان محصول، «سوال از AI» را بزنید (پاسخ‌ها برای همان دسته است)\n"
             "• برای منوی اصلی دستور /menu را بفرستید\n"
@@ -353,7 +353,7 @@ def help_text(lang: Lang) -> str:
             f"پشتیبانی: {SUPPORT_HANDLE}"
         ),
         "en": (
-            f"I'm {name} — Black Fox VPN product support.\n\n"
+            f"I'm {name} — VPS to VPN product support by Black Fox Group.\n\n"
             "• Open a product catalog from the menu\n"
             "• Inside that product, tap Ask AI (answers stay in that category)\n"
             "• /menu — main menu\n"
@@ -362,7 +362,7 @@ def help_text(lang: Lang) -> str:
             f"Support: {SUPPORT_HANDLE}"
         ),
         "ru": (
-            f"Я {name} — поддержка продукта Black Fox VPN.\n\n"
+            f"Я {name} — поддержка продукта VPS to VPN (Black Fox Group).\n\n"
             "• Откройте каталог продукта в меню\n"
             "• Внутри продукта нажмите «Спросить AI» (ответы по этой категории)\n"
             "• /menu — главное меню\n"
@@ -371,7 +371,7 @@ def help_text(lang: Lang) -> str:
             f"Поддержка: {SUPPORT_HANDLE}"
         ),
         "zh": (
-            f"我是 {name} — Black Fox VPN 产品支持。\n\n"
+            f"我是 {name} — Black Fox Group 的 VPS to VPN 产品支持。\n\n"
             "• 从菜单打开产品目录\n"
             "• 在该产品内点「向 AI 提问」（仅回答该分类）\n"
             "• /menu — 主菜单\n"
@@ -857,30 +857,30 @@ def bot_intro(lang: Lang) -> str:
     name = get_bot_display_name()
     table = {
         "fa": (
-            f"من {name} هستم — دستیار پشتیبانی محصول Black Fox VPN در تلگرام.\n"
+            f"من {name} هستم — دستیار پشتیبانی محصول VPS to VPN در تلگرام.\n"
             "اکانت من: @BlackFox_Agent_Bot\n\n"
-            "محصول Black Fox یک نصب‌کننده عملیاتی برای راه‌اندازی و مدیریت WireGuard و پنل 3X-UI "
+            "محصول VPS to VPN از Black Fox Group یک نصب‌کننده عملیاتی برای راه‌اندازی و مدیریت WireGuard و پنل 3X-UI "
             "روی VPS شماست (نه VPN مصرفی با دکمهٔ وصل شو).\n\n"
             "هر سؤالی دارید از من بپرسید؛ از منوی پایین هم می‌توانید موضوع را انتخاب کنید."
         ),
         "en": (
-            f"I'm {name} — the Telegram product support assistant for Black Fox VPN.\n"
+            f"I'm {name} — the Telegram product support assistant for VPS to VPN.\n"
             "My account: @BlackFox_Agent_Bot\n\n"
-            "Black Fox is an operations installer for WireGuard and the 3X-UI panel on your VPS "
+            "VPS to VPN by Black Fox Group is an operations installer for WireGuard and the 3X-UI panel on your VPS "
             "(not a consumer “connect” VPN app).\n\n"
             "Ask me anything — or pick a menu topic below."
         ),
         "ru": (
-            f"Я {name} — помощник поддержки Black Fox VPN в Telegram.\n"
+            f"Я {name} — помощник поддержки VPS to VPN в Telegram.\n"
             "Мой аккаунт: @BlackFox_Agent_Bot\n\n"
-            "Black Fox — операционный установщик WireGuard и панели 3X-UI на вашем VPS "
+            "VPS to VPN (Black Fox Group) — операционный установщик WireGuard и панели 3X-UI на вашем VPS "
             "(не бытовой VPN).\n\n"
             "Спрашивайте меня о чём угодно — или выберите тему в меню."
         ),
         "zh": (
-            f"我是 {name} — Black Fox VPN 的 Telegram 产品支持助手。\n"
+            f"我是 {name} — VPS to VPN 的 Telegram 产品支持助手。\n"
             "我的账号：@BlackFox_Agent_Bot\n\n"
-            "Black Fox 是用于在您的 VPS 上部署管理 WireGuard 与 3X-UI 面板的操作安装器"
+            "VPS to VPN（Black Fox Group）是用于在您的 VPS 上部署管理 WireGuard 与 3X-UI 面板的操作安装器"
             "（不是消费级一键 VPN）。\n\n"
             "有问题尽管问我，也可从下方菜单选择主题。"
         ),

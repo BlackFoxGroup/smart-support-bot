@@ -163,11 +163,14 @@ async def _show_product_detail(
         "en"
     ) or "—"
     on = data.get("enabled", True)
+    cat_on = data.get("catalog_enabled", True)
     body = (
         f"🏷 {data.get('menu_emoji') or ''} {name}\n"
         f"id: `{product_id}`\n"
         f"{'وضعیت منو' if (lang or '').startswith('fa') else 'Menu'}: "
-        f"{'روشن' if on else 'خاموش' if (lang or '').startswith('fa') else ('on' if on else 'off')}\n\n"
+        f"{'روشن' if on else 'خاموش' if (lang or '').startswith('fa') else ('on' if on else 'off')}\n"
+        f"{'کاتالوگ AI' if (lang or '').startswith('fa') else 'Product Catalog'}: "
+        f"{'🟢 Enabled' if cat_on else '🔴 Disabled'}\n\n"
         f"{summary}"
     )
     await message.answer(
@@ -210,8 +213,7 @@ _EDIT_FIELD_BY_ACTION = {
     "edit_slot_kind": "kind",
     "edit_panel_url": "base_url",
     "edit_panel_token": "api_token",
-    "edit_panel_port": "required_port",
-    "edit_panel_inbound": "inbound_id",
+    "edit_panel_inbound": "inbound_ids",
 }
 
 _ASK_MSG = {
@@ -222,8 +224,7 @@ _ASK_MSG = {
     "kind": "ask_slot_kind",
     "base_url": "ask_panel_url",
     "api_token": "ask_panel_token",
-    "required_port": "ask_panel_port",
-    "inbound_id": "ask_panel_inbound",
+    "inbound_ids": "ask_panel_inbound",
 }
 
 
@@ -773,6 +774,7 @@ def setup_admin_settings_router(
         | ak.texts("products_edit_emoji")
         | ak.texts("products_edit_summary")
         | ak.texts("products_toggle")
+        | ak.texts("products_catalog_ai")
         | ak.texts("products_delete")
         | ak.texts("products_build_catalog")
         | ak.texts("products_catalog_enrich")
@@ -823,8 +825,6 @@ def setup_admin_settings_router(
         | ak.texts("edit_panel_url_legacy")
         | ak.texts("edit_panel_token")
         | ak.texts("edit_panel_token_legacy")
-        | ak.texts("edit_panel_port")
-        | ak.texts("edit_panel_port_legacy")
         | ak.texts("edit_panel_inbound")
         | ak.texts("edit_panel_inbound_legacy")
         | ak.texts("backup_settings")
@@ -1388,6 +1388,7 @@ def setup_admin_settings_router(
             "products_edit_emoji",
             "products_edit_summary",
             "products_toggle",
+            "products_catalog_ai",
             "products_delete",
             "products_build_catalog",
             "products_catalog_enrich",
@@ -1399,6 +1400,23 @@ def setup_admin_settings_router(
             if not pid:
                 await bot_settings.set_session(uid, {"mode": "products_hub"})
                 await _show_products_hub(message, settings, lang)
+                return
+            if action == "products_catalog_ai":
+                data = next(
+                    (
+                        d
+                        for d in list_all_product_dicts(settings.knowledge_root)
+                        if str(d.get("product_id")) == pid
+                    ),
+                    None,
+                )
+                cur = bool((data or {}).get("catalog_enabled", True))
+                update_product_fields(settings.knowledge_root, pid, catalog_enabled=not cur)
+                await audit.write("product_catalog_ai", admin_id=uid, detail=f"{pid}:{not cur}")
+                await bot_settings.set_session(
+                    uid, {"mode": "product_detail", "product_id": pid}
+                )
+                await _show_product_detail(message, settings, lang, pid)
                 return
             if action == "products_toggle":
                 data = next(
@@ -1694,7 +1712,7 @@ def setup_admin_settings_router(
         if action in _EDIT_FIELD_BY_ACTION:
             field = _EDIT_FIELD_BY_ACTION[action]
             sess = await bot_settings.get_session(uid)
-            if field in {"base_url", "api_token", "required_port", "inbound_id"}:
+            if field in {"base_url", "api_token", "inbound_ids"}:
                 panel = await bot_settings.get_panel()
                 if field == "api_token":
                     ask_body = _ask_with_current(
@@ -1702,10 +1720,8 @@ def setup_admin_settings_router(
                     )
                 elif field == "base_url":
                     ask_body = _ask_with_current(lang, _ASK_MSG[field], panel.base_url)
-                elif field == "required_port":
-                    ask_body = _ask_with_current(lang, _ASK_MSG[field], panel.required_port)
                 else:
-                    ask_body = _ask_with_current(lang, _ASK_MSG[field], panel.inbound_id)
+                    ask_body = _ask_with_current(lang, _ASK_MSG[field], panel.inbound_ids)
                 await bot_settings.set_session(
                     uid, {"mode": "edit_panel", "panel_field": field}
                 )
@@ -3233,10 +3249,8 @@ def setup_admin_settings_router(
                     fields["api_token"] = text
                 elif field == "base_url":
                     fields["base_url"] = text
-                elif field == "required_port":
-                    fields["required_port"] = int(text)
-                elif field == "inbound_id":
-                    fields["inbound_id"] = int(text)
+                elif field == "inbound_ids":
+                    fields["inbound_ids"] = text
                 else:
                     await message.answer(
                         "فیلد نامعتبر." if lang == "fa" else "Invalid field.",
@@ -3245,11 +3259,26 @@ def setup_admin_settings_router(
                     return
             except ValueError:
                 await message.answer(
-                    "عدد معتبر بفرستید." if lang == "fa" else "Send a valid number.",
+                    (
+                        "شناسه Inbound معتبر بفرستید (مثل 1 یا 1,2,5)."
+                        if lang == "fa"
+                        else "Send valid inbound ID(s), e.g. 1 or 1,2,5."
+                    ),
                     reply_markup=ak.cancel_keyboard(lang),
                 )
                 return
-            panel = await bot_settings.update_panel(**fields)
+            try:
+                panel = await bot_settings.update_panel(**fields)
+            except ValueError:
+                await message.answer(
+                    (
+                        "شناسه Inbound معتبر بفرستید (مثل 1 یا 1,2,5)."
+                        if lang == "fa"
+                        else "Send valid inbound ID(s), e.g. 1 or 1,2,5."
+                    ),
+                    reply_markup=ak.cancel_keyboard(lang),
+                )
+                return
             await audit.write(
                 "update_panel",
                 admin_id=uid,

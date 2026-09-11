@@ -1,4 +1,4 @@
-"""Black Fox VPN Telegram support bot — long-polling entrypoint."""
+"""VPS to VPN Telegram support bot — long-polling entrypoint."""
 
 from __future__ import annotations
 
@@ -136,6 +136,24 @@ async def run() -> None:
     knowledge = KnowledgeLoader(settings)
     knowledge.load()
 
+    if settings.source_catalog_sync_on_start:
+        try:
+            from src.knowledge.source_catalog.pipeline import run_sync
+
+            payload = run_sync(
+                settings.vps_to_vpn_source,
+                settings.knowledge_root,
+                settings.data_dir,
+                force=False,
+            )
+            log.info(
+                "source catalog sync: features=%s missing=%s",
+                (payload.get("stats") or {}).get("features"),
+                (payload.get("validation") or {}).get("missing"),
+            )
+        except Exception:  # noqa: BLE001
+            log.exception("source catalog sync skipped")
+
     products = load_product_catalogs(settings.knowledge_root)
     log.info("Product catalogs ready: %s", [p.product_id for p in products])
     try:
@@ -236,7 +254,7 @@ async def run() -> None:
         active.name if active else "(none)",
     )
     if settings.nightly_enabled:
-        base, token, _, _ = await bot_settings.effective_panel(settings)
+        base, token, _inbound_ids = await bot_settings.effective_panel(settings)
         if not base or not token:
             log.error(
                 "Nightly job enabled but panel settings are incomplete: PANEL_BASE_URL/PANEL_API_TOKEN"

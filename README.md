@@ -1,18 +1,18 @@
 <p align="center">
-  <img src="docs/assets/logo.jpg" alt="Black Fox VPN Logo" width="96">
+  <img src="docs/assets/logo.png" alt="VPS to VPN — Black Fox Group" width="96">
 </p>
 
 <h1 align="center">Smart Support Bot</h1>
 
 <p align="center">
-  <strong>Telegram product support for Black Fox VPN Installer</strong><br>
+  <strong>Telegram product support for VPS to VPN by Black Fox Group</strong><br>
   Features · Languages · Catalog · Setup · Deploy · Safety
 </p>
 
 <p align="center">
   <a href="https://foxnext.net">Website</a> •
   <a href="https://foxnext.net/downloads/Black-Fox-Config-Builder.apk">Black-Fox-Config-Builder.apk</a> •
-  <a href="https://github.com/balckfoxgroup/blackfox-vpn-installer">Black Fox Vpn Installer</a> •
+  <a href="https://github.com/balckfoxgroup/blackfox-vpn-installer">VPS to VPN</a> •
   <a href="https://github.com/balckfoxgroup/blackfox-config-builder">Black Fox Config Builder</a> •
   <a href="https://t.me/blackFoxVPNN">Telegram</a>
 </p>
@@ -36,7 +36,7 @@
 
 ## Overview / معرفی
 
-Async Telegram support bot for **Black Fox VPN Installer** (ops toolkit).  
+Async Telegram support bot for **VPS to VPN** by **Black Fox Group** (Server Installer & Manager) (ops toolkit).  
 Long polling · **aiogram 3** · OpenAI-compatible chat API · local multilingual knowledge.
 
 Not an image/video/codegen bot.
@@ -49,7 +49,7 @@ Archive root folder: `Smart Support Bot/`
 
 <div dir="rtl">
 
-ربات پشتیبانی تلگرام برای **Black Fox VPN Installer** — اجرا به‌صورت async با **aiogram 3**، Long Polling، API سازگار با OpenAI و پایگاه دانش چندزبانهٔ محلی.
+ربات پشتیبانی تلگرام برای برنامه **VPS to VPN** از **Black Fox Group** (Server Installer & Manager) — اجرا به‌صورت async با **aiogram 3**، Long Polling، API سازگار با OpenAI و پایگاه دانش چندزبانهٔ محلی.
 
 ربات تولید تصویر/ویدیو/کد عمومی نیست؛ تمرکز روی پشتیبانی محصول است.
 
@@ -119,11 +119,13 @@ Smart Support Bot/
 │   └── product_guides/
 ├── data/.gitkeep
 ├── media/
-├── docs/assets/logo.jpg
+├── docs/assets/logo.png
 ├── deploy/
 │   ├── install.sh
 │   ├── smart-support-bot.service
 │   └── smart-support-bot-watchdog.service
+├── src/manager/            # Smart Support Manager (local UI)
+├── Start-Smart-Support-Manager.bat
 ├── requirements.txt
 ├── .env.example
 └── README.md
@@ -283,6 +285,45 @@ sudo bash "/opt/Smart Support Bot/deploy/install.sh"
 - VPS فقط از طریق شرکای FoxNext در foxnext.net
 - فروش لایسنس بدون عدد ساختگی؛ لینک سایت و @HiBlackFoxVpn
 - هرگز `.env`، فایل‌های runtime در `data/` یا session تلگرام را commit نکنید
+
+</div>
+
+## Recent changes / تغییرات اخیر
+
+- Live product catalog from the desktop app source (scan → validate → version → activate). Previous ACTIVE catalog stays if upload fails.
+- Catalog AI can be turned OFF per product in Telegram Settings; RAG and catalog images are skipped, data is kept.
+- Incremental media: hash, duplicate skip, queue with retry of one file, LOCAL DELETED does not auto-delete the server file.
+- **Smart Support Manager** desktop UI for catalog, media, SFTP settings, and upload queue.
+
+<div dir="rtl">
+
+- کاتالوگ زنده از سورس برنامه دسکتاپ (اسکن تا فعال‌سازی). اگر آپلود شکست بخورد نسخهٔ ACTIVE قبلی می‌ماند.
+- کاتالوگ AI را می‌توان برای هر محصول خاموش کرد؛ داده پاک نمی‌شود.
+- رسانهٔ افزایشی: اثرانگشت، جلوگیری از تکراری، صف با Retry تک‌فایل. حذف محلی فایل سرور را خودکار پاک نمی‌کند.
+- برنامهٔ **Smart Support Manager** برای کاتالوگ، عکس، تنظیم SFTP و صف آپلود.
+
+</div>
+
+## Smart Support Manager / اسکریپت مدیر
+
+Windows: double-click `Start-Smart-Support-Manager.bat` in the project root. It starts the local server and opens `http://127.0.0.1:8765`.
+
+First screen: choose **فارسی / English / Русский / 中文**.  
+Dashboard shows a short usage guide. Product actions (Scan, Auto-map, Build catalog, Queue, Rollback) sit in one row.
+
+```powershell
+py -3 -m src.manager
+```
+
+Needs `py -3` (Python 3). Secrets stay in `.env` / Manager Settings — never in Git.
+
+<div dir="rtl">
+
+در ویندوز روی `Start-Smart-Support-Manager.bat` در ریشهٔ پروژه دوبار کلیک کنید. سرور محلی بالا می‌آید و مرورگر باز می‌شود.
+
+ابتدا زبان را انتخاب کنید. داشبورد راهنمای کوتاه دارد. دکمه‌های محصول در یک ردیف‌اند.
+
+رمزها فقط در `.env` یا تنظیمات Manager؛ در گیت‌هاب نیستند.
 
 </div>
 

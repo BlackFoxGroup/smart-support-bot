@@ -215,6 +215,10 @@ _LABELS: dict[str, dict[Lang, str]] = {
         "fa": "👁 روشن/خاموش در منو",
         "en": "👁 Toggle Menu Visibility",
     },
+    "products_catalog_ai": {
+        "fa": "📗 کاتالوگ محصول AI",
+        "en": "📗 Product Catalog AI",
+    },
     "products_delete": {
         "fa": "🗑 حذف محصول",
         "en": "🗑 Delete Product",
@@ -390,14 +394,6 @@ _LABELS: dict[str, dict[Lang, str]] = {
     "edit_panel_token_legacy": {
         "fa": "🔑 ویرایش API پنل",
         "en": "🔑 Edit Panel API",
-    },
-    "edit_panel_port": {
-        "fa": "🔌 پورت کانفیگ",
-        "en": "🔌 Config Port",
-    },
-    "edit_panel_port_legacy": {
-        "fa": "🔌 ویرایش پورت کانفیگ",
-        "en": "🔌 Edit Config Port",
     },
     "edit_panel_inbound": {
         "fa": "📥 Inbound ID",
@@ -677,7 +673,7 @@ _UI_MSGS: dict[str, dict[Lang, str]] = {
             "می‌توانم همهٔ بخش‌های موجود را ویرایش کنم:\n"
             "• اطلاعات اصلی (نام/سایت/کانال/گروه/پشتیبانی)\n"
             "• پیام‌ها: کانال، گروه، اکانت، اکانت تست (اسلات‌ها، زمان، متن، قوانین، روشن/خاموش)\n"
-            "• پنل (آدرس/پورت/Inbound)\n"
+            "• پنل (آدرس/API/Inbound)\n"
             "• سلامت روزانه / ادمین‌ها / ستون کیبورد\n"
             "• ساخت کلید با کدنویسی AI (safe-change حدود ۱ دقیقه)\n"
             "• آموزش محصول، و به‌روز کردن دانش تمام محصولات\n"
@@ -1068,13 +1064,9 @@ _UI_MSGS: dict[str, dict[Lang, str]] = {
         "fa": "🔑 توکن API پنل را بفرستید (رمزنگاری می‌شود):",
         "en": "🔑 Send panel API token (stored encrypted):",
     },
-    "ask_panel_port": {
-        "fa": "🔌 پورت ساخت کانفیگ را بفرستید (مثل 443):",
-        "en": "🔌 Send config port (e.g. 443):",
-    },
     "ask_panel_inbound": {
-        "fa": "📥 شناسه Inbound را بفرستید (عدد):",
-        "en": "📥 Send inbound ID (number):",
+        "fa": "📥 شناسه Inbound را بفرستید (یک عدد یا چند عدد با کاما، مثل 1,2,5):",
+        "en": "📥 Send inbound ID(s) — one number or comma-separated, e.g. 1,2,5:",
     },
     "saved_ok": {
         "fa": "✅ ذخیره شد.",
@@ -1347,6 +1339,7 @@ def product_detail_keyboard(lang: str | None = "en") -> ReplyKeyboardMarkup:
             "products_edit_emoji",
             "products_edit_summary",
             "products_toggle",
+            "products_catalog_ai",
             "products_build_catalog",
             "products_product_chat",
             "products_delete",
@@ -1477,7 +1470,6 @@ def panel_edit_keyboard(lang: str | None = "en") -> ReplyKeyboardMarkup:
         [
             "edit_panel_url",
             "edit_panel_token",
-            "edit_panel_port",
             "edit_panel_inbound",
             "settings_back",
         ],

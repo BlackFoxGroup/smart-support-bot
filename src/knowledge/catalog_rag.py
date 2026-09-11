@@ -13,6 +13,8 @@ from pathlib import Path
 from typing import Any
 
 from src.knowledge.product_catalogs import ProductCatalog, get_product_catalogs
+from src.knowledge.source_catalog.pipeline import load_matrix
+from src.knowledge.source_catalog.schema import STATUS_DEPRECATED, STATUS_LIVE
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +60,136 @@ TOPIC_ALIASES: dict[str, tuple[str, ...]] = {
     "نود": ("add_node_servers", "node"),
     "اگزیت": ("add_exit_servers", "exit"),
     "تونل": ("add_tunnel_servers", "tunnel"),
+    # Disambiguated backup senses only — bare "backup" must NOT alias to mesh/telegram.
+    "backup panel": ("move_central", "panel_manager", "restore_panel", "backup_panel"),
+    "panel backup": ("move_central", "backup_panel", "restore_panel"),
+    "بکاپ پنل": ("move_central", "backup_panel", "restore_panel"),
+    "بک‌آپ پنل": ("move_central", "backup_panel", "restore_panel"),
+    "restore panel": ("move_central", "restore_panel", "backup_panel"),
+    "panel manager": ("move_central", "panel_manager", "backup_panel"),
+    "backup path": ("mesh_servers", "mesh_deploy", "ssh_protected"),
+    "backup paths": ("mesh_servers", "mesh_deploy", "ssh_protected"),
+    "مسیر پشتیبان": ("mesh_servers", "mesh_deploy", "ssh_protected"),
+    "مسیرهای پشتیبان": ("mesh_servers", "mesh_deploy", "ssh_protected"),
+    "install backup paths": ("mesh_servers", "mesh_deploy"),
+    "ssh protected backup": ("mesh_servers", "ssh_protected", "mesh_deploy"),
+    "move bot": ("add_telegram_move", "telegram_move", "mirza"),
+    "انتقال ربات": ("add_telegram_move", "telegram_move", "mirza"),
+    "update mirza": ("add_telegram_update_mirza", "mirza_update"),
+    "آپدیت میرزا": ("add_telegram_update_mirza", "mirza_update"),
 }
+
+# Tokens that inflate scores without naming a product surface.
+_STOPWORD_TOKENS = frozenset(
+    {
+        "برنامه",
+        "سیستم",
+        "داره",
+        "دارد",
+        "آیا",
+        "ایا",
+        "هم",
+        "چی",
+        "چه",
+        "یک",
+        "does",
+        "have",
+        "has",
+        "is",
+        "there",
+        "any",
+        "the",
+        "and",
+        "for",
+        "with",
+        "this",
+        "that",
+        "from",
+        "into",
+        "also",
+        "yes",
+        "no",
+    }
+)
+
+_BACKUP_TOKEN_FAMILY = frozenset(
+    {
+        "backup",
+        "backups",
+        "بکاپ",
+        "بکآپ",
+        "پشتیبان",
+    }
+)
+
+# Feature → backup sense cluster (vpn-installer).
+_BACKUP_FEATURE_CLUSTER: dict[str, str] = {
+    "move_central": "backup_panel",
+    "mesh_servers": "backup_mesh_link",
+    "link_test": "backup_mesh_link",
+    "add_telegram_move": "backup_telegram_bot",
+    "add_telegram_update_mirza": "backup_telegram_bot",
+}
+
+_CLUSTER_PRIMARY_SLOTS: dict[str, tuple[str, ...]] = {
+    "backup_panel": ("panel-manager", "restore-panel", "move-central"),
+    "backup_mesh_link": ("mesh-backup-paths", "mesh-deploy", "mesh-links"),
+    "backup_telegram_bot": ("telegram-move", "mirza-update"),
+}
+
+_CLUSTER_DISAMBIG_CUES: dict[str, tuple[str, ...]] = {
+    "backup_panel": (
+        "panel backup",
+        "backup panel",
+        "restore panel",
+        "panel manager",
+        "move central",
+        "path a",
+        "path b",
+        "بکاپ پنل",
+        "بکآپ پنل",
+        "بازیابی پنل",
+        "پنل منیجر",
+        "انتقال سنترال",
+    ),
+    "backup_mesh_link": (
+        "backup path",
+        "backup paths",
+        "install backup",
+        "ssh_protected",
+        "ssh protected",
+        "mesh backup",
+        "مسیر پشتیبان",
+        "مسیرهای پشتیبان",
+        "لینک پشتیبان",
+        "مش",
+        "mesh",
+        "server connection",
+    ),
+    "backup_telegram_bot": (
+        "move bot",
+        "telegram bot",
+        "mirza",
+        "update mirza",
+        "انتقال ربات",
+        "ربات تلگرام",
+        "میرزا",
+        "smart support",
+    ),
+}
+
+_CAPABILITY_YESNO = (
+    "هم داره",
+    "داره؟",
+    "داره",
+    "دارد؟",
+    "دارد",
+    "آیا",
+    "does it have",
+    "is there",
+    "do you have",
+    "any backup",
+)
 
 EDU_HINTS = (
     "آموزش",
@@ -172,15 +303,98 @@ class CatalogRetrieval:
     prompt_block: str
     media_units: list[CatalogUnit] = field(default_factory=list)
     attach_media: bool = False
+    needs_clarification: bool = False
+    clarifying_question: str | None = None
+    dominant_cluster: str | None = None
 
 
 def _norm(text: str) -> str:
     t = (text or "").strip().lower().replace("‌", "")
+    # Unify common Persian backup spellings for matching only.
+    t = t.replace("بک آپ", "بکاپ").replace("بک-آپ", "بکاپ")
+    t = t.replace("بکآپ", "بکاپ")
     return re.sub(r"\s+", " ", t)
 
 
 def _tokens(text: str) -> list[str]:
-    return [t for t in re.findall(r"[\w\u0600-\u06ff]+", _norm(text)) if len(t) >= 2]
+    raw = re.findall(r"[\w\u0600-\u06ff]+", _norm(text))
+    out: list[str] = []
+    for t in raw:
+        t = t.strip("؟?!.،,;:…")
+        if len(t) >= 2:
+            out.append(t)
+    return out
+
+
+def _query_mentions_backup(q: str) -> bool:
+    n = _norm(q)
+    if "backup" in n or "بکاپ" in n or "پشتیبان" in n:
+        # "پشتیبانی" alone is support contact, not backup.
+        if "پشتیبانی" in n and "بکاپ" not in n and "backup" not in n and "پشتیبان " not in n and "مسیر پشتیبان" not in n:
+            if "پشتیبان" not in n.replace("پشتیبانی", ""):
+                return False
+        return True
+    return False
+
+
+def _cue_cluster(q: str) -> str | None:
+    n = _norm(q)
+    hits: list[str] = []
+    for cluster, cues in _CLUSTER_DISAMBIG_CUES.items():
+        if any(c in n for c in cues):
+            hits.append(cluster)
+    if len(hits) == 1:
+        return hits[0]
+    return None
+
+
+def _clusters_from_evidence(evidence: list[CatalogUnit]) -> set[str]:
+    found: set[str] = set()
+    for u in evidence:
+        for fid in u.feature_ids or []:
+            c = _BACKUP_FEATURE_CLUSTER.get(fid)
+            if c:
+                found.add(c)
+        uid = (u.unit_id or "").split(":")[-1]
+        c2 = _BACKUP_FEATURE_CLUSTER.get(uid)
+        if c2:
+            found.add(c2)
+    return found
+
+
+def backup_clarifying_question(lang: str) -> str:
+    if (lang or "").startswith("fa"):
+        return (
+            "چند جور بک‌آپ/پشتیبان در VPN Installer هست. منظورتان کدام است؟\n"
+            "۱) Backup / Restore پنل (Panel manager / Move Central)\n"
+            "۲) مسیر پشتیبان لینک مش (Install backup paths / ssh_protected_backup)\n"
+            "۳) بک‌آپ ربات تلگرام (Move Bot / Update Mirza)"
+        )
+    return (
+        "VPN Installer has several backup-related paths. Which do you mean?\n"
+        "1) Panel Backup / Restore (Panel manager / Move Central)\n"
+        "2) Mesh backup link paths (Install backup paths / ssh_protected_backup)\n"
+        "3) Telegram bot backup (Move Bot / Update Mirza)"
+    )
+
+
+def is_capability_yesno(query: str) -> bool:
+    q = _norm(query)
+    return any(h in q for h in _CAPABILITY_YESNO)
+
+
+def is_ambiguous_backup_retrieval(query: str, evidence: list[CatalogUnit]) -> bool:
+    if not _query_mentions_backup(query):
+        return False
+    if _cue_cluster(query):
+        return False
+    clusters = _clusters_from_evidence(evidence)
+    if len(clusters) >= 2:
+        return True
+    # Bare "does it have backup?" with no disambiguator → always clarify.
+    if is_capability_yesno(query) or len(clusters) != 1:
+        return True
+    return False
 
 
 def expand_query(query: str) -> str:
@@ -224,6 +438,8 @@ def _feature_body(feat: dict[str, Any], lang: str) -> str:
 def build_catalog_units(*, lang: str = "fa") -> list[CatalogUnit]:
     units: list[CatalogUnit] = []
     for cat in get_product_catalogs():
+        if not cat.catalog_enabled:
+            continue
         # Product overview unit
         prod_title = cat.title.get(lang) or cat.title.get("en") or cat.product_id
         prod_body = (
@@ -332,7 +548,111 @@ def build_catalog_units(*, lang: str = "fa") -> list[CatalogUnit]:
                     media_path=rel,
                 )
             )
+
+    units.extend(_units_from_source_matrix(lang))
+    units.extend(_units_from_live_media(lang))
     return units
+
+
+def _units_from_live_media(lang: str) -> list[CatalogUnit]:
+    from src.config import DATA_DIR, KNOWLEDGE_ROOT
+    from src.knowledge.product_catalogs import get_product
+    from src.knowledge.source_catalog.store import load_media_index
+
+    out: list[CatalogUnit] = []
+    for cat in get_product_catalogs():
+        if not cat.catalog_enabled:
+            continue
+        index = load_media_index(DATA_DIR, cat.product_id)
+        for item in index.get("items") or []:
+            if not isinstance(item, dict):
+                continue
+            if item.get("status") != "SYNCED":
+                continue
+            fids = [str(x) for x in (item.get("feature_ids") or []) if str(x).strip()]
+            if not fids:
+                continue
+            title = str(item.get("filename") or item.get("media_id"))
+            desc = str(item.get("description") or "")
+            blob = _norm(f"{title} {desc} {' '.join(fids)} {' '.join(item.get('keywords') or [])}")
+            out.append(
+                CatalogUnit(
+                    kind="media",
+                    product_id=cat.product_id,
+                    unit_id=f"live-media:{item.get('media_id')}",
+                    title=title,
+                    body=desc,
+                    search_blob=blob,
+                    feature_ids=fids,
+                    media_slots=[str(item.get("catalog_feature_id") or "")],
+                    media_path=str(item.get("server_path") or item.get("path") or ""),
+                )
+            )
+    return out
+
+
+def _units_from_source_matrix(lang: str) -> list[CatalogUnit]:
+    from src.config import KNOWLEDGE_ROOT
+
+    matrix = load_matrix(KNOWLEDGE_ROOT)
+    if not matrix:
+        return []
+    from src.knowledge.product_catalogs import get_product
+    from src.knowledge.source_catalog.versions import load_active
+
+    prod = get_product(str(matrix.get("product_id") or "vpn-installer"))
+    if prod is not None and not prod.catalog_enabled:
+        return []
+    active = load_active(KNOWLEDGE_ROOT, str(matrix.get("product_id") or "vpn-installer"))
+    if active and str(active.get("status") or "") not in {"", "ACTIVE"}:
+        return []
+    if active is None:
+        # First-run: allow current matrix until a version is activated.
+        pass
+    out: list[CatalogUnit] = []
+    for item in matrix.get("features") or []:
+        if not isinstance(item, dict):
+            continue
+        fid = str(item.get("id") or "").strip()
+        if not fid:
+            continue
+        status = str(item.get("status") or STATUS_LIVE)
+        name = str(item.get("name") or fid)
+        purpose = str(item.get("purpose") or "")
+        if status in {STATUS_DEPRECATED, "legacy"}:
+            body = (
+                f"DEPRECATED/LEGACY: {name}. Do not recommend as the current product path. "
+                f"{purpose}"
+            )
+        else:
+            parts = [
+                purpose,
+                "Files: " + ", ".join(item.get("source_files") or [])[:400],
+                "Ops: " + ", ".join(item.get("operation_ids") or []),
+                "Workflow: " + " | ".join(item.get("workflow") or []),
+                "APIs: " + ", ".join(item.get("api_calls") or [])[:300],
+                "UNKNOWN fields stay UNKNOWN — do not invent.",
+            ]
+            body = "\n".join(p for p in parts if p)
+        blob = _norm(
+            f"{fid} {name} {item.get('category')} {purpose} "
+            f"{' '.join(item.get('source_files') or [])} "
+            f"{' '.join(item.get('operation_ids') or [])} "
+            f"{' '.join(item.get('source_symbols') or [])} {status}"
+        )
+        out.append(
+            CatalogUnit(
+                kind="feature",
+                product_id=str(matrix.get("product_id") or "vpn-installer"),
+                unit_id=f"source:{fid}",
+                title=name,
+                body=body,
+                search_blob=blob,
+                feature_ids=[fid],
+                media_slots=list(item.get("media_slots") or []),
+            )
+        )
+    return out
 
 
 def score_unit(query_expanded: str, unit: CatalogUnit) -> float:
@@ -345,21 +665,43 @@ def score_unit(query_expanded: str, unit: CatalogUnit) -> float:
     compact_blob = blob.replace(" ", "").replace("-", "").replace("_", "")
     score = 0.0
     hits = 0
+    content_hits = 0
+    mesh_cue = _cue_cluster(q) == "backup_mesh_link" or any(
+        x in q for x in ("mesh", "مش", "لینک", "link type", "ssh_protected")
+    )
     for tok in tokens:
         if len(tok) < 3:
             continue
+        if tok in _STOPWORD_TOKENS:
+            continue
+        # Bare "backup" must not score via link-type id ssh_protected_backup
+        # unless the user actually asked about mesh backup paths.
+        if tok in _BACKUP_TOKEN_FAMILY or tok == "backup":
+            if "ssh_protected_backup" in blob and not mesh_cue:
+                # Still allow score if "backup" appears as a real word outside that id.
+                stripped = blob.replace("ssh_protected_backup", " ")
+                if tok not in stripped and tok.replace("بکاپ", "backup") not in stripped:
+                    if "backup" not in stripped and "بکاپ" not in stripped and "پشتیبان" not in stripped:
+                        continue
         if tok in blob:
             score += 1.6
             hits += 1
+            content_hits += 1
         ctok = tok.replace("-", "").replace("_", "")
         if len(ctok) >= 4 and ctok in compact_blob:
             score += 1.2
             hits += 1
+            content_hits += 1
     # Coverage: prefer units that match a larger share of meaningful tokens
-    meaningful = [t for t in tokens if len(t) >= 3]
+    meaningful = [t for t in tokens if len(t) >= 3 and t not in _STOPWORD_TOKENS]
     if meaningful:
         cov = hits / max(1, len(meaningful))
         score *= 0.55 + min(1.0, cov)
+    if content_hits == 0 and not any(
+        fid.replace("_", "").replace("-", "").lower() in compact_q
+        for fid in unit.feature_ids
+    ):
+        return 0.0
     # Strong id/title containment
     for fid in unit.feature_ids:
         fcompact = fid.replace("_", "").replace("-", "").lower()
@@ -370,7 +712,10 @@ def score_unit(query_expanded: str, unit: CatalogUnit) -> float:
         score += 6.0
     # Kind weights: features > media cards for text evidence
     if unit.kind == "feature":
-        score *= 1.15
+        if "DEPRECATED" in (unit.body or "").upper() and "legacy" not in q and "deprecated" not in q:
+            score *= 0.15
+        else:
+            score *= 1.15
     elif unit.kind == "media":
         score *= 0.85
     elif unit.kind == "product":
@@ -419,13 +764,93 @@ def retrieve_catalog_context(
         if top.score >= min_score * 0.85:
             evidence = [top]
 
-    # Related feature ids from evidence → pull linked media
-    wanted_feats = {fid for u in evidence for fid in u.feature_ids}
-    wanted_slots = {s for u in evidence for s in u.media_slots}
+    needs_clarification = False
+    clarifying_question: str | None = None
+    dominant_cluster: str | None = None
+    if pid_filter == "vpn-installer" and is_ambiguous_backup_retrieval(query, evidence):
+        # Also respect prior_text disambiguation (e.g. user replied "پنل")
+        if not _cue_cluster(search_query):
+            needs_clarification = True
+            clarifying_question = backup_clarifying_question(lang)
+
+    cue = _cue_cluster(search_query) or _cue_cluster(query)
+    if cue:
+        dominant_cluster = cue
+    else:
+        clusters = _clusters_from_evidence(evidence[:1] if evidence else [])
+        if len(clusters) == 1:
+            dominant_cluster = next(iter(clusters))
+
+    # Dominant feature only for media slots (avoid union of top-3 unrelated senses).
+    dominant_feats = evidence[:1] if evidence else []
+    if dominant_cluster:
+        filtered = [
+            u
+            for u in evidence
+            if any(
+                _BACKUP_FEATURE_CLUSTER.get(fid) == dominant_cluster
+                or _BACKUP_FEATURE_CLUSTER.get((u.unit_id or "").split(":")[-1])
+                == dominant_cluster
+                for fid in (u.feature_ids or [ (u.unit_id or "").split(":")[-1] ])
+            )
+        ]
+        if filtered:
+            dominant_feats = filtered[:1]
+            # Keep clarifying evidence to the chosen sense when disambiguated
+            if not needs_clarification:
+                evidence = [
+                    u
+                    for u in evidence
+                    if u in filtered
+                    or not any(
+                        _BACKUP_FEATURE_CLUSTER.get(fid) in _CLUSTER_PRIMARY_SLOTS
+                        for fid in (u.feature_ids or [])
+                    )
+                ] or filtered
+
+    wanted_feats = {fid for u in dominant_feats for fid in u.feature_ids}
+    wanted_slots = {s for u in dominant_feats for s in u.media_slots}
+    if dominant_cluster:
+        for slot in _CLUSTER_PRIMARY_SLOTS.get(dominant_cluster, ()):
+            wanted_slots.add(slot)
+    # Topology only when explicitly asked
+    qn = _norm(search_query)
+    if "topology" not in qn and "توپولوژی" not in qn and "view mesh" not in qn:
+        wanted_slots.discard("mesh-topology-live")
 
     media_scored: list[tuple[float, CatalogUnit]] = []
     seen_paths: set[str] = set()
+
+    def _slot_allowed(slot: str) -> bool:
+        if not slot:
+            return True
+        if dominant_cluster:
+            allowed = set(_CLUSTER_PRIMARY_SLOTS.get(dominant_cluster, ()))
+            # Also allow the dominant feature's own media_slot
+            allowed |= wanted_slots
+            if slot.startswith("mesh-topology") and slot not in wanted_slots:
+                return False
+            if dominant_cluster == "backup_panel" and slot.startswith("telegram"):
+                return False
+            if dominant_cluster == "backup_telegram_bot" and (
+                slot.startswith("mesh") or slot in ("panel-manager", "restore-panel")
+            ):
+                return False
+            if dominant_cluster == "backup_mesh_link" and (
+                slot.startswith("telegram") or slot in ("panel-manager", "restore-panel", "move-central")
+            ):
+                return False
+        # Never use Move Bot shot for panel backup language
+        if slot == "telegram-move" and (
+            dominant_cluster == "backup_panel"
+            or any(x in qn for x in ("panel backup", "backup panel", "بکاپ پنل", "restore panel"))
+        ):
+            return False
+        return True
+
     for mu in media_units:
+        if any(s and not _slot_allowed(s) for s in mu.media_slots):
+            continue
         bonus = mu.score
         if any(f in wanted_feats for f in mu.feature_ids):
             bonus += 8.0
@@ -445,9 +870,9 @@ def retrieve_catalog_context(
         mu.score = bonus
         media_scored.append((bonus, mu))
 
-    # Also resolve paths for evidence slots even if media unit scored low
+    # Resolve paths for dominant feature slots only (not free 20.0 for every top-K slot)
     catalogs = {c.product_id: c for c in get_product_catalogs()}
-    for u in evidence:
+    for u in dominant_feats:
         cat = catalogs.get(u.product_id)
         if not cat:
             continue
@@ -458,39 +883,51 @@ def retrieve_catalog_context(
             rel = str(media.get("path") or "").strip().replace("\\", "/")
             if not rel or rel in seen_paths:
                 continue
-            if slot and slot in wanted_slots:
-                path = (project_root / rel).resolve()
-                if path.is_file():
-                    seen_paths.add(rel)
-                    media_scored.append(
-                        (
-                            20.0,
-                            CatalogUnit(
-                                kind="media",
-                                product_id=u.product_id,
-                                unit_id=f"media-slot:{slot}",
-                                title=slot,
-                                body=str(media.get("note") or ""),
-                                search_blob=slot,
-                                media_slots=[slot],
-                                media_path=rel,
-                                score=20.0,
-                            ),
-                        )
+            if not slot or slot not in wanted_slots or not _slot_allowed(slot):
+                continue
+            path = (project_root / rel).resolve()
+            if path.is_file():
+                seen_paths.add(rel)
+                media_scored.append(
+                    (
+                        14.0,
+                        CatalogUnit(
+                            kind="media",
+                            product_id=u.product_id,
+                            unit_id=f"media-slot:{slot}",
+                            title=slot,
+                            body=str(media.get("note") or ""),
+                            search_blob=slot,
+                            feature_ids=list(u.feature_ids or []),
+                            media_slots=[slot],
+                            media_path=rel,
+                            score=14.0,
+                        ),
                     )
+                )
 
     media_scored.sort(key=lambda x: -x[0])
+    if dominant_cluster:
+        primary = list(_CLUSTER_PRIMARY_SLOTS.get(dominant_cluster, ()))
+
+        def _media_rank(item: tuple[float, CatalogUnit]) -> tuple[int, float]:
+            score, mu = item
+            slots = mu.media_slots or []
+            best = 99
+            for s in slots:
+                if s in primary:
+                    best = min(best, primary.index(s))
+            return (best, -score)
+
+        media_scored.sort(key=_media_rank)
     media_paths = [
         (project_root / mu.media_path).resolve()
         for _, mu in media_scored[:limit_media]
         if mu.media_path
     ]
-    # Deduplicate existing files only
     media_paths = [p for p in media_paths if p.is_file()]
 
-    # Product with 1–2 catalog photos and no scored filename match:
-    # those photos belong to this product's current section (e.g. Agent Hub GUI).
-    # Do not do this for large catalogs (Installer) — that would dump unrelated shots.
+    # Small-catalog folder fallback only
     if pid_filter and not media_scored:
         from src.knowledge.catalog_index import listed_image_paths
 
@@ -516,24 +953,48 @@ def retrieve_catalog_context(
 
     top_media_score = media_scored[0][0] if media_scored else 0.0
     linked = bool(wanted_feats or wanted_slots)
-    attach_media = bool(
-        media_paths
-        and pid_filter
-        and (
-            linked
-            or top_media_score >= 12.0
-            or (educational and top_media_score >= 10.0)
-        )
+    ui_intent = (
+        wants_catalog_media(query)
+        or wants_catalog_media(expanded)
+        or educational
+        or send_now
+        or bool(dominant_cluster)
     )
+    # Build candidate paths before the attach gate.
+    candidate_paths = [
+        (project_root / mu.media_path).resolve()
+        for _, mu in media_scored[:limit_media]
+        if mu.media_path
+    ]
+    candidate_paths = [p for p in candidate_paths if p.is_file()]
+    if pid_filter and not media_scored:
+        # folder fallback already filled media_scored/media_paths above
+        candidate_paths = list(media_paths)
+
+    attach_media = bool(
+        candidate_paths
+        and pid_filter
+        and not needs_clarification
+        and linked
+        and top_media_score >= 12.0
+        and ui_intent
+        and not (is_capability_yesno(query) and not educational and not send_now and not dominant_cluster)
+    )
+    if needs_clarification or not attach_media:
+        media_paths = []
+        picked_media: list[CatalogUnit] = []
+    else:
+        media_paths = candidate_paths
+        picked_media = [m for _, m in media_scored[:limit_media]]
 
     insufficient = not evidence
-    picked_media = [m for _, m in media_scored[:limit_media]]
     prompt_block = _format_prompt_block(
         evidence=evidence,
-        media_units=picked_media,
+        media_units=picked_media if attach_media else [],
         educational=educational,
         insufficient=insufficient,
         lang=lang,
+        clarifying_question=clarifying_question if needs_clarification else None,
     )
     if pid_filter:
         prompt_block = (
@@ -550,6 +1011,9 @@ def retrieve_catalog_context(
         prompt_block=prompt_block,
         media_units=picked_media,
         attach_media=attach_media,
+        needs_clarification=needs_clarification,
+        clarifying_question=clarifying_question,
+        dominant_cluster=dominant_cluster,
     )
 
 
@@ -560,8 +1024,17 @@ def _format_prompt_block(
     educational: bool,
     insufficient: bool,
     lang: str,
+    clarifying_question: str | None = None,
 ) -> str:
     lines: list[str] = ["### Catalog evidence (authoritative — do not invent beyond this)"]
+    if clarifying_question:
+        lines.append(
+            "The user question is AMBIGUOUS across backup senses. "
+            "Ask the clarifying question below and do NOT invent a single path. "
+            "Do not claim screenshots were selected."
+        )
+        lines.append(f"Clarifying question to send:\n{clarifying_question}")
+        return "\n".join(lines)
     if insufficient:
         lines.append(
             "NO sufficiently related catalog sections were found for this question. "
@@ -577,9 +1050,11 @@ def _format_prompt_block(
             lines.append(f"feature_ids: {', '.join(u.feature_ids)}")
 
     if media_units:
-        lines.append("\n#### Related teaching screenshots (already selected for Telegram)")
+        lines.append("\n#### Related teaching screenshots (selected only if on-topic)")
         for m in media_units:
             lines.append(f"- {m.title}: {m.body or m.media_path}")
+    else:
+        lines.append("\n#### Media policy\nNo screenshot selected for this turn — answer with text only.")
 
     lines.append("\n#### Reply style rules")
     if educational or lang.startswith("fa"):

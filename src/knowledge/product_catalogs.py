@@ -31,6 +31,12 @@ class ProductCatalog:
     support: dict[str, Any] = field(default_factory=dict)
     raw: dict[str, Any] = field(default_factory=dict)
 
+    @property
+    def catalog_enabled(self) -> bool:
+        if "catalog_enabled" in self.raw:
+            return bool(self.raw.get("catalog_enabled"))
+        return True
+
     def label(self, lang: str) -> str:
         title = self.title.get(lang) or self.title.get("en") or self.product_id
         emoji = (self.menu_emoji or "").strip()
@@ -574,6 +580,7 @@ def update_product_fields(
     emoji: str | None = None,
     summary: str | None = None,
     enabled: bool | None = None,
+    catalog_enabled: bool | None = None,
     menu_order: int | None = None,
 ) -> ProductCatalog:
     path = product_catalogs_dir(knowledge_root) / f"{slugify_product_id(product_id)}.json"
@@ -599,6 +606,8 @@ def update_product_fields(
         data["menu_emoji"] = (emoji or "").strip() or data.get("menu_emoji") or "📦"
     if enabled is not None:
         data["enabled"] = bool(enabled)
+    if catalog_enabled is not None:
+        data["catalog_enabled"] = bool(catalog_enabled)
     if menu_order is not None:
         data["menu_order"] = int(menu_order)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")

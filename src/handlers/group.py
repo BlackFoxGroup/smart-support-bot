@@ -130,6 +130,19 @@ def setup_group_router(
             await message.reply("Usage: /announce your source notes…", disable_notification=True)
             return
         source = raw[1].strip()
+        from src.knowledge.source_catalog.questions import (
+            fingerprint,
+            is_duplicate_post,
+            record_post,
+        )
+
+        qfp = fingerprint(source)
+        if is_duplicate_post(settings.data_dir, qfp, qfp):
+            await message.reply(
+                "Duplicate educational topic (same fingerprint). Not posted.",
+                disable_notification=True,
+            )
+            return
         cfg = _load_group_config(settings)
         topics = _topic_map(cfg)
         if not topics:
@@ -147,7 +160,8 @@ def setup_group_router(
         for lang, thread_id in topics.items():
             system = build_system_prompt(lang, facts_block=format_facts_safe(knowledge))
             prompt = (
-                "Write a short Telegram group post (max 900 chars) for Black Fox community.\n"
+                "Write a short Telegram group post (max 900 chars) for Black Fox Group.\n"
+                "Product name is VPS to VPN. Do not invent facts beyond Knowledge/Catalog.\n"
                 "No invented prices/versions. Persian: start every sentence with a Persian word; "
                 "prefer Persian wording; never rename official product names.\n"
                 f"Source notes:\n{source}\n\nKnowledge:\n{kb}\n\n"
@@ -173,6 +187,8 @@ def setup_group_router(
                 posted += 1
             except Exception as exc:
                 logger.warning("announce send fail %s: %s", lang, exc)
+        if posted:
+            record_post(settings.data_dir, question_fp=qfp, content_fp=qfp, langs=list(topics))
         try:
             await wait.edit_text(f"Posted to {posted}/{len(topics)} topics.")
         except Exception:

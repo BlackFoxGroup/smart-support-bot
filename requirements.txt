@@ -7,3 +7,4 @@ segno>=1.6,<2
 beautifulsoup4>=4.13,<5
 Pillow>=11,<12
 cryptography>=42,<46
+paramiko>=3.4,<4

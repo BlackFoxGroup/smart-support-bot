@@ -44,7 +44,7 @@ DEFAULT_NIGHTLY_TEMPLATE = (
 )
 
 DEFAULT_SOCIAL_RULES = (
-    "تو ویراستار خبری کانال تلگرام Black Fox VPN هستی. "
+    "تو ویراستار خبری کانال تلگرام Black Fox Group (محصول VPS to VPN) هستی. "
     "خبر را با تیتر، لید کوتاه و نکات کلیدی ایموجی‌دار (🔴⚖️📊⏳) بنویس. "
     "هر نکته جملهٔ کامل و مستقل باشد؛ تکرار تیتر در لید ممنوع است. "
     "جملهٔ ناقص، تگ سایت و ایموجی تزئینی مبدأ ممنوع. "
@@ -177,11 +177,16 @@ class OwnerInfo:
 class PanelSettings:
     base_url: str = ""
     api_token_enc: str = ""
+    # Legacy field kept for older backups; UI no longer edits it.
     required_port: int = 443
-    inbound_id: int = 0
+    # Comma-separated inbound IDs, e.g. "1,2,5"
+    inbound_ids: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
+
+    def inbound_id_list(self) -> list[int]:
+        return parse_inbound_ids(self.inbound_ids)
 
     @classmethod
     def from_dict(cls, raw: dict[str, Any] | None) -> PanelSettings:
@@ -190,16 +195,57 @@ class PanelSettings:
             port = int(raw.get("required_port") or 443)
         except (TypeError, ValueError):
             port = 443
+        ids_raw = raw.get("inbound_ids")
+        if ids_raw is None or str(ids_raw).strip() == "":
+            ids_raw = raw.get("inbound_id")
         try:
-            inbound = int(raw.get("inbound_id") or 0)
-        except (TypeError, ValueError):
-            inbound = 0
+            inbound_ids = normalize_inbound_ids(ids_raw) if ids_raw not in (None, "") else ""
+        except ValueError:
+            inbound_ids = ""
         return cls(
             base_url=str(raw.get("base_url") or "").rstrip("/"),
             api_token_enc=str(raw.get("api_token_enc") or ""),
             required_port=port,
-            inbound_id=inbound,
+            inbound_ids=inbound_ids,
         )
+
+
+def parse_inbound_ids(raw: Any) -> list[int]:
+    """Parse inbound IDs from int/list/comma-separated string."""
+    if raw is None or raw == "":
+        return []
+    if isinstance(raw, int):
+        return [raw] if raw > 0 else []
+    if isinstance(raw, (list, tuple)):
+        out: list[int] = []
+        for item in raw:
+            try:
+                n = int(item)
+            except (TypeError, ValueError):
+                continue
+            if n > 0 and n not in out:
+                out.append(n)
+        return out
+    text = str(raw).replace(";", ",")
+    out = []
+    for part in text.split(","):
+        part = part.strip()
+        if not part:
+            continue
+        try:
+            n = int(part)
+        except ValueError:
+            continue
+        if n > 0 and n not in out:
+            out.append(n)
+    return out
+
+
+def normalize_inbound_ids(raw: Any) -> str:
+    ids = parse_inbound_ids(raw)
+    if not ids:
+        raise ValueError("no inbound ids")
+    return ",".join(str(x) for x in ids)
 
 
 class BotSettingsStore:
@@ -325,7 +371,7 @@ class BotSettingsStore:
                 if settings.panel_api_token
                 else "",
                 required_port=settings.panel_required_port,
-                inbound_id=settings.panel_inbound_id,
+                inbound_ids=settings.panel_inbound_ids,
             ).to_dict()
             seeded = True
         if not owner or not any(owner.values()):
@@ -576,6 +622,13 @@ class BotSettingsStore:
                 token = str(fields.pop("api_token") or "").strip()
                 if token:
                     panel.api_token_enc = encrypt_secret(token, self._master)
+            if "inbound_ids" in fields or "inbound_id" in fields:
+                raw_ids = fields.pop("inbound_ids", None)
+                if raw_ids is None:
+                    raw_ids = fields.pop("inbound_id", None)
+                else:
+                    fields.pop("inbound_id", None)
+                panel.inbound_ids = normalize_inbound_ids(raw_ids)
             for k, v in fields.items():
                 if hasattr(panel, k) and k != "api_token_enc":
                     setattr(panel, k, v)
@@ -675,13 +728,12 @@ class BotSettingsStore:
         t = await self.get_target("group")
         return (t.effective_chat_id(0) or "").strip()
 
-    async def effective_panel(self, settings: Settings) -> tuple[str, str, int, int]:
+    async def effective_panel(self, settings: Settings) -> tuple[str, str, list[int]]:
         panel = await self.get_panel()
         base = panel.base_url or settings.panel_base_url
         token = self.panel_token(panel) or settings.panel_api_token
-        port = panel.required_port or settings.panel_required_port
-        inbound = panel.inbound_id or settings.panel_inbound_id
-        return base.rstrip("/"), token, int(port), int(inbound)
+        inbound_ids = panel.inbound_id_list() or parse_inbound_ids(settings.panel_inbound_ids)
+        return base.rstrip("/"), token, inbound_ids
 
     async def get_session(self, admin_id: int) -> dict[str, Any]:
         async with self._lock:
@@ -917,8 +969,7 @@ class BotSettingsStore:
                 "panel": {
                     "base_url": panel.base_url,
                     "api_token": token,
-                    "required_port": panel.required_port,
-                    "inbound_id": panel.inbound_id,
+                    "inbound_ids": panel.inbound_ids,
                 },
                 "admins": admins_out,
                 "health": {
@@ -971,7 +1022,11 @@ class BotSettingsStore:
                     base_url=str(p.get("base_url") or "").rstrip("/"),
                     api_token_enc=enc,
                     required_port=int(p.get("required_port") or 443),
-                    inbound_id=int(p.get("inbound_id") or 0),
+                    inbound_ids=(
+                        normalize_inbound_ids(p.get("inbound_ids") or p.get("inbound_id") or "")
+                        if (p.get("inbound_ids") or p.get("inbound_id"))
+                        else ""
+                    ),
                 ).to_dict()
                 applied.append("panel")
             if isinstance(payload.get("admins"), dict):
@@ -1088,18 +1143,17 @@ class BotSettingsStore:
     def format_panel_card(self, panel: PanelSettings, *, lang: str = "fa") -> str:
         fa = (lang or "").startswith("fa")
         masked = self.mask_panel_token(panel)
+        inbound_disp = panel.inbound_ids or "—"
         if fa:
             return (
                 "🖥 تنظیمات پنل و API\n"
                 f"آدرس پنل: {panel.base_url or '—'}\n"
                 f"وضعیت API: {masked}\n"
-                f"پورت کانفیگ: {panel.required_port}\n"
-                f"شناسه Inbound: {panel.inbound_id}"
+                f"شناسه Inbound: {inbound_disp}"
             )
         return (
             "🖥 Panel & API settings\n"
             f"Panel URL: {panel.base_url or '-'}\n"
             f"API status: {masked}\n"
-            f"Config port: {panel.required_port}\n"
-            f"Inbound ID: {panel.inbound_id}"
+            f"Inbound ID(s): {inbound_disp}"
         )

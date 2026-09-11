@@ -50,8 +50,8 @@ class Settings:
     users_db_path: Path
     panel_base_url: str
     panel_api_token: str
-    panel_inbound_id: int
-    panel_required_port: int
+    panel_inbound_ids: str
+    panel_required_port: int  # legacy; unused by panel create flow
     nightly_enabled: bool
     nightly_iran_time: time
     nightly_support_chat_id: str
@@ -69,6 +69,8 @@ class Settings:
     news_report_admin_ids: frozenset[int]
     ai_budget_usd: float
     ai_usd_per_million_tokens: float
+    vps_to_vpn_source: Path
+    source_catalog_sync_on_start: bool
 
     @property
     def kb_multilingual_dir(self) -> Path:
@@ -164,7 +166,7 @@ def load_settings(env_file: Path | None = None) -> Settings:
         users_db_path=USERS_DB_PATH,
         panel_base_url=os.getenv("PANEL_BASE_URL", "").rstrip("/"),
         panel_api_token=os.getenv("PANEL_API_TOKEN", "").strip(),
-        panel_inbound_id=int(os.getenv("PANEL_INBOUND_ID", "0")),
+        panel_inbound_ids=(os.getenv("PANEL_INBOUND_ID", "0") or "0").strip(),
         panel_required_port=int(os.getenv("PANEL_REQUIRED_PORT", "443")),
         nightly_enabled=_as_bool(os.getenv("NIGHTLY_ENABLED"), False),
         nightly_iran_time=_parse_hhmm(os.getenv("NIGHTLY_IRAN_TIME", "21:00")),
@@ -186,6 +188,8 @@ def load_settings(env_file: Path | None = None) -> Settings:
         news_report_admin_ids=_parse_id_set(os.getenv("NEWS_REPORT_ADMIN_IDS")),
         ai_budget_usd=float(os.getenv("AI_BUDGET_USD", "50")),
         ai_usd_per_million_tokens=float(os.getenv("AI_USD_PER_MILLION_TOKENS", "2.0")),
+        vps_to_vpn_source=Path(os.getenv("VPS_TO_VPN_SOURCE", r"F:\VPS to VPN")),
+        source_catalog_sync_on_start=_as_bool(os.getenv("SOURCE_CATALOG_SYNC_ON_START"), False),
     )
 
 

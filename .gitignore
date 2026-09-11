@@ -1,38 +1,13 @@
-# Byte-compiled / caches
+.env
+.venv/
 __pycache__/
-*.py[cod]
-*$py.class
+*.pyc
+*.pyo
 .pytest_cache/
 .mypy_cache/
-
-# Virtualenvs
-.venv/
-venv/
-
-# Secrets — never commit
-.env
-
-# Runtime state (created on first run, not shipped)
-data/*.json
-data/.runtime/
-data/*.flag
+data/users.json
+data/live_catalog/sftp.json
+data/live_catalog/.sftp_key
 data/*.tmp
-!data/.gitkeep
-
-# Safety watchdog handshakes
-data/safety_request.json
-data/safety_decision.json
-data/heartbeat.json
-
-# Extracted group media / Telegram sessions (runtime, regenerable)
-media/group_raw/
-*.session
-
-# Logs
+knowledge/source_catalog/*.tmp
 *.log
-
-# Editor / OS
-.DS_Store
-Thumbs.db
-.idea/
-.vscode/
