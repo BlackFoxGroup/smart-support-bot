@@ -15,7 +15,8 @@ class CreatedSubscription:
     email: str
     sub_id: str
     sub_link: str
-    vless_link: str
+    vless_link: str = ""
+    inbound_ids: tuple[int, ...] = ()
 
 
 class PanelAPIError(RuntimeError):
@@ -58,48 +59,25 @@ class PanelClient:
             raise PanelAPIError("Panel did not return uuid")
         return str(obj["uuid"])
 
-    async def resolve_inbound_id(self, preferred_id: int, required_port: int = 443) -> int:
-        if preferred_id > 0 and required_port <= 0:
-            return preferred_id
+    async def resolve_inbound_ids(self, preferred_ids: list[int]) -> list[int]:
+        """Validate preferred inbound IDs against the panel; keep order, drop missing."""
+        wanted = [int(x) for x in preferred_ids if int(x) > 0]
+        if not wanted:
+            raise PanelAPIError("No inbound ID configured")
         data = await self._call("GET", "/panel/api/inbounds/list")
         obj = data.get("obj")
         if not isinstance(obj, list) or not obj:
             raise PanelAPIError("No inbound found in panel")
-        if preferred_id > 0:
-            for rec in obj:
-                if not isinstance(rec, dict):
-                    continue
-                if int(rec.get("id") or 0) == preferred_id:
-                    if required_port > 0 and int(rec.get("port") or 0) != required_port:
-                        raise PanelAPIError(
-                            f"Preferred inbound {preferred_id} is not on required port {required_port}"
-                        )
-                    return preferred_id
-
-        candidates: list[dict] = []
-        if required_port > 0:
-            for rec in obj:
-                if isinstance(rec, dict) and rec.get("enable", False) and int(rec.get("port") or 0) == required_port:
-                    candidates.append(rec)
-        if not candidates:
-            candidates = [rec for rec in obj if isinstance(rec, dict) and rec.get("enable", False)] or [
-                rec for rec in obj if isinstance(rec, dict)
-            ]
-        if not candidates:
-            raise PanelAPIError("No inbound candidate found")
-
-        # Prefer an inbound that already contains an "agent-bot" example client.
-        for rec in candidates:
-            for cl in rec.get("clientStats") or []:
-                if "agent-bot" in str((cl or {}).get("email", "")).lower() and isinstance(rec.get("id"), int):
-                    return int(rec["id"])
-        for rec in candidates:
-            if isinstance(rec, dict) and rec.get("enable", False) and isinstance(rec.get("id"), int):
-                return int(rec["id"])
-        first = candidates[0]
-        if isinstance(first, dict) and isinstance(first.get("id"), int):
-            return int(first["id"])
-        raise PanelAPIError("Unable to detect inbound id")
+        available = {
+            int(rec.get("id") or 0)
+            for rec in obj
+            if isinstance(rec, dict) and int(rec.get("id") or 0) > 0
+        }
+        resolved = [iid for iid in wanted if iid in available]
+        if not resolved:
+            missing = ", ".join(str(x) for x in wanted)
+            raise PanelAPIError(f"Configured inbound ID(s) not found in panel: {missing}")
+        return resolved
 
     @staticmethod
     def _parse_json_field(raw: str | dict | None) -> dict:
@@ -165,11 +143,14 @@ class PanelClient:
     async def add_client_10gb(
         self,
         *,
-        inbound_id: int,
-        required_port: int = 443,
+        inbound_ids: list[int] | None = None,
+        inbound_id: int | None = None,
         email_prefix: str = "bf-ai-nightly",
     ) -> CreatedSubscription:
-        inbound_id = await self.resolve_inbound_id(inbound_id, required_port=required_port)
+        raw_ids = list(inbound_ids or [])
+        if inbound_id is not None and int(inbound_id) > 0:
+            raw_ids.append(int(inbound_id))
+        ids = await self.resolve_inbound_ids(raw_ids)
         uuid = await self.get_new_uuid()
         suffix = secrets.token_hex(3)
         email = f"{email_prefix}-{suffix}"
@@ -189,7 +170,7 @@ class PanelClient:
                 "flow": "",
                 "comment": "BlackFox AI nightly auto account",
             },
-            "inboundIds": [inbound_id],
+            "inboundIds": ids,
         }
         try:
             await self._call("POST", "/panel/api/clients/add", payload)
@@ -197,29 +178,24 @@ class PanelClient:
             # Older 3x-ui builds use /panel/api/inbounds/addClient with settings JSON string.
             if "HTTP 404" not in str(exc):
                 raise
-            legacy_payload = {
-                "id": inbound_id,
-                "settings": json.dumps(
-                    {
-                        "clients": [
-                            {
-                                "id": uuid,
-                                "email": email,
-                                "enable": True,
-                                "expiryTime": 0,
-                                "totalGB": total_bytes,
-                                "limitIp": 0,
-                                "flow": "",
-                                "subId": sub_id,
-                                "reset": 0,
-                                "tgId": "",
-                            }
-                        ]
-                    },
-                    ensure_ascii=False,
-                ),
+            client_obj = {
+                "id": uuid,
+                "email": email,
+                "enable": True,
+                "expiryTime": 0,
+                "totalGB": total_bytes,
+                "limitIp": 0,
+                "flow": "",
+                "subId": sub_id,
+                "reset": 0,
+                "tgId": "",
             }
-            await self._call("POST", "/panel/api/inbounds/addClient", legacy_payload)
+            for iid in ids:
+                legacy_payload = {
+                    "id": iid,
+                    "settings": json.dumps({"clients": [client_obj]}, ensure_ascii=False),
+                }
+                await self._call("POST", "/panel/api/inbounds/addClient", legacy_payload)
 
         sub_link = ""
         try:
@@ -231,11 +207,21 @@ class PanelClient:
             sub_link = ""
         if not sub_link:
             sub_link = f"{self._base_url}/sub/{sub_id}"
-        inbound = await self._get_inbound(inbound_id)
-        vless_link = self._build_vless_link(
-            inbound=inbound,
-            client_uuid=uuid,
-            title=f"@BlackFoxVPNN-{email}-🪧",
+        vless_link = ""
+        try:
+            inbound = await self._get_inbound(ids[0])
+            vless_link = self._build_vless_link(
+                inbound=inbound,
+                client_uuid=uuid,
+                title=f"@BlackFoxVPNN-{email}-🪧",
+            )
+        except PanelAPIError:
+            vless_link = ""
+        return CreatedSubscription(
+            email=email,
+            sub_id=sub_id,
+            sub_link=sub_link,
+            vless_link=vless_link,
+            inbound_ids=tuple(ids),
         )
-        return CreatedSubscription(email=email, sub_id=sub_id, sub_link=sub_link, vless_link=vless_link)
 

@@ -12,7 +12,19 @@ from typing import Any, Awaitable, Callable
 
 logger = logging.getLogger(__name__)
 
-TEXT_EXTS = {".txt", ".md", ".json", ".csv", ".html"}
+TEXT_EXTS = {
+    ".txt",
+    ".md",
+    ".json",
+    ".csv",
+    ".html",
+    ".rst",
+    ".log",
+    ".go",
+    ".py",
+    ".ts",
+    ".js",
+}
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 
 AiChat = Callable[[list[dict[str, str]]], Awaitable[str]]

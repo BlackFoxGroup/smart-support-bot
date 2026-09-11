@@ -235,7 +235,7 @@ _NO_MEDIA_HINTS = (
 
 
 def wants_send_media(query: str) -> bool:
-    from src.knowledge.catalog_index import wants_send_media as _wants_send
+    from src.knowledge.catalog_index import listed_image_paths, wants_send_media as _wants_send, wants_overview_ui
 
     return _wants_send(query)
 
@@ -275,6 +275,54 @@ def wants_catalog_media(query: str) -> bool:
         "آموزش",
     )
     return any(h in q for h in ui_hints) or is_educational_question(query)
+
+
+OVERVIEW_SLOTS = {
+    "vpn-installer": ("product-logo", "operations-pro", "operations-basic"),
+}
+
+
+def _pick_overview_media(project_root: Path, product_id: str, limit: int = 3) -> list[tuple[str, Path]]:
+    from src.knowledge.product_catalogs import get_product
+
+    out: list[tuple[str, Path]] = []
+    seen: set[str] = set()
+    cat = get_product(product_id)
+    wanted = list(OVERVIEW_SLOTS.get(product_id) or ("product-logo",))
+    if cat:
+        by_slot = {
+            str(m.get("slot") or ""): str(m.get("path") or "").replace("\\", "/")
+            for m in (cat.media or [])
+            if isinstance(m, dict)
+        }
+        for slot in wanted:
+            rel = by_slot.get(slot) or ""
+            path = (project_root / rel).resolve() if rel else None
+            if path and path.is_file() and rel not in seen:
+                seen.add(rel)
+                out.append((rel, path))
+            if len(out) >= limit:
+                return out
+    folder = project_root / "media" / "catalogs" / product_id
+    if folder.is_dir():
+        for name in (
+            "logo.png",
+            "product-logo.png",
+            "39-operations-pro-overview-v310.png",
+            "01-operations-pro-overview.png",
+            "18-operations-basic-overview.png",
+        ):
+            path = folder / name
+            if not path.is_file():
+                continue
+            rel = str(path.relative_to(project_root)).replace("\\", "/")
+            if rel in seen:
+                continue
+            seen.add(rel)
+            out.append((rel, path))
+            if len(out) >= limit:
+                break
+    return out[:limit]
 
 
 @dataclass(slots=True)
@@ -585,7 +633,7 @@ def _units_from_live_media(lang: str) -> list[CatalogUnit]:
                     search_blob=blob,
                     feature_ids=fids,
                     media_slots=[str(item.get("catalog_feature_id") or "")],
-                    media_path=str(item.get("server_path") or item.get("path") or ""),
+                    media_path=str(item.get("path") or item.get("server_path") or ""),
                 )
             )
     return out
@@ -739,8 +787,19 @@ def retrieve_catalog_context(
     expanded = expand_query(search_query)
     educational = is_educational_question(query) or is_educational_question(search_query)
     send_now = wants_send_media(query)
+    from src.knowledge.catalog_index import wants_overview_ui
+
+    overview = wants_overview_ui(query)
+    if overview:
+        send_now = True
+        limit_media = max(limit_media, 3)
     units = build_catalog_units(lang=lang)
     pid_filter = (product_id or "").strip()
+    if overview and not pid_filter:
+        from src.knowledge.product_catalogs import get_product
+
+        if get_product("vpn-installer"):
+            pid_filter = "vpn-installer"
     if pid_filter:
         units = [u for u in units if u.product_id == pid_filter]
     scored: list[CatalogUnit] = []
@@ -758,6 +817,21 @@ def retrieve_catalog_context(
     media_units = [u for u in scored if u.kind == "media"]
 
     evidence = features or products
+    if overview and pid_filter:
+        prod_u = next((u for u in units if u.kind == "product" and u.product_id == pid_filter), None)
+        if prod_u:
+            evidence = [prod_u] + [u for u in evidence if u is not prod_u]
+        elif not evidence:
+            evidence = [
+                CatalogUnit(
+                    kind="product",
+                    product_id=pid_filter,
+                    unit_id=f"product:{pid_filter}",
+                    title=pid_filter,
+                    body="Official product UI screenshots exist in the catalog.",
+                    search_blob=pid_filter,
+                )
+            ]
     # If educational and we have a weak top hit, still keep it when clearly themed
     if not evidence and scored:
         top = scored[0]
@@ -951,8 +1025,32 @@ def retrieve_catalog_context(
                 media_scored.append((12.0, mu))
             media_paths = [p.resolve() for p in folder_paths if p.is_file()][:2]
 
+    overview_units: list[CatalogUnit] = []
+    if overview and pid_filter:
+        overview_units = []
+        media_paths = []
+        media_scored = []
+        seen_paths.clear()
+        for rel, path in _pick_overview_media(project_root, pid_filter, limit=3):
+            if rel in seen_paths or not path.is_file():
+                continue
+            seen_paths.add(rel)
+            mu = CatalogUnit(
+                kind="media",
+                product_id=pid_filter,
+                unit_id=f"media:{pid_filter}:overview:{path.name}",
+                title=path.stem,
+                body="Product UI screenshot",
+                search_blob=_norm(f"{pid_filter} ui screenshot {path.name}"),
+                media_path=rel,
+                score=16.0,
+            )
+            overview_units.append(mu)
+            media_scored.append((16.0, mu))
+            media_paths.append(path.resolve())
+
     top_media_score = media_scored[0][0] if media_scored else 0.0
-    linked = bool(wanted_feats or wanted_slots)
+    linked = bool(wanted_feats or wanted_slots) or overview
     ui_intent = (
         wants_catalog_media(query)
         or wants_catalog_media(expanded)
@@ -961,22 +1059,24 @@ def retrieve_catalog_context(
         or bool(dominant_cluster)
     )
     # Build candidate paths before the attach gate.
-    candidate_paths = [
-        (project_root / mu.media_path).resolve()
-        for _, mu in media_scored[:limit_media]
-        if mu.media_path
-    ]
-    candidate_paths = [p for p in candidate_paths if p.is_file()]
-    if pid_filter and not media_scored:
-        # folder fallback already filled media_scored/media_paths above
+    if overview and overview_units:
         candidate_paths = list(media_paths)
+    else:
+        candidate_paths = [
+            (project_root / mu.media_path).resolve()
+            for _, mu in media_scored[:limit_media]
+            if mu.media_path
+        ]
+        candidate_paths = [p for p in candidate_paths if p.is_file()]
+        if pid_filter and not media_scored:
+            candidate_paths = list(media_paths)
 
     attach_media = bool(
         candidate_paths
         and pid_filter
         and not needs_clarification
         and linked
-        and top_media_score >= 12.0
+        and top_media_score >= (8.0 if overview else 12.0)
         and ui_intent
         and not (is_capability_yesno(query) and not educational and not send_now and not dominant_cluster)
     )
@@ -985,7 +1085,7 @@ def retrieve_catalog_context(
         picked_media: list[CatalogUnit] = []
     else:
         media_paths = candidate_paths
-        picked_media = [m for _, m in media_scored[:limit_media]]
+        picked_media = overview_units if overview and overview_units else [m for _, m in media_scored[:limit_media]]
 
     insufficient = not evidence
     prompt_block = _format_prompt_block(

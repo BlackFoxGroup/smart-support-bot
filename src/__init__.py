@@ -1,1 +1,1 @@
-"""Black Fox VPN Telegram support bot — package root."""
+"""VPS to VPN Telegram support bot — package root."""

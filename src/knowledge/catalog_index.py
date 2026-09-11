@@ -27,6 +27,10 @@ def wants_send_media(query: str) -> bool:
         "نشون بده",
         "نشان بده",
         "عکسش",
+        "عکس از",
+        "عکس داری",
+        "عکس هم",
+        "تصویر",
         "اسکرین",
         "screenshot",
         "show me",
@@ -36,7 +40,27 @@ def wants_send_media(query: str) -> bool:
         "send the photo",
         "send the image",
     )
-    return any(h in q for h in hints)
+    return any(h in q for h in hints) or wants_overview_ui(query)
+
+
+def wants_overview_ui(query: str) -> bool:
+    """True when the user asks for a general product UI / app screenshot."""
+    q = (query or "").strip().lower().replace("‌", "")
+    if not q:
+        return False
+    photo = any(
+        x in q
+        for x in ("عکس", "تصویر", "اسکرین", "screenshot", "ui", "رابط")
+    )
+    app = any(
+        x in q
+        for x in ("برنامه", "نرم افزار", "نرم‌افزار", "محصول", "ویندوز", "installer", "vpn", "نما", "رابط")
+    )
+    ask = any(
+        x in q
+        for x in ("داری", "دارید", "دارین", "هست", "بفرست", "ببینم", "نشان", "نشون")
+    )
+    return bool(photo and (app or ask))
 
 
 def listed_image_paths(project_root: Path, product_id: str, *, limit: int = 8) -> list[Path]:

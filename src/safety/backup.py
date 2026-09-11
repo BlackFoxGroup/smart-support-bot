@@ -20,7 +20,7 @@ from src.safety.paths import (
 )
 from src.safety.state import ensure_safety_dirs
 
-log = logging.getLogger("smart-support-bot-safety.backup")
+log = logging.getLogger("blackfox-bot-safety.backup")
 
 
 def _should_exclude(member_name: str) -> bool:

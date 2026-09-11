@@ -20,7 +20,7 @@ from src.knowledge.source_catalog.deploy import (
     try_remote_scp,
     upload_media_files,
 )
-from src.knowledge.source_catalog.media import pending_uploads, scan_local_media
+from src.knowledge.source_catalog.media import is_remote_server_item, pending_uploads, scan_local_media
 from src.knowledge.source_catalog.pipeline import load_matrix
 from src.knowledge.source_catalog.products import (
     discover_pic_products,
@@ -65,6 +65,7 @@ def dashboard(project_root: Path, knowledge_root: Path, data_dir: Path) -> dict[
         mmap = next((m for m in maps if m.get("product_id") == pid), {})
         cat_on = bool(row.get("catalog_enabled", True))
         status = "DISABLED" if not cat_on else (state.get("catalog_status") or active.get("status") or "DRAFT")
+        on_server = [i for i in items if is_remote_server_item(i)]
         products.append(
             {
                 "product_id": pid,
@@ -75,18 +76,20 @@ def dashboard(project_root: Path, knowledge_root: Path, data_dir: Path) -> dict[
                 "catalog_version": active.get("catalog_version") or state.get("active_version"),
                 "features": len(get_product(pid).features) if get_product(pid) else 0,
                 "last_scan": media.get("scanned_at"),
-                "images": len(items),
+                "images": len(on_server),
                 "pending": len([i for i in items if i.get("status") in {"LOCAL_ONLY", "MODIFIED", "PENDING_UPLOAD"}]),
                 "failed": len([i for i in items if i.get("status") == "FAILED"]),
                 "unmapped": len([i for i in items if i.get("status") == "UNMAPPED" or not i.get("feature_ids")]),
                 "local_deleted": len([i for i in items if i.get("status") == "LOCAL_DELETED"]),
-                "synced": len([i for i in items if i.get("status") == "SYNCED"]),
+                "synced": len(on_server),
                 "pic_dir": mmap.get("images") or str(pic_dir_for_product(project_root, pid, data_dir) or ""),
                 "source": mmap.get("source") or "",
                 "server_media": mmap.get("server_media") or "",
                 "server": server,
             }
         )
+    from src.knowledge.source_catalog.queue import visible_queue_jobs
+
     return {
         "products": products,
         "pic": pic,
@@ -94,7 +97,9 @@ def dashboard(project_root: Path, knowledge_root: Path, data_dir: Path) -> dict[
         "ssh_configured": ssh_ready(data_dir),
         "server": server,
         "sftp_host": sftp.get("host") or "",
-        "queue": load_global_queue(data_dir),
+        "queue": visible_queue_jobs(load_global_queue(data_dir)),
+        "queue_count": len(visible_queue_jobs(load_global_queue(data_dir))),
+        "media_count": sum(int(p.get("images") or 0) for p in products),
     }
 
 
@@ -104,12 +109,16 @@ def set_catalog_enabled(knowledge_root: Path, product_id: str, enabled: bool) ->
 
 def source_root_for(data_dir: Path, product_id: str) -> Path | None:
     stored = (load_registry(data_dir).get("paths") or {}).get(product_id) or {}
-    raw = str(stored.get("source") or "")
-    if raw and Path(raw).is_dir():
-        return Path(raw)
+    raw = str(stored.get("source") or "").strip()
+    if raw:
+        path = Path(raw)
+        if path.is_dir() or path.is_file():
+            return path
     env = (os.getenv("VPS_TO_VPN_SOURCE") or "").strip()
-    if env and Path(env).is_dir():
-        return Path(env)
+    if env:
+        path = Path(env)
+        if path.is_dir() or path.is_file():
+            return path
     return None
 
 
@@ -291,3 +300,59 @@ def save_product_paths(data_dir: Path, product_id: str, source: str, images: str
     if display:
         aliases[" ".join(display.lower().replace("-", " ").split())] = product_id
     save_registry(data_dir, {"aliases": aliases, "paths": paths})
+
+
+def build_ai_catalog(project_root: Path, knowledge_root: Path, data_dir: Path, product_id: str) -> dict[str, Any]:
+    """Build product_catalogs JSON from mapped source via AI, then version it."""
+    import asyncio
+    import shutil
+    import tempfile
+
+    src = source_root_for(data_dir, product_id)
+    if src is None:
+        return {"ok": False, "error": "err_source"}
+    from src.manager.ai_store import ai_ready, manager_ai_client
+
+    if not ai_ready(project_root, data_dir):
+        return {"ok": False, "error": "err_ai"}
+    tmp: Path | None = None
+    folder = src
+    extra = ""
+    try:
+        if src.is_file():
+            tmp = Path(tempfile.mkdtemp(prefix="ssm-src-"))
+            shutil.copy2(src, tmp / src.name)
+            folder = tmp
+            extra = f"Single written source file: {src.name}"
+        from src.knowledge.catalog_builder import build_one_catalog
+
+        async def _run() -> str:
+            ai = manager_ai_client(project_root, data_dir)
+            try:
+                return await build_one_catalog(
+                    folder,
+                    ai.chat,
+                    knowledge_root=knowledge_root,
+                    project_root=project_root,
+                    extra_sources=extra,
+                    force_product_id=product_id,
+                )
+            finally:
+                await ai.close()
+
+        asyncio.run(_run())
+    except Exception as exc:  # noqa: BLE001
+        return {"ok": False, "error": str(exc)[:400]}
+    finally:
+        if tmp is not None:
+            shutil.rmtree(tmp, ignore_errors=True)
+    root = folder if src.is_dir() else src.parent
+    return sync_catalog(
+        source_root=root,
+        knowledge_root=knowledge_root,
+        data_dir=data_dir,
+        product_id=product_id,
+        force=True,
+        activate=True,
+    )
+

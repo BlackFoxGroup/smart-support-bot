@@ -27,8 +27,7 @@ BOT_COMMANDS_ADMIN: list[BotCommand] = [
     BotCommand(command="active_agent", description="Admin: active agent"),
     BotCommand(command="failover", description="Admin: failover status"),
     BotCommand(command="safety_status", description="Admin: safe-change status"),
-    BotCommand(command="safety_drill", description="Admin: test backup/confirm/rollback"),
-]
+    BotCommand(command="catalog_scan", description="Admin: rescan VPS to VPN catalog"),
 
 BOT_COMMANDS_FA: list[BotCommand] = [
     BotCommand(command="start", description="شروع / انتخاب زبان"),
@@ -205,6 +204,36 @@ def setup_start_router(
             user_id=uid,
             settings=settings,
             access=access,
+        )
+
+    @router.message(Command("catalog_scan"))
+    async def cmd_catalog_scan(message: Message) -> None:
+        uid = _uid(message)
+        if not uid or not is_bot_admin(settings, uid):
+            await message.answer("Admin only.")
+            return
+        await message.answer("Scanning VPS to VPN source…")
+        try:
+            from src.knowledge.source_catalog.pipeline import run_sync
+
+            payload = run_sync(
+                settings.vps_to_vpn_source,
+                settings.knowledge_root,
+                settings.data_dir,
+                force=True,
+            )
+        except Exception as exc:  # noqa: BLE001
+            await message.answer(f"SCAN_ERROR: {exc}")
+            return
+        val = payload.get("validation") or {}
+        st = payload.get("stats") or {}
+        await message.answer(
+            "Catalog scan done.\n"
+            f"go_files={st.get('go_files')} ui={st.get('ui_prod_files')} "
+            f"features={st.get('features')}\n"
+            f"MISSING={val.get('missing')}\n"
+            f"deprecated={val.get('deprecated')}\n"
+            f"outdated={len(val.get('outdated') or [])}"
         )
 
     return router

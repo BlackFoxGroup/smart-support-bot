@@ -1,13 +1,31 @@
 .env
+.env.*
+!.env.example
 .venv/
 __pycache__/
 *.pyc
 *.pyo
 .pytest_cache/
 .mypy_cache/
-data/users.json
-data/live_catalog/sftp.json
-data/live_catalog/.sftp_key
-data/*.tmp
-knowledge/source_catalog/*.tmp
 *.log
+*.pem
+*.key
+HANDOFF.md
+
+# Local secrets and live manager state
+data/users.json
+data/*.tmp
+data/live_catalog/
+data/live_catalog/**
+
+# Product catalogs, guides, and screenshots stay off GitHub
+knowledge/product_catalogs/*.json
+knowledge/product_catalogs.examples/
+knowledge/product_guides/*.md
+!knowledge/product_guides/README.md
+media/catalogs/**/*.png
+media/catalogs/**/*.jpg
+media/catalogs/**/*.jpeg
+media/catalogs/**/*.webp
+media/catalogs/**/*.gif
+knowledge/source_catalog/*.tmp

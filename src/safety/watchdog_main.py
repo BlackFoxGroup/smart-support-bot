@@ -49,7 +49,7 @@ from src.safety.telegram_notify import (
     send_message,
 )
 
-log = logging.getLogger("smart-support-bot-watchdog")
+log = logging.getLogger("blackfox-bot-watchdog")
 
 POLL_SECONDS = 3
 HEARTBEAT_STALE_SECONDS = 45
@@ -143,9 +143,6 @@ def _apply_marker(change_id: str) -> Path:
 
 
 def _notify(token: str, chat_id: str, text: str, *, markup: dict | None = None) -> dict:
-    if not (chat_id or "").strip():
-        log.warning("Safety notify skipped — no support chat configured (set SAFETY_CONFIRM_CHAT_ID).")
-        return {"ok": False, "description": "no support chat configured"}
     return send_message(token, chat_id, text, reply_markup=markup, disable_notification=True)
 
 

@@ -107,9 +107,8 @@ def _bundle_from_retrieval(
             str(u.unit_id)
             for u in (getattr(retrieval, "units", None) or [])
             if getattr(u, "unit_id", None)
-        ]
-        + [r.unit_id for r in refs if r.unit_id],
-        media_refs=refs,
+        ],
+        media_refs=refs if getattr(retrieval, "attach_media", False) else [],
     )
 
 
@@ -310,7 +309,7 @@ def setup_chat_router(
                 limit_features=3,
                 limit_media=2,
                 product_id=ask_product,
-                prior_text="",
+                prior_text=history_blob,
             )
 
         def _run_kb():
@@ -339,15 +338,36 @@ def setup_chat_router(
                 if getattr(u, "product_id", "") == ask_product
             ]
         bundle = _bundle_from_retrieval(ask_product or "", text, retrieval)
-        media_paths = existing_media_paths(
-            bundle.media_refs,
-            product_id=ask_product or "",
-            knowledge_refs=bundle.knowledge_refs,
-            project_root=settings.project_root,
-            limit=2,
-        )
-        if not ask_product:
-            media_paths = []
+        media_paths = []
+        if ask_product and getattr(retrieval, "attach_media", False):
+            media_paths = existing_media_paths(
+                bundle.media_refs,
+                product_id=ask_product or "",
+                knowledge_refs=bundle.knowledge_refs,
+                project_root=settings.project_root,
+                limit=2,
+                min_score=12.0,
+            )
+
+        if (
+            ask_product
+            and getattr(retrieval, "needs_clarification", False)
+            and getattr(retrieval, "clarifying_question", None)
+        ):
+            clarify = str(retrieval.clarifying_question)
+            try:
+                await wait.edit_text(clarify)
+            except Exception:  # noqa: BLE001
+                await message.answer(clarify, reply_markup=ask_kb)
+            await users.append_chat(user.id, "user", text)
+            await users.append_chat(user.id, "assistant", clarify)
+            await metrics.record_answered(referred_support=False, ai_solved=False)
+            if ask_product:
+                bundle.answer_text = clarify
+                await users.set_last_ask_context(user.id, bundle.as_dict())
+            stages.mark("clarify_backup")
+            stages.flush()
+            return
 
         if (
             not ask_product
@@ -517,7 +537,7 @@ def setup_chat_router(
             "If prior turns show Exit Server, answer Add Exit Server only — not Central Full Deploy.\n"
             "Persian: start every sentence with a Persian word; prefer Persian wording; "
             "never rename official product names "
-            "(Black Fox VPN Installer & Android, Config Builder, Ask AI, 3X-UI, …).\n"
+            "(VPS to VPN by Black Fox Group, Config Builder, Ask AI, 3X-UI, …).\n"
             "CRITICAL: Output ONLY the final Telegram reply. "
             "Do not write reasoning, constraint lists, or English meta analysis. "
             "Do not paste catalog teaching or memory files verbatim."
@@ -679,7 +699,7 @@ def setup_chat_router(
         except Exception:
             await message.answer(final, reply_markup=ask_kb)
         stages.mark("send_text")
-        if ask_product and media_paths:
+        if ask_product and media_paths and getattr(retrieval, "attach_media", False):
             try:
                 await messaging.answer_with_media(
                     message,

@@ -529,7 +529,6 @@ def setup_admin_control_router(
             "edit_slot_kind",
             "edit_panel_url",
             "edit_panel_token",
-            "edit_panel_port",
             "edit_panel_inbound",
         }:
             raise SkipHandler()

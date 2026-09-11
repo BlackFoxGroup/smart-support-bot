@@ -68,30 +68,30 @@ def _next_run_iran(
 
 def _build_support_message(
     *,
-    config_link: str,
     sub_link: str,
     template: str | None = None,
 ) -> str:
     shamsi_date = jdatetime.datetime.now().strftime("%Y/%m/%d")
-    _ = sub_link
-    cfg = html.escape(config_link, quote=False)
+    sub = html.escape(sub_link, quote=False)
     raw = (template or "").strip()
     if raw:
-        # Allow plain placeholders; if template already has HTML, keep as-is.
-        body = raw.replace("{config}", f"<blockquote><code>{cfg}</code></blockquote>")
+        # Prefer {sub}; keep {config} as alias for older templates.
+        body = raw.replace("{sub}", f"<blockquote><code>{sub}</code></blockquote>")
+        body = body.replace("{config}", f"<blockquote><code>{sub}</code></blockquote>")
         body = body.replace("{date}", shamsi_date)
         return body
     return (
         "🤖 سلام، من ربات هوش مصنوعی  Black Fox هستم 🦊\n\n"
         "🎁 به پاس قدردانی از همراهی شما عزیزان، یک اشتراک رایگان برای شما در کانال قرار داده‌ام.\n\n"
-        "⏰ از این به بعد هر شب رأس ساعت ۹ شب همین‌جا منتظرتان هستم تا بتوانید از کانفیگ رایگان Black Fox استفاده کنید.\n\n"
+        "⏰ از این به بعد هر شب رأس ساعت ۹ شب همین‌جا منتظرتان هستم تا بتوانید از اشتراک رایگان Black Fox استفاده کنید.\n\n"
         "📢 لطفاً این پیام را با دوستان خود به اشتراک بگذارید تا آن‌ها هم بتوانند از این هدیه استفاده کنند.\n\n"
         "💡 همچنین خوشحال می‌شوم کاربران عزیز را برای استفاده از برنامهBlackFox Vpn Installer &amp; Android و امکانات آن راهنمایی کنم.\n\n"
         "━━━━━━━━━━━━━━\n\n"
-        "🔹 کانفیگ رایگان:\n"
+        "🔹 لینک Subscription:\n"
         "<blockquote><code>"
-        f"{cfg}"
+        f"{sub}"
         "</code></blockquote>\n\n"
+        "📱 QR کد Subscription را در تصویر ببینید.\n\n"
         "━━━━━━━━━━━━━━\n\n"
         f"🤖 ربات: {BOT_HANDLE}\n"
         f"👥 گروه کاربران: {GROUP_HANDLE}\n"
@@ -168,31 +168,28 @@ async def run_nightly_subscription_job(
 
         try:
             if bot_settings is not None:
-                base, token, port, inbound = await bot_settings.effective_panel(settings)
+                base, token, inbound_ids = await bot_settings.effective_panel(settings)
                 chat_id = await bot_settings.effective_nightly_chat_id(settings)
                 template = await bot_settings.effective_nightly_template()
             else:
+                from src.storage.bot_settings import parse_inbound_ids
+
                 base = settings.panel_base_url
                 token = settings.panel_api_token
-                port = settings.panel_required_port
-                inbound = settings.panel_inbound_id
+                inbound_ids = parse_inbound_ids(settings.panel_inbound_ids)
                 chat_id = settings.nightly_support_chat_id
                 template = None
 
             panel = PanelClient(base_url=base, api_token=token)
-            created = await panel.add_client_10gb(
-                inbound_id=inbound,
-                required_port=port,
-            )
+            created = await panel.add_client_10gb(inbound_ids=inbound_ids)
             text = _build_support_message(
-                config_link=created.vless_link,
                 sub_link=created.sub_link,
                 template=template,
             )
-            qr_bytes = _build_qr_png(created.vless_link)
+            qr_bytes = _build_qr_png(created.sub_link)
             await bot.send_photo(
                 chat_id=chat_id,
-                photo=BufferedInputFile(qr_bytes, filename="blackfox-free-config-qr.png"),
+                photo=BufferedInputFile(qr_bytes, filename="blackfox-subscription-qr.png"),
                 caption=text,
                 parse_mode="HTML",
             )
@@ -206,4 +203,3 @@ async def run_nightly_subscription_job(
 
             record_job(settings.data_dir, "nightly_config", ok=False, detail=str(exc)[:200])
             # Avoid tight retry loops; next run remains next day.
-

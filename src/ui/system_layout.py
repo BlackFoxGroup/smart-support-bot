@@ -72,7 +72,6 @@ SYSTEM_PLACEMENTS: dict[str, tuple[str, ...]] = {
     "msg_test": ("messages",),
     "edit_panel_url": ("panel",),
     "edit_panel_token": ("panel",),
-    "edit_panel_port": ("panel",),
     "edit_panel_inbound": ("panel",),
 }
 

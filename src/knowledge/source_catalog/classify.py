@@ -12,12 +12,13 @@ def classify_filename(filename: str, feature_ids: list[str], *, threshold: float
     tokens = [t for t in _SPLIT.split((filename or "").lower()) if len(t) >= 3]
     scored: list[tuple[float, str]] = []
     for fid in feature_ids:
-        parts = [p for p in fid.lower().replace("-", "_").split("_") if p]
+        parts = [p for p in fid.lower().replace("-", "_").split("_") if len(p) >= 3]
         if not parts:
             continue
         hits = sum(1 for p in parts if p in tokens or any(p in t or t in p for t in tokens))
         score = hits / max(1, len(parts))
-        if any(p in (filename or "").lower() for p in parts):
+        name = (filename or "").lower()
+        if any(p in name for p in parts):
             score = max(score, 0.5)
         scored.append((score, fid))
     scored.sort(reverse=True)

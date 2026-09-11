@@ -137,8 +137,8 @@ async def build_full_state_brief(bot_settings: BotSettingsStore) -> str:
         f"ui={ui}",
         f"health={health}",
         (
-            f"panel={{base_url={panel.base_url!r}, port={panel.required_port}, "
-            f"inbound={panel.inbound_id}, token_set={bool(bot_settings.panel_token(panel))}}}"
+            f"panel={{base_url={panel.base_url!r}, inbound_ids={panel.inbound_ids!r}, "
+            f"token_set={bool(bot_settings.panel_token(panel))}}}"
         ),
     ]
     for key in TARGET_KEYS:
@@ -204,8 +204,7 @@ async def build_human_status(bot_settings: BotSettingsStore, *, lang: str = "fa"
         f"• {'آدرس' if fa else 'url'}: "
         + ("تنظیم‌شده" if fa else "set")
         + (f" | {'توکن' if fa else 'token'}: {_yn(token_set, fa=fa)}"),
-        f"• {'پورت' if fa else 'port'}: {panel.required_port}",
-        f"• inbound: {panel.inbound_id}",
+        f"• inbound: {panel.inbound_ids or ('—' if fa else '-')}",
     ]
 
     for key in TARGET_KEYS:
@@ -295,7 +294,7 @@ def operator_command_help() -> str:
         "APPLY_TARGET key=channel|group|support|test chat_id=@name\n"
         "APPLY_SLOT target=channel slot=1 enabled=true schedule=10:00,17:00 "
         "chat_id=@x kind=news template=\"...\" rules=\"...\"\n"
-        "APPLY_PANEL base_url=https://... required_port=443 inbound_id=1\n"
+        "APPLY_PANEL base_url=https://... inbound_ids=1,2\n"
         "APPLY_HEALTH enabled=true times=09:00 chat_id=@x_or_id\n"
         "APPLY_UI settings_columns=1|2\n"
         "APPLY_ADMIN action=add|remove|set_role user_id=123456 role=full|stats\n"
@@ -418,14 +417,16 @@ async def apply_operator_lines(
                 if "base_url" in fields and fields["base_url"]:
                     await bot_settings.update_panel(base_url=fields["base_url"])
                     result.applied.append("panel.base_url")
-                if "required_port" in fields and fields["required_port"]:
-                    await bot_settings.update_panel(required_port=int(fields["required_port"]))
-                    result.applied.append("panel.required_port")
-                if "inbound_id" in fields and fields["inbound_id"]:
-                    await bot_settings.update_panel(inbound_id=int(fields["inbound_id"]))
-                    result.applied.append("panel.inbound_id")
+                if "inbound_ids" in fields and fields["inbound_ids"]:
+                    await bot_settings.update_panel(inbound_ids=fields["inbound_ids"])
+                    result.applied.append("panel.inbound_ids")
+                elif "inbound_id" in fields and fields["inbound_id"]:
+                    await bot_settings.update_panel(inbound_ids=fields["inbound_id"])
+                    result.applied.append("panel.inbound_ids")
                 if "api_token" in fields:
                     result.errors.append("panel.api_token skipped (use Panel menu)")
+                if "required_port" in fields and fields["required_port"]:
+                    result.errors.append("panel.required_port removed (use inbound_ids)")
             except ValueError as exc:
                 result.errors.append(str(exc))
             continue
