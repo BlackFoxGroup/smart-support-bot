@@ -75,6 +75,13 @@ Archive root folder: `Smart Support Bot/`
 - Optional nightly free-config / conversation-analysis jobs
 - **Safe-change watchdog**: backup → apply → observe → admin confirm → keep or auto-restore  
   (`/safety_drill`, `/safety_status`; `smart-support-bot-watchdog.service`)
+- **Smart Support Manager v2** local UI (`8766`): products, live catalog text, catalog photos, media, upload queue, persistent SSH
+- Map each product source/image/server path on the Products page (two-column cards)
+- Persistent **Connect / Disconnect** to the VPS; Process queue and Retry upload only while connected
+- Upload extra photos from any disk folder (not only the main image folder)
+- AI vision analyze (cached; optional analyze-all + send to catalog); feature dropdown is required
+- Catalog page: edit title/summaries/features; add a feature by hand
+- Catalog photos page: change feature, return to Media, or delete from the server
 
 <div dir="rtl">
 
@@ -89,6 +96,13 @@ Archive root folder: `Smart Support Bot/`
 - ارسال خبرهای تأییدشدهٔ اینترنت
 - جاب‌های اختیاری: کانفیگ شبانه و تحلیل گفتگو
 - **نگهبان تغییر امن**: پشتیبان → اعمال → مشاهده → تأیید ادمین → نگه داشتن یا بازگردانی خودکار
+- **مدیر پشتیبانی هوشمند v2** روی `8766`: محصولات، متن کاتالوگ، عکس کاتالوگ، رسانه، صف آپلود، اتصال پایدار SSH
+- مسیر سورس / تصویر / سرور هر محصول در صفحهٔ محصولات (کارت‌های دوتایی)
+- **اتصال / قطع اتصال** به سرور؛ پردازش صف و تلاش مجدد فقط وقتی وصل است
+- افزودن عکس از هر جای هارد، جدا از پوشهٔ اصلی تصاویر
+- تحلیل بینایی AI (با کش؛ تحلیل کلی و ارسال به کاتالوگ)؛ بدون ویژگی ارسال نمی‌شود
+- صفحهٔ کاتالوگ: ویرایش عنوان و خلاصه و ویژگی؛ افزودن ویژگی دستی
+- صفحهٔ عکس‌های کاتالوگ: تغییر ویژگی، بازگشت به رسانه، یا حذف از سرور
 
 </div>
 
@@ -126,6 +140,7 @@ Smart Support Bot/
 │   └── smart-support-bot-watchdog.service
 ├── src/manager/            # Smart Support Manager (local UI)
 ├── Start-Smart-Support-Manager.bat
+├── Start-Smart-Support-Manager-v2.bat
 ├── requirements.txt
 ├── .env.example
 └── README.md
@@ -293,37 +308,55 @@ sudo bash "/opt/Smart Support Bot/deploy/install.sh"
 - Live product catalog from the desktop app source (scan → validate → version → activate). Previous ACTIVE catalog stays if upload fails.
 - Catalog AI can be turned OFF per product in Telegram Settings; RAG and catalog images are skipped, data is kept.
 - Incremental media: hash, duplicate skip, queue with retry of one file, LOCAL DELETED does not auto-delete the server file.
-- **Smart Support Manager** desktop UI for catalog, media, SFTP settings, and upload queue.
+- **Smart Support Manager v2**: persistent SSH, catalog text editor, catalog photos, batch AI analyze, extra-disk uploads, two-column product path cards.
 
 <div dir="rtl">
 
 - کاتالوگ زنده از سورس برنامه دسکتاپ (اسکن تا فعال‌سازی). اگر آپلود شکست بخورد نسخهٔ ACTIVE قبلی می‌ماند.
 - کاتالوگ AI را می‌توان برای هر محصول خاموش کرد؛ داده پاک نمی‌شود.
 - رسانهٔ افزایشی: اثرانگشت، جلوگیری از تکراری، صف با Retry تک‌فایل. حذف محلی فایل سرور را خودکار پاک نمی‌کند.
-- برنامهٔ **Smart Support Manager** برای کاتالوگ، عکس، تنظیم SFTP و صف آپلود.
+- **مدیر v2**: اتصال پایدار SSH، ویرایش متن کاتالوگ، عکس کاتالوگ، تحلیل کلی AI، آپلود از هارد، کارت مسیر محصول دوتایی.
 
 </div>
 
 ## Smart Support Manager / اسکریپت مدیر
 
-Windows: double-click `Start-Smart-Support-Manager.bat` in the project root. It starts the local server and opens `http://127.0.0.1:8765`.
+Use **v2** so you get the current UI (old `8765` may hide an older process):
 
-First screen: choose **فارسی / English / Русский / 中文**.  
-Dashboard shows a short usage guide. Product actions (Scan, Auto-map, Build catalog, Queue, Rollback) sit in one row.
+- Windows: `Start-Smart-Support-Manager-v2.bat` → `http://127.0.0.1:8766`
+- Or: `py -3 -m src.manager` with `MANAGER_PORT=8766` and `MANAGER_NAME=Smart Support Manager v2`
 
-```powershell
-py -3 -m src.manager
-```
+**Pages**
 
-Needs `py -3` (Python 3). Secrets stay in `.env` / Manager Settings — never in Git.
+| Page | What it does |
+|------|----------------|
+| Products | Edit source / images / server path for each product. Add a new mapping. Two cards per row. |
+| Catalog | Build catalog. Edit title, short/full summary, and features for the selected product. Add a feature by hand. |
+| Catalog photos | Photos already in that catalog. Change feature, return to Media, or delete from the server. |
+| Media | Server photos. Pick a target catalog, AI-analyze one photo, or **analyze all and send**. Feature is required to send. |
+| Upload queue | Process / retry server uploads. Add photos from any disk folder. Needs **Connect** first. |
+| Settings | SSH host and AI endpoint. **Connect** stays up until **Disconnect**. |
+
+Language: فارسی / English / Русский / 中文. Secrets stay in `.env` / Settings — never in Git.
 
 <div dir="rtl">
 
-در ویندوز روی `Start-Smart-Support-Manager.bat` در ریشهٔ پروژه دوبار کلیک کنید. سرور محلی بالا می‌آید و مرورگر باز می‌شود.
+نسخهٔ **v2** را باز کنید تا UI فعلی بیاید (پورت قدیمی `8765` ممکن است نسخهٔ کهنه را نشان بدهد):
 
-ابتدا زبان را انتخاب کنید. داشبورد راهنمای کوتاه دارد. دکمه‌های محصول در یک ردیف‌اند.
+- ویندوز: `Start-Smart-Support-Manager-v2.bat` → `http://127.0.0.1:8766`
 
-رمزها فقط در `.env` یا تنظیمات Manager؛ در گیت‌هاب نیستند.
+**صفحات**
+
+| صفحه | کار |
+|------|------|
+| محصولات | مسیر سورس، تصاویر و سرور هر محصول؛ افزودن نگاشت جدید؛ کارت‌ها دوتایی |
+| کاتالوگ | ساخت کاتالوگ؛ ویرایش عنوان و خلاصه و ویژگی؛ افزودن ویژگی دستی |
+| عکس‌های کاتالوگ | عکس‌های داخل کاتالوگ؛ تغییر ویژگی؛ بازگشت به رسانه؛ حذف از سرور |
+| رسانه | عکس روی سرور؛ انتخاب کاتالوگ؛ تحلیل یک عکس یا **تحلیل کلی و ارسال**؛ بدون ویژگی ارسال نمی‌شود |
+| صف آپلود | پردازش و تلاش مجدد؛ عکس از هر جای هارد؛ اول باید **اتصال** بزنید |
+| تنظیمات | SSH و هوش مصنوعی؛ **اتصال** تا **قطع اتصال** باز می‌ماند |
+
+رمزها فقط در `.env` یا تنظیمات؛ در گیت‌هاب نیستند.
 
 </div>
 

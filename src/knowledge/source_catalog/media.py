@@ -10,7 +10,20 @@ from typing import Any
 
 from src.knowledge.catalog_builder import IMAGE_EXTS
 from src.knowledge.source_catalog.products import ensure_default_registry, pic_dir_for_product
-from src.knowledge.source_catalog.store import load_media_index, save_media_index
+from src.knowledge.source_catalog.store import live_root, load_media_index, save_media_index
+
+def is_remote_server_item(item: dict[str, Any]) -> bool:
+    """True only when the file is on the VPS, not a local catalog copy."""
+    path = str(item.get("server_path") or "")
+    if len(path) >= 2 and path[1] == ":":
+        return False
+    norm = path.replace("\\", "/")
+    remote = bool(norm.startswith("/") and not norm.startswith("//"))
+    st = str(item.get("status") or "")
+    if st == "LOCAL_DELETED":
+        return remote
+    return st == "SYNCED" and remote
+
 
 STATES = (
     "LOCAL_ONLY",
@@ -36,12 +49,14 @@ def _sha256(path: Path) -> str:
 def scan_local_media(project_root: Path, data_dir: Path, product_id: str) -> dict[str, Any]:
     ensure_default_registry(data_dir, project_root)
     folder = pic_dir_for_product(project_root, product_id, data_dir)
+    inbox = live_root(data_dir) / "inbox" / product_id
     prev = load_media_index(data_dir, product_id)
     by_id = {str(i.get("media_id")): i for i in prev.get("items") or [] if isinstance(i, dict)}
     by_hash = {str(i.get("hash")): i for i in by_id.values() if i.get("hash")}
     seen: set[str] = set()
     items: list[dict[str, Any]] = []
-    if folder and folder.is_dir():
+    scan_roots = [p for p in (folder, inbox) if p and p.is_dir()]
+    for folder in scan_roots:
         for path in sorted(folder.rglob("*")):
             if not path.is_file() or path.suffix.lower() not in IMAGE_EXTS:
                 continue
@@ -77,6 +92,10 @@ def scan_local_media(project_root: Path, data_dir: Path, product_id: str) -> dic
                 "uploaded_at": (old or {}).get("uploaded_at") or "",
                 "description": (old or {}).get("description") or "",
                 "keywords": (old or {}).get("keywords") or [],
+                "visible_ui": (old or {}).get("visible_ui") or [],
+                "catalog_path": (old or {}).get("catalog_path") or "",
+                "ai_likely_feature": (old or {}).get("ai_likely_feature") or "",
+                "classify_candidates": (old or {}).get("classify_candidates") or [],
                 "classify_confidence": (old or {}).get("classify_confidence"),
                 "needs_review": bool((old or {}).get("needs_review", not mapped)),
             }

@@ -65,6 +65,7 @@ class AIClient:
         *,
         temperature: float | None = None,
         max_tokens: int | None = None,
+        retry_empty: bool = True,
     ) -> str:
         # Control Plane path — independent registry + automatic failover
         if self._control is not None:
@@ -97,7 +98,9 @@ class AIClient:
                 logger.error("Control Plane chat failed, trying env fallback: %s", type(exc).__name__)
                 # Fall through to env Settings so support bot stays up if registry empty/corrupt
 
-        return await self._chat_env(messages, temperature=temperature, max_tokens=max_tokens)
+        return await self._chat_env(
+            messages, temperature=temperature, max_tokens=max_tokens, _retry_empty=retry_empty
+        )
 
     async def chat_with_images(
         self,
@@ -106,6 +109,7 @@ class AIClient:
         *,
         system: str | None = None,
         max_images: int = 6,
+        max_tokens: int | None = None,
     ) -> str:
         """Vision-capable chat: send JPEG bytes as data-URL image_url parts."""
         import base64
@@ -125,7 +129,7 @@ class AIClient:
         if system:
             messages.append({"role": "system", "content": system})
         messages.append({"role": "user", "content": content})
-        return await self.chat(messages)
+        return await self.chat(messages, max_tokens=max_tokens or 400, retry_empty=False)
 
     async def _chat_env(
         self,
@@ -186,6 +190,16 @@ class AIClient:
             raise AIClientError(f"Unexpected AI response shape: {body!r}") from exc
 
         content = message.get("content") if isinstance(message, dict) else None
+        if isinstance(content, list):
+            bits: list[str] = []
+            for part in content:
+                if isinstance(part, str) and part.strip():
+                    bits.append(part.strip())
+                elif isinstance(part, dict):
+                    txt = part.get("text") or part.get("content")
+                    if isinstance(txt, str) and txt.strip():
+                        bits.append(txt.strip())
+            content = "\n".join(bits)
         if isinstance(content, str) and content.strip():
             return content.strip()
 

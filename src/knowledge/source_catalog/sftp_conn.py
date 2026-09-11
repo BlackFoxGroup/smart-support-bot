@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import socket
+import threading
 import time
 from pathlib import Path
 from typing import Any
@@ -73,17 +74,34 @@ def load_sftp_settings(data_dir: Path) -> dict[str, Any]:
     }
 
 
-def save_sftp_settings(data_dir: Path, fields: dict[str, Any], *, password: str | None = None) -> None:
+def save_sftp_settings(
+    data_dir: Path,
+    fields: dict[str, Any],
+    *,
+    password: str | None = None,
+    key_pem: str | None = None,
+) -> None:
     current = load_sftp_settings(data_dir)
     password_enc = current.get("password_enc") or ""
-    if password:
-        password_enc = encrypt_secret(password, _master_secret(data_dir))
+    if password and password.strip():
+        password_enc = encrypt_secret(password.strip(), _master_secret(data_dir))
+    incoming = str(fields.get("key_path") or "").strip()
+    key_path = incoming or str(current.get("key_path") or "")
+    pem = (key_pem or "").strip()
+    if pem and "BEGIN" in pem:
+        dest = live_root(data_dir) / "sftp_user_key"
+        dest.write_text(pem + "\n", encoding="utf-8")
+        try:
+            os.chmod(dest, 0o600)
+        except OSError:
+            pass
+        key_path = str(dest)
     data = {
         "host": str(fields.get("host") or current["host"]).strip(),
         "port": int(fields.get("port") or current["port"] or 22),
         "username": str(fields.get("username") or current["username"]).strip(),
         "auth_method": str(fields.get("auth_method") or current["auth_method"]).strip(),
-        "key_path": str(fields.get("key_path") or current["key_path"]).strip(),
+        "key_path": key_path,
         "remote_media_path": str(fields.get("remote_media_path") or current["remote_media_path"]).strip(),
         "timeout": int(fields.get("timeout") or current["timeout"] or 20),
         "password_enc": password_enc,
@@ -99,9 +117,75 @@ def _password(data_dir: Path, settings: dict[str, Any]) -> str:
     return (os.getenv("BOT_SSH_PASS") or "").strip()
 
 
+_SESS_LOCK = threading.Lock()
+_SESS: dict[str, Any] = {"client": None, "sftp": None, "host": ""}
+
+
 def ssh_ready(data_dir: Path) -> bool:
     s = load_sftp_settings(data_dir)
     return bool(s["host"] and s["username"])
+
+
+def session_status() -> dict[str, Any]:
+    with _SESS_LOCK:
+        client = _SESS.get("client")
+        alive = False
+        try:
+            tr = client.get_transport() if client is not None else None
+            alive = bool(tr and tr.is_active())
+        except Exception:
+            alive = False
+        return {"connected": alive, "host": str(_SESS.get("host") or "")}
+
+
+def connect_session(data_dir: Path) -> dict[str, Any]:
+    s = load_sftp_settings(data_dir)
+    if not s["host"] or not s["username"]:
+        return {"ok": False, "status": "NOT CONFIGURED", "error": "host/username missing"}
+    disconnect_session()
+    try:
+        client, settings = _client(data_dir)
+        sftp = client.open_sftp()
+        remote = settings["remote_media_path"]
+        try:
+            sftp.stat(remote)
+        except FileNotFoundError:
+            _mkdirs(sftp, remote.replace("\\", "/"))
+        tr = client.get_transport()
+        if tr is not None:
+            tr.set_keepalive(30)
+        with _SESS_LOCK:
+            _SESS["client"] = client
+            _SESS["sftp"] = sftp
+            _SESS["host"] = settings["host"]
+        return {"ok": True, "status": CONNECTED, "host": settings["host"]}
+    except Exception as exc:  # noqa: BLE001
+        disconnect_session()
+        return {"ok": False, "status": _classify_error(exc), "error": str(exc)[:300]}
+
+
+def disconnect_session() -> None:
+    with _SESS_LOCK:
+        sftp = _SESS.get("sftp")
+        client = _SESS.get("client")
+        _SESS["sftp"] = None
+        _SESS["client"] = None
+        _SESS["host"] = ""
+    for obj in (sftp, client):
+        if obj is None:
+            continue
+        try:
+            obj.close()
+        except Exception:
+            pass
+
+
+def _live_sftp(data_dir: Path):
+    st = session_status()
+    if not st.get("connected"):
+        return None, load_sftp_settings(data_dir)
+    with _SESS_LOCK:
+        return _SESS.get("sftp"), load_sftp_settings(data_dir)
 
 
 def _classify_error(exc: BaseException) -> str:
@@ -155,35 +239,11 @@ def _client(data_dir: Path):
 
 
 def test_connection(data_dir: Path) -> dict[str, Any]:
-    s = load_sftp_settings(data_dir)
-    if not s["host"] or not s["username"]:
-        return {"ok": False, "status": "NOT CONFIGURED", "error": "host/username missing"}
-    try:
-        client, settings = _client(data_dir)
-    except Exception as exc:  # noqa: BLE001
-        return {"ok": False, "status": _classify_error(exc), "error": str(exc)[:300]}
-    try:
-        sftp = client.open_sftp()
-        remote = settings["remote_media_path"]
-        try:
-            sftp.stat(remote)
-        except FileNotFoundError:
-            sftp.close()
-            client.close()
-            return {"ok": False, "status": REMOTE_PATH_ERROR, "error": f"missing {remote}"}
-        sftp.close()
-        client.close()
-        return {"ok": True, "status": CONNECTED, "host": settings["host"]}
-    except Exception as exc:  # noqa: BLE001
-        try:
-            client.close()
-        except Exception:
-            pass
-        return {"ok": False, "status": _classify_error(exc), "error": str(exc)[:300]}
+    return connect_session(data_dir)
 
 
 def _mkdirs(sftp, remote_dir: str) -> None:
-    parts = remote_dir.replace("\\", "/").strip("/").split("/")
+    parts = [p for p in remote_dir.replace("\\", "/").strip("/").split("/") if p]
     cur = ""
     for part in parts:
         cur += "/" + part
@@ -206,11 +266,12 @@ def upload_and_verify(
         return {"ok": False, "status": "FAILED", "error": "SFTP not configured"}
     started = time.time()
     try:
-        client, settings = _client(data_dir)
-        sftp = client.open_sftp()
-        remote_root = settings["remote_media_path"].rstrip("/")
+        sftp, settings = _live_sftp(data_dir)
+        if sftp is None:
+            return {"ok": False, "status": "FAILED", "error": "not connected"}
+        remote_root = str(settings["remote_media_path"]).rstrip("/").replace("\\", "/")
         remote = f"{remote_root}/{remote_rel.lstrip('/')}"
-        parent = str(Path(remote).parent).replace("\\", "/")
+        parent = remote.rsplit("/", 1)[0]
         _mkdirs(sftp, parent)
 
         def _cb(transferred: int, total: int) -> None:
@@ -221,8 +282,6 @@ def upload_and_verify(
         sftp.put(str(local_path), remote, callback=_cb)
         st = sftp.stat(remote)
         if int(st.st_size or 0) != int(expected_size):
-            sftp.close()
-            client.close()
             return {
                 "ok": False,
                 "status": "FAILED",
@@ -239,9 +298,7 @@ def upload_and_verify(
                     break
                 h.update(chunk)
             got = h.hexdigest()
-        sftp.close()
-        client.close()
-        if got != expected_hash:
+        if expected_hash and got != expected_hash:
             return {"ok": False, "status": "FAILED", "error": "checksum mismatch", "remote": remote, "got": got}
         return {"ok": True, "status": "SYNCED", "remote": remote, "size": expected_size}
     except socket.timeout as exc:
@@ -270,6 +327,20 @@ def list_remote(data_dir: Path, product_id: str) -> dict[str, Any]:
         return {"ok": True, "files": files, "path": remote}
     except Exception as exc:  # noqa: BLE001
         return {"ok": False, "error": _classify_error(exc), "files": []}
+
+
+def download_remote(data_dir: Path, remote_path: str, dest: Path) -> dict[str, Any]:
+    if not remote_path or not str(remote_path).replace("\\", "/").startswith("/"):
+        return {"ok": False, "error": "bad remote"}
+    try:
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        sftp, _settings = _live_sftp(data_dir)
+        if sftp is None:
+            return {"ok": False, "error": "not connected"}
+        sftp.get(remote_path, str(dest))
+        return {"ok": dest.is_file()}
+    except Exception as exc:  # noqa: BLE001
+        return {"ok": False, "error": _classify_error(exc)}
 
 
 def delete_remote(data_dir: Path, remote_path: str) -> dict[str, Any]:

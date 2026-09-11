@@ -7,11 +7,11 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-from src.knowledge.source_catalog.deploy import upload_media_files
 from src.knowledge.source_catalog.media import scan_local_media
-from src.knowledge.source_catalog.sftp_conn import ssh_ready, upload_and_verify
+from src.knowledge.source_catalog.sftp_conn import session_status, upload_and_verify
 from src.knowledge.source_catalog.store import (
     append_history,
+    live_root,
     load_global_queue,
     load_media_index,
     save_global_queue,
@@ -25,6 +25,30 @@ SYNCED = "SYNCED"
 FAILED = "FAILED"
 CANCELLED = "CANCELLED"
 DUPLICATE = "DUPLICATE"
+PENDING_UPLOAD = "PENDING_UPLOAD"
+CATALOG_ONLY = "CATALOG_ONLY"
+QUEUE_DONE = {SYNCED, CATALOG_ONLY}
+
+
+def _finished_on_server(job: dict[str, Any]) -> bool:
+    if job.get("status") == CATALOG_ONLY:
+        return True
+    if job.get("on_server"):
+        return True
+    try:
+        progress = int(job.get("progress") or 0)
+    except (TypeError, ValueError):
+        progress = 0
+    return bool(job.get("on_server") and progress >= 100)
+
+
+def visible_queue_jobs(queue: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Jobs still waiting for a real server upload."""
+    return [job for job in queue if not _finished_on_server(job)]
+
+
+def _drop_finished_server_jobs(queue: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    return [job for job in queue if not _finished_on_server(job)]
 
 
 def enqueue_media(data_dir: Path, product_id: str, media_ids: list[str]) -> list[dict[str, Any]]:
@@ -71,7 +95,10 @@ def retry_job(data_dir: Path, job_id: str) -> bool:
     queue = load_global_queue(data_dir)
     found = False
     for job in queue:
-        if job.get("job_id") == job_id and job.get("status") in {FAILED, CANCELLED}:
+        if job.get("job_id") == job_id and (
+            job.get("status") in {FAILED, CANCELLED, PENDING_UPLOAD, WAITING}
+            or (job.get("status") == SYNCED and not job.get("on_server"))
+        ):
             job["status"] = WAITING
             job["error"] = ""
             job["progress"] = 0
@@ -80,19 +107,149 @@ def retry_job(data_dir: Path, job_id: str) -> bool:
     return found
 
 
-def process_waiting(project_root: Path, data_dir: Path, *, limit: int = 8) -> list[dict[str, Any]]:
+def upload_state_path(data_dir: Path) -> Path:
+    return live_root(data_dir) / "upload_state.json"
+
+
+def set_upload_state(data_dir: Path, *, busy: bool, filename: str = "") -> None:
+    import json
+
+    path = upload_state_path(data_dir)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps({"busy": bool(busy), "filename": filename, "at": time.time()}),
+        encoding="utf-8",
+    )
+
+
+def load_upload_state(data_dir: Path) -> dict[str, Any]:
+    import json
+
+    path = upload_state_path(data_dir)
+    if not path.is_file():
+        return {"busy": False, "filename": ""}
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {"busy": False, "filename": ""}
+    return {
+        "busy": bool(data.get("busy")),
+        "filename": str(data.get("filename") or ""),
+    }
+
+
+def _needs_server(job: dict[str, Any]) -> bool:
+    if job.get("on_server"):
+        return False
+    st = str(job.get("status") or "")
+    if st in {WAITING, PENDING_UPLOAD, FAILED}:
+        return True
+    if st == SYNCED and not job.get("on_server"):
+        return True
+    return False
+
+
+def process_waiting(project_root: Path, data_dir: Path, *, limit: int | None = None) -> list[dict[str, Any]]:
     queue = load_global_queue(data_dir)
-    results = []
-    n = 0
+    if not session_status().get("connected"):
+        for job in queue:
+            if _needs_server(job) and not job.get("error"):
+                job["error"] = "not connected"
+        save_global_queue(data_dir, queue)
+        return []
     for job in queue:
-        if job.get("status") != WAITING:
-            continue
-        if n >= limit:
-            break
-        results.append(_run_job(project_root, data_dir, job))
-        n += 1
-    save_global_queue(data_dir, queue)
+        if _needs_server(job):
+            job["status"] = WAITING
+            job["error"] = ""
+            job["progress"] = 0
+    waiting = [job for job in queue if job.get("status") == WAITING]
+    if limit is not None:
+        waiting = waiting[:limit]
+    results = []
+    try:
+        for job in waiting:
+            set_upload_state(data_dir, busy=True, filename=str(job.get("filename") or ""))
+            save_global_queue(data_dir, queue)
+            results.append(_run_job(project_root, data_dir, job))
+            queue = _drop_finished_server_jobs(queue)
+            save_global_queue(data_dir, queue)
+    finally:
+        set_upload_state(data_dir, busy=False, filename="")
+    save_global_queue(data_dir, _drop_finished_server_jobs(queue))
     return results
+
+
+def send_mapped_media_to_catalog(
+    project_root: Path,
+    knowledge_root: Path,
+    data_dir: Path,
+    product_id: str,
+    media_id: str,
+    feature_id: str,
+    catalog_id: str = "",
+) -> dict[str, Any]:
+    """Copy one mapped photo into the product catalog. Feature is required."""
+    import json
+    import shutil
+
+    feat = str(feature_id or "").strip()
+    if not feat:
+        return {"ok": False, "error": "no_feature"}
+    pid = str(product_id or "").strip()
+    dest_pid = str(catalog_id or product_id or "").strip() or pid
+    mid = str(media_id or "").strip()
+    index = load_media_index(data_dir, pid)
+    item = next((i for i in index.get("items") or [] if str(i.get("media_id")) == mid), None)
+    if not item:
+        return {"ok": False, "error": "media not found"}
+    from src.knowledge.source_catalog.analyze import _resolve_image
+
+    src = _resolve_image(project_root, data_dir, pid, item)
+    if src is None or not src.is_file():
+        return {"ok": False, "error": "local file missing"}
+    dest_dir = project_root / "media" / "catalogs" / dest_pid
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest = dest_dir / f"{mid}{src.suffix.lower() or Path(str(item.get('filename') or 'img.png')).suffix.lower() or '.png'}"
+    shutil.copy2(src, dest)
+    rel = str(dest.relative_to(project_root)).replace("\\", "/")
+    item["catalog_path"] = rel
+    item["catalog_feature_id"] = feat
+    fids = [str(x) for x in (item.get("feature_ids") or []) if str(x).strip()]
+    if feat not in fids:
+        fids.append(feat)
+    item["feature_ids"] = fids
+    save_media_index(data_dir, pid, index)
+    from src.knowledge.product_catalogs import product_json_path
+
+    cat = product_json_path(knowledge_root, dest_pid)
+    data: dict[str, Any] = {}
+    if cat.is_file():
+        try:
+            loaded = json.loads(cat.read_text(encoding="utf-8"))
+            if isinstance(loaded, dict):
+                data = loaded
+        except (OSError, json.JSONDecodeError):
+            data = {}
+    media = list(data.get("media") or []) if isinstance(data.get("media"), list) else []
+    media = [m for m in media if not (isinstance(m, dict) and m.get("path") == rel)]
+    media.append(
+        {
+            "role": "catalog",
+            "slot": feat,
+            "feature_ids": [feat],
+            "path": rel,
+            "note": src.name,
+        }
+    )
+    data["media"] = media
+    if not data.get("product_id"):
+        data["product_id"] = dest_pid
+    cat.parent.mkdir(parents=True, exist_ok=True)
+    cat.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    from src.knowledge.product_catalogs import load_product_catalogs
+
+    load_product_catalogs(knowledge_root)
+    return {"ok": True, "path": rel, "feature_id": feat}
 
 
 def _run_job(project_root: Path, data_dir: Path, job: dict[str, Any]) -> dict[str, Any]:
@@ -117,47 +274,40 @@ def _run_job(project_root: Path, data_dir: Path, job: dict[str, Any]) -> dict[st
         job["speed"] = int(speed)
 
     remote_rel = f"{pid}/{mid}{src.suffix.lower()}"
-    if ssh_ready(data_dir):
-        job["status"] = UPLOADING
-        item["status"] = UPLOADING
+    if not session_status().get("connected"):
+        job["status"] = PENDING_UPLOAD
+        job["on_server"] = False
+        job["error"] = "not connected"
         save_media_index(data_dir, pid, index)
-        job["status"] = VERIFYING
-        out = upload_and_verify(
-            data_dir,
-            src,
-            remote_rel,
-            str(item.get("hash") or ""),
-            int(item.get("size") or src.stat().st_size),
-            progress_cb=_progress,
-        )
-        if not out.get("ok"):
-            job["status"] = FAILED
-            job["error"] = str(out.get("error") or "upload failed")
-            item["status"] = FAILED
-            save_media_index(data_dir, pid, index)
-            append_history(data_dir, pid, {"action": "sftp_upload", "result": "FAILED", "object": mid, "error": job["error"]})
-            return job
-        item["status"] = SYNCED
-        item["server_path"] = out.get("remote") or ""
-        item["uploaded_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
-        job["status"] = SYNCED
-        job["progress"] = 100
-        save_media_index(data_dir, pid, index)
-        append_history(data_dir, pid, {"action": "sftp_upload", "result": "ok", "object": mid})
         return job
-
-    dest = project_root / "media" / "catalogs" / pid
     job["status"] = UPLOADING
-    local = upload_media_files(data_dir=data_dir, product_id=pid, dest_media=dest, only_ids=[mid])
-    if local.get("ok") and mid in (local.get("uploaded") or []):
-        job["status"] = SYNCED
-        job["progress"] = 100
-        job["error"] = ""
-        job["note"] = "local copy (SFTP not configured)"
-    else:
+    item["status"] = UPLOADING
+    save_media_index(data_dir, pid, index)
+    job["status"] = VERIFYING
+    out = upload_and_verify(
+        data_dir,
+        src,
+        remote_rel,
+        str(item.get("hash") or ""),
+        int(item.get("size") or src.stat().st_size),
+        progress_cb=_progress,
+    )
+    if not out.get("ok"):
         job["status"] = FAILED
-        fails = local.get("failed") or []
-        job["error"] = str(fails[0] if fails else "local upload failed")
+        job["error"] = str(out.get("error") or "upload failed")
+        item["status"] = FAILED
+        save_media_index(data_dir, pid, index)
+        append_history(data_dir, pid, {"action": "sftp_upload", "result": "FAILED", "object": mid, "error": job["error"]})
+        return job
+    item["status"] = SYNCED
+    item["server_path"] = out.get("remote") or ""
+    item["uploaded_at"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    job["status"] = SYNCED
+    job["on_server"] = True
+    job["progress"] = 100
+    job["error"] = ""
+    save_media_index(data_dir, pid, index)
+    append_history(data_dir, pid, {"action": "sftp_upload", "result": "ok", "object": mid})
     return job
 
 
@@ -212,6 +362,52 @@ def ingest_files(
                     item["catalog_feature_id"] = fids[0]
                     if item.get("status") == "UNMAPPED":
                         item["status"] = "LOCAL_ONLY"
+                new_ids.append(str(item.get("media_id")))
+    save_media_index(data_dir, product_id, index)
+    jobs = enqueue_media(data_dir, product_id, new_ids) if new_ids else []
+    return {"ok": True, "imported": new_ids, "duplicates": duplicates, "jobs": [j["job_id"] for j in jobs]}
+
+
+def ingest_loose_files(
+    project_root: Path,
+    data_dir: Path,
+    product_id: str,
+    files: list[tuple[str, bytes]],
+) -> dict[str, Any]:
+    """Import photos from any disk path into inbox, then queue for server upload."""
+    import hashlib
+    import re
+
+    if not product_id or not files:
+        return {"ok": False, "error": "no files"}
+    folder = live_root(data_dir) / "inbox" / product_id
+    folder.mkdir(parents=True, exist_ok=True)
+    scan_local_media(project_root, data_dir, product_id)
+    index = load_media_index(data_dir, product_id)
+    hashes = {str(i.get("hash")) for i in index.get("items") or [] if isinstance(i, dict)}
+    imported: list[str] = []
+    duplicates: list[dict[str, Any]] = []
+    for name, blob in files:
+        safe = re.sub(r"[^A-Za-z0-9._-]+", "_", Path(name).name) or "image.bin"
+        digest = hashlib.sha256(blob).hexdigest()
+        if digest in hashes:
+            duplicates.append({"filename": safe, "status": DUPLICATE, "hash": digest})
+            continue
+        dest = folder / safe
+        n = 1
+        while dest.exists():
+            dest = folder / f"{dest.stem}_{n}{dest.suffix}"
+            n += 1
+        dest.write_bytes(blob)
+        imported.append(str(dest))
+        hashes.add(digest)
+    scan_local_media(project_root, data_dir, product_id)
+    index = load_media_index(data_dir, product_id)
+    new_ids = []
+    for path in imported:
+        p = Path(path)
+        for item in index.get("items") or []:
+            if str(item.get("path")) == str(p):
                 new_ids.append(str(item.get("media_id")))
     save_media_index(data_dir, product_id, index)
     jobs = enqueue_media(data_dir, product_id, new_ids) if new_ids else []
