@@ -15,12 +15,12 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-# Sealed digest of knowledge/creator_contact.json (canonical UTF-8 bytes on disk).
-_EXPECTED = "395f5166f55916468c01f15e78b03fea57b0a3b082582efaeb9555c54cc34e1e"
+# Sealed digest with LF-normalized line endings, stable on Windows and Linux.
+_EXPECTED = "d02a60765eacb591a39ce030aa205e92922ebea50854a38026b2a1fdd219b00c"
 
 
 def _digest(path: Path) -> str:
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    return hashlib.sha256(path.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
 
 
 def primary(*, knowledge_root: Path, flag_path: Path) -> None:
