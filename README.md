@@ -10,14 +10,14 @@
 
 <p align="center">
   <a href="https://foxnext.net">Website</a> •
-  <a href="https://github.com/BlackFoxGroup/VPS to VPN">VPS to VPNr</a> •
+  <a href="https://github.com/BlackFoxGroup/VPS to VPN">VPS to VPN</a> •
   <a href="https://github.com/BlackFoxGroup/blackfox-config-builder">Black Fox Config Builder</a> •
   <a href="https://t.me/blackFoxVPNN">Telegram</a>
 </p>
 
 <div dir="rtl">
 
-ربات **Smart Support Bot** به‌صورت رایگان و متن‌باز (**Open Source**) در اختیار عموم قرار گرفته است تا همه بتوانند آزادانه از آن استفاده کنند و در توسعه و بهبود آن مشارکت داشته باشند.
+  **Smart Support Bot and Manager** به‌صورت رایگان و متن‌باز (**Open Source**) در اختیار عموم قرار گرفته است تا همه بتوانند آزادانه از آن استفاده کنند و در توسعه و بهبود آن مشارکت داشته باشند.
 
 ⭐ اگر این پروژه برای شما مفید است، لطفاً با **Star ⭐ در GitHub** از ادامه این مسیر و توسعه پروژه حمایت کنید. حمایت شما انگیزه‌ای برای ادامه و ساخت پروژه‌های بهتر است.
 
@@ -29,6 +29,7 @@
 **از همراهی و حمایت شما سپاسگزاریم. 🙏**
 
 </div>
+
 Smart Support Bot is a Telegram support bot that answers product questions from an active catalog. Smart Support Manager 2.1 is the companion interface for creating, editing, publishing, and managing those catalogs with an OpenAI-compatible service.
 
 Both programs use the same product directory on the server:
