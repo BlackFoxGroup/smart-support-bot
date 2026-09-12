@@ -26,12 +26,14 @@ from src.knowledge.source_catalog.catalog_edit import (
 )
 from src.knowledge.source_catalog.queue import (
     cancel_job,
+    cancel_active_uploads,
     ingest_files,
     ingest_loose_files,
     load_upload_state,
     process_waiting,
     retry_job,
     send_mapped_media_to_catalog,
+    set_upload_state,
 )
 from src.knowledge.source_catalog.sftp_conn import (
     connect_session,
@@ -416,14 +418,11 @@ document.querySelectorAll('.file-btn input').forEach(inp=>{
     }
   });
 });
-const lb=document.getElementById('lightbox');
-const lbimg=document.getElementById('lbimg');
-function closeLb(){if(!lb)return;lb.classList.remove('on');lb.hidden=true;if(lbimg)lbimg.removeAttribute('src');}
-function openLb(src){if(!lb||!lbimg)return;lbimg.src=src;lb.hidden=false;lb.classList.add('on');const x=document.getElementById('lbx');if(x)x.focus();}
-if(lb){lb.addEventListener('click',e=>{if(e.target!==lbimg)closeLb();});}
-const lbx=document.getElementById('lbx');if(lbx)lbx.addEventListener('click',closeLb);
+function closeLb(){const lb=document.getElementById('lightbox');const img=document.getElementById('lbimg');if(!lb)return;lb.classList.remove('on');lb.hidden=true;if(img)img.removeAttribute('src');}
+function openLb(src){const lb=document.getElementById('lightbox');const img=document.getElementById('lbimg');if(!lb||!img)return;img.src=src;lb.hidden=false;lb.classList.add('on');const x=document.getElementById('lbx');if(x)x.focus();}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLb();});
 document.addEventListener('click',e=>{
+  if(e.target.id==='lbx'||e.target.id==='lightbox'){e.preventDefault();closeLb();return;}
   const link=e.target.closest&&e.target.closest('a.zoom');
   if(!link)return;
   e.preventDefault();openLb(link.getAttribute('href'));
@@ -472,11 +471,15 @@ def _form(raw: bytes, headers) -> tuple[dict[str, list[str]], list[tuple[str, by
 
 def execute_action(name: str, pid: str) -> tuple[str, str]:
     """Returns (ok_key_or_empty, err_text)."""
-    if name == "toggle":
-        page = service.product_page(PROJECT_ROOT, KNOWLEDGE_ROOT, DATA_DIR, pid)
-        cur = bool((page.get("product") or {}).get("catalog_enabled", True))
-        service.set_catalog_enabled(KNOWLEDGE_ROOT, pid, not cur)
-        return "ok_toggle", ""
+    if name in {"toggle", "auto-catalog"}:
+        src = service.source_root_for(DATA_DIR, pid)
+        if not src:
+            return "", "err_source"
+        out = service.build_ai_catalog(PROJECT_ROOT, KNOWLEDGE_ROOT, DATA_DIR, pid)
+        if not out.get("ok"):
+            err = str(out.get("error") or "catalog failed")
+            return "", err if err.startswith("err_") else err
+        return "ok_auto_catalog", ""
     if name == "scan":
         from src.knowledge.source_catalog.media import scan_local_media
 
@@ -485,18 +488,48 @@ def execute_action(name: str, pid: str) -> tuple[str, str]:
     if name == "map":
         service.auto_map_media(PROJECT_ROOT, KNOWLEDGE_ROOT, DATA_DIR, pid)
         return "ok_map", ""
-    if name == "catalog":
+    if name in {"catalog", "save-catalog"}:
         src = service.source_root_for(DATA_DIR, pid)
         if not src:
             return "", "err_source"
-        out = service.build_ai_catalog(PROJECT_ROOT, KNOWLEDGE_ROOT, DATA_DIR, pid)
+        out = service.sync_catalog(
+            source_root=src,
+            knowledge_root=KNOWLEDGE_ROOT,
+            data_dir=DATA_DIR,
+            product_id=pid,
+            force=True,
+            activate=True,
+        )
         if not out.get("ok"):
             err = str(out.get("error") or "catalog failed")
             return "", err if err.startswith("err_") else err
-        return "ok_catalog", ""
-    if name == "upload-media":
-        service.sync_media(PROJECT_ROOT, DATA_DIR, pid)
-        return "ok_queue", ""
+        return "ok_save_catalog", ""
+    if name in {"upload-media", "send-media"}:
+        uploaded = service.sync_media(PROJECT_ROOT, DATA_DIR, pid)
+        page = service.product_page(PROJECT_ROOT, KNOWLEDGE_ROOT, DATA_DIR, pid)
+        targets = {
+            str(item.get("media_id") or "")
+            for item in page.get("media") or []
+            if item.get("media_id") and not item.get("catalog_path")
+        }
+        targets.update(str(media_id) for media_id in uploaded.get("queued") or [])
+        failed: list[str] = []
+        for media_id in sorted(targets):
+            result = analyze_and_send(
+                PROJECT_ROOT,
+                KNOWLEDGE_ROOT,
+                DATA_DIR,
+                pid,
+                str(media_id),
+                catalog_id=pid,
+            )
+            if not result.get("ok") or not result.get("on_server"):
+                failed.append(str(result.get("error") or media_id))
+        return ("ok_send_media", "") if not failed else ("", failed[0])
+    if name == "activate":
+        service.set_catalog_enabled(KNOWLEDGE_ROOT, pid, True)
+        result = publish_catalog_to_bot(DATA_DIR, PROJECT_ROOT, KNOWLEDGE_ROOT, pid)
+        return ("ok_activate", "") if result.get("ok") else ("", str(result.get("error") or "err_catalog_publish"))
     if name == "rollback":
         from src.knowledge.source_catalog.versions import rollback
 
@@ -1072,6 +1105,16 @@ class Handler(BaseHTTPRequestHandler):
             flash += f"<p class='ok'>{_esc(t(lang, msg_key) if msg_key.startswith('ok_') else msg_key)}</p>"
         if err_key:
             flash += f"<p class='warn'>{_esc(t(lang, err_key) if err_key.startswith('err_') else err_key)}</p>"
+        catalog_rows = "".join(
+            "<div class='media-row'>"
+            f"<a class='zoom' href='/cmedia?p={_esc(str(m.get('path') or ''))}'>"
+            f"<img class='th' src='/cmedia?p={_esc(str(m.get('path') or ''))}' alt=''></a>"
+            f"<span class='name'>{_esc(str(m.get('filename') or ''))}</span>"
+            f"<span>{_esc(_human(m.get('feature_ids') or m.get('slot') or ''))}</span>"
+            "</div>"
+            for m in catalog_media_list(KNOWLEDGE_ROOT, pid)
+            if str(m.get("path") or "")
+        )
         body = f"""
 <div class="card">
 <h2>{_esc(t(lang,'auto_catalog'))} — {_esc(p.get('title') or pid)}</h2>
@@ -1080,34 +1123,56 @@ class Handler(BaseHTTPRequestHandler):
 <p>{_esc(t(lang,'col_source'))}: {_esc(p.get('source'))}<br>{_esc(t(lang,'col_images'))}: {_esc(p.get('pic_dir'))}<br>{_esc(t(lang,'storage_path'))}: <code class="readonly-path">{_esc(p.get('server_media'))}</code></p>
 {flash}
 <div class="toolbar">
-<a class="btn" href="/run/toggle?id={_esc(pid)}">{_esc(t(lang, 'toggle'))}</a>
+<a class="btn busy-link" data-wait="{_esc(t(lang,'building_catalog'))}" href="/run/auto-catalog?id={_esc(pid)}">{_esc(t(lang, 'auto_catalog_button'))}</a>
+<a class="btn busy-link" data-wait="{_esc(t(lang,'saving_catalog'))}" href="/run/save-catalog?id={_esc(pid)}">{_esc(t(lang, 'save_catalog_text'))}</a>
 <a class="btn" href="/run/scan?id={_esc(pid)}">{_esc(t(lang, 'scan'))}</a>
 <a class="btn" href="/run/map?id={_esc(pid)}">{_esc(t(lang, 'map'))}</a>
-<a class="btn" href="/run/catalog?id={_esc(pid)}">{_esc(t(lang, 'catalog'))}</a>
-<a class="btn" href="/run/upload-media?id={_esc(pid)}">{_esc(t(lang, 'upload'))}</a>
+<a class="btn busy-link" data-wait="{_esc(t(lang,'sending_media'))}" href="/run/send-media?id={_esc(pid)}">{_esc(t(lang, 'send_media_catalog'))}</a>
+<a class="btn busy-link" data-wait="{_esc(t(lang,'activating_catalog'))}" href="/run/activate?id={_esc(pid)}">{_esc(t(lang, 'activate_catalog'))}</a>
 <a class="btn" href="/run/rollback?id={_esc(pid)}">{_esc(t(lang, 'rollback'))}</a>
 </div>
+<p class="ok">{_esc(t(lang, 'auto_catalog_notice'))}</p>
 {_keys_list(lang, 'keys_help')}
 </div>
-<div class="card drop" id="drop">
+<div class="card drop" id="catalog-upload">
 <h3>{t(lang, 'select_files')}</h3>
 <form method="post" action="/api/ingest" enctype="multipart/form-data" id="up" class="upload-form">
 <input type="hidden" name="id" value="{_esc(pid)}">
 {_file_pick('files', 'files', lang)}
 <label class="upload-feature"><span>{_esc(t(lang,'feature'))}</span>
 <select name="feature"><option value="">{_esc(t(lang,'choose_feature'))}</option>{feats}</select></label>
-<button type="submit">{_esc(t(lang,'upload_selected'))}</button>
+<button type="submit">{_esc(t(lang,'send_media_catalog'))}</button>
 <button type="button" onclick="const f=document.getElementById('files');f.value='';f.dispatchEvent(new Event('change'))">{_esc(t(lang,'cancel'))}</button>
 </form>
 <div id="preview"></div>
+<div id="upload-result" role="status"></div>
+<h3>{_esc(t(lang,'catalog_photos'))}</h3>
+<div class="media-list" id="catalog-uploaded">{catalog_rows or f"<p class='stat'>{_esc(t(lang,'no_results'))}</p>"}</div>
 </div>
 <script>
-const input=document.getElementById('files'); const box=document.getElementById('drop'); const prev=document.getElementById('preview');
+document.querySelectorAll('.busy-link').forEach(a=>a.addEventListener('click',()=>{{a.setAttribute('aria-busy','true');a.textContent=a.dataset.wait||a.textContent;}}));
+const input=document.getElementById('files'); const box=document.getElementById('catalog-upload'); const prev=document.getElementById('preview');
 function show(){{prev.innerHTML='';[...input.files].forEach((f,i)=>{{const d=document.createElement('div');
 d.innerHTML='<b>'+f.name+'</b> '+(f.size/1024).toFixed(1)+' KB <button type=button data-i="'+i+'">{t(lang,'remove')}</button>';
 if(f.type.startsWith('image/')){{const img=document.createElement('img');img.className='th';img.src=URL.createObjectURL(f);d.prepend(img);}}
 prev.appendChild(d);}});prev.querySelectorAll('button').forEach(b=>b.onclick=()=>{{const dt=new DataTransfer();[...input.files].forEach((f,i)=>{{if(i!=+b.dataset.i)dt.items.add(f);}});input.files=dt.files;show();}});}}
 input.onchange=()=>{{show();const name=input.parentElement&&input.parentElement.querySelector('.file-name');if(name)name.textContent=input.files.length?input.files[0].name:name.getAttribute('data-empty');}}; ['dragover','drop'].forEach(ev=>box.addEventListener(ev,e=>{{e.preventDefault(); if(ev==='drop'){{input.files=e.dataTransfer.files;input.onchange();}}}}));
+document.getElementById('up').addEventListener('submit',async e=>{{
+  e.preventDefault();
+  if(!input.files.length)return;
+  const result=document.getElementById('upload-result');
+  const button=e.currentTarget.querySelector('button[type=submit]');
+  button.disabled=true;button.setAttribute('aria-busy','true');
+  result.className='stat';result.textContent='{_esc(t(lang,'sending_media'))}';
+  try{{
+    const response=await fetch('/api/ingest',{{method:'POST',headers:{{'X-Stay':'1'}},body:new FormData(e.currentTarget)}});
+    const data=await response.json();
+    if(!data.ok)throw new Error(data.msg||'upload failed');
+    prev.innerHTML='';input.value='';result.className='ok';result.textContent=data.msg;
+    setTimeout(()=>location.reload(),600);
+  }}catch(error){{result.className='warn';result.textContent=error.message;}}
+  finally{{button.disabled=false;button.removeAttribute('aria-busy');}}
+}});
 </script>
 <p><a href="/media?id={_esc(pid)}">{_esc(t(lang,'nav_media'))}</a> · <a href="/queue">{_esc(t(lang,'nav_queue'))}</a></p>
 """
@@ -1302,6 +1367,7 @@ b.disabled=false;b.removeAttribute('aria-busy');toast(txt.textContent,failed===0
         if u == "/api/stop-all":
             stop_all_operations()
             disconnect_session()
+            cancel_active_uploads(DATA_DIR)
             append_history(
                 DATA_DIR,
                 "_manager",
@@ -1327,6 +1393,7 @@ b.disabled=false;b.removeAttribute('aria-busy');toast(txt.textContent,failed===0
             "/api/cat-delete-picked",
             "/api/to-catalog",
             "/api/analyze-send",
+            "/api/ingest",
         }
         if u in catalog_mutations and not session_status().get("connected"):
             if (self.headers.get("X-Stay") or "") == "1":
@@ -1383,7 +1450,7 @@ b.disabled=false;b.removeAttribute('aria-busy');toast(txt.textContent,failed===0
                     was_enabled = bool(
                         read_catalog(KNOWLEDGE_ROOT, pid).get("catalog_enabled", False)
                     )
-                    ok, err = execute_action("catalog", pid)
+                    ok, err = execute_action("auto-catalog", pid)
                     if ok:
                         service.set_catalog_enabled(KNOWLEDGE_ROOT, pid, was_enabled)
                         result = publish_catalog_to_bot(
@@ -1399,11 +1466,46 @@ b.disabled=false;b.removeAttribute('aria-busy');toast(txt.textContent,failed===0
             elif u == "/api/ingest":
                 feat = (form.get("feature") or [""])[0]
                 result = ingest_files(PROJECT_ROOT, DATA_DIR, pid, files, feature_id=feat)
-                loc = "/queue"
                 if not result.get("ok"):
-                    self._page(f"<p class='warn'>{_esc(result.get('error'))}</p>")
+                    if (self.headers.get("X-Stay") or "") == "1":
+                        self._send(
+                            json.dumps({"ok": False, "msg": str(result.get("error") or "upload failed")}).encode("utf-8"),
+                            200,
+                            "application/json",
+                        )
+                    else:
+                        self._page(f"<p class='warn'>{_esc(result.get('error'))}</p>")
                     return
                 process_waiting(PROJECT_ROOT, DATA_DIR)
+                sent = []
+                for media_id in result.get("imported") or []:
+                    sent.append(
+                        analyze_and_send(
+                            PROJECT_ROOT,
+                            KNOWLEDGE_ROOT,
+                            DATA_DIR,
+                            pid,
+                            str(media_id),
+                            catalog_id=pid,
+                            feature_id=feat,
+                        )
+                    )
+                failed = [x for x in sent if not x.get("ok") or not x.get("on_server")]
+                if (self.headers.get("X-Stay") or "") == "1":
+                    self._send(
+                        json.dumps(
+                            {
+                                "ok": not failed,
+                                "msg": t(lang, "ok_direct_upload") if not failed else str(failed[0].get("error") or t(lang, "err_catalog_publish")),
+                                "imported": result.get("imported") or [],
+                            },
+                            ensure_ascii=False,
+                        ).encode("utf-8"),
+                        200,
+                        "application/json",
+                    )
+                    return
+                loc = f"/products?id={quote(pid)}&msg={'ok_direct_upload' if not failed else 'err_catalog_publish'}"
             elif u == "/api/process-queue":
                 if not session_status().get("connected"):
                     loc = "/queue?err=err_offline"
@@ -1867,6 +1969,7 @@ b.disabled=false;b.removeAttribute('aria-busy');toast(txt.textContent,failed===0
 
 
 def run(host: str = HOST, port: int = PORT) -> None:
+    set_upload_state(DATA_DIR, busy=False, filename="")
     httpd = ThreadingHTTPServer((host, port), Handler)
     print(f"{APP_NAME} http://{host}:{port}")
     httpd.serve_forever()

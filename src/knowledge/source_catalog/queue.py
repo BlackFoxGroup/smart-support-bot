@@ -138,6 +138,32 @@ def load_upload_state(data_dir: Path) -> dict[str, Any]:
     }
 
 
+def cancel_active_uploads(data_dir: Path) -> int:
+    """Cancel persisted in-flight jobs and clear their stale media status."""
+    queue = load_global_queue(data_dir)
+    cancelled = 0
+    touched: set[str] = set()
+    for job in queue:
+        if str(job.get("status") or "") not in {UPLOADING, VERIFYING, WAITING}:
+            continue
+        job["status"] = CANCELLED
+        job["error"] = "stopped by user"
+        job["progress"] = 0
+        cancelled += 1
+        pid = str(job.get("product_id") or "")
+        if pid:
+            touched.add(pid)
+    save_global_queue(data_dir, queue)
+    for pid in touched:
+        index = load_media_index(data_dir, pid)
+        for item in index.get("items") or []:
+            if str(item.get("status") or "") in {UPLOADING, VERIFYING}:
+                item["status"] = "LOCAL_ONLY"
+        save_media_index(data_dir, pid, index)
+    set_upload_state(data_dir, busy=False, filename="")
+    return cancelled
+
+
 def _needs_server(job: dict[str, Any]) -> bool:
     if job.get("on_server"):
         return False

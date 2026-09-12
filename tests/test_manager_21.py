@@ -24,6 +24,13 @@ from src.operation_control import (
     stop_all_operations,
 )
 from src.knowledge.source_catalog.analyze import analyze_and_send
+from src.knowledge.source_catalog.queue import cancel_active_uploads, load_upload_state
+from src.knowledge.source_catalog.store import (
+    load_global_queue,
+    load_media_index,
+    save_global_queue,
+    save_media_index,
+)
 from src.knowledge.catalog_rag import build_catalog_units
 from src.knowledge.product_catalogs import (
     load_product_catalogs,
@@ -277,6 +284,36 @@ class Manager21Tests(unittest.TestCase):
             raise_if_stopped()
         begin_operation()
         raise_if_stopped()
+
+    def test_stop_all_clears_persisted_upload_state(self) -> None:
+        with tempfile.TemporaryDirectory() as td:
+            data_dir = Path(td)
+            save_global_queue(
+                data_dir,
+                [{"job_id": "j1", "product_id": "p1", "media_id": "m1", "status": "UPLOADING"}],
+            )
+            save_media_index(data_dir, "p1", {"items": [{"media_id": "m1", "status": "UPLOADING"}]})
+            from src.knowledge.source_catalog.queue import set_upload_state
+
+            set_upload_state(data_dir, busy=True, filename="stale.jpg")
+            self.assertEqual(cancel_active_uploads(data_dir), 1)
+            self.assertEqual(load_global_queue(data_dir)[0]["status"], "CANCELLED")
+            self.assertEqual(load_media_index(data_dir, "p1")["items"][0]["status"], "LOCAL_ONLY")
+            self.assertFalse(load_upload_state(data_dir)["busy"])
+
+    def test_automatic_catalog_controls_use_requested_order(self) -> None:
+        app_source = (Path(__file__).parents[1] / "src" / "manager" / "app.py").read_text(encoding="utf-8")
+        names = [
+            "/run/auto-catalog",
+            "/run/save-catalog",
+            "/run/scan",
+            "/run/map",
+            "/run/send-media",
+            "/run/activate",
+            "/run/rollback",
+        ]
+        positions = [app_source.index(name) for name in names]
+        self.assertEqual(positions, sorted(positions))
 
     def test_ai_and_server_settings_persist_in_manager_directory(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
