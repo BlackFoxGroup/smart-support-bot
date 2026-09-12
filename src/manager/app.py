@@ -1105,16 +1105,6 @@ class Handler(BaseHTTPRequestHandler):
             flash += f"<p class='ok'>{_esc(t(lang, msg_key) if msg_key.startswith('ok_') else msg_key)}</p>"
         if err_key:
             flash += f"<p class='warn'>{_esc(t(lang, err_key) if err_key.startswith('err_') else err_key)}</p>"
-        catalog_rows = "".join(
-            "<div class='media-row'>"
-            f"<a class='zoom' href='/cmedia?p={_esc(str(m.get('path') or ''))}'>"
-            f"<img class='th' src='/cmedia?p={_esc(str(m.get('path') or ''))}' alt=''></a>"
-            f"<span class='name'>{_esc(str(m.get('filename') or ''))}</span>"
-            f"<span>{_esc(_human(m.get('feature_ids') or m.get('slot') or ''))}</span>"
-            "</div>"
-            for m in catalog_media_list(KNOWLEDGE_ROOT, pid)
-            if str(m.get("path") or "")
-        )
         body = f"""
 <div class="card">
 <h2>{_esc(t(lang,'auto_catalog'))} — {_esc(p.get('title') or pid)}</h2>
@@ -1146,8 +1136,6 @@ class Handler(BaseHTTPRequestHandler):
 </form>
 <div id="preview"></div>
 <div id="upload-result" role="status"></div>
-<h3>{_esc(t(lang,'catalog_photos'))}</h3>
-<div class="media-list" id="catalog-uploaded">{catalog_rows or f"<p class='stat'>{_esc(t(lang,'no_results'))}</p>"}</div>
 </div>
 <script>
 document.querySelectorAll('.busy-link').forEach(a=>a.addEventListener('click',()=>{{a.setAttribute('aria-busy','true');a.textContent=a.dataset.wait||a.textContent;}}));
