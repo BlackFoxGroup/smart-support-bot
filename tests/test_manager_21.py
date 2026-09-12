@@ -196,7 +196,8 @@ class Manager21Tests(unittest.TestCase):
         )
         self.assertIn('MANAGER_INSTALL_DIR:-/opt/smart-support', script)
         self.assertIn('Environment="MANAGER_LOCAL_BOT=1"', script)
-        self.assertIn('or "/opt/smart-support"', installer)
+        self.assertIn('"/opt/smart-support"', installer)
+        self.assertIn('"/opt/telegram-bot"', installer)
 
     def test_ai_uses_only_enabled_product_catalogs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -28,6 +28,7 @@ BOT_COMMANDS_ADMIN: list[BotCommand] = [
     BotCommand(command="failover", description="Admin: failover status"),
     BotCommand(command="safety_status", description="Admin: safe-change status"),
     BotCommand(command="catalog_scan", description="Admin: rescan VPS to VPN catalog"),
+]
 
 BOT_COMMANDS_FA: list[BotCommand] = [
     BotCommand(command="start", description="شروع / انتخاب زبان"),
