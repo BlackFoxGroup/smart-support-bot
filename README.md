@@ -1,373 +1,313 @@
-<p align="center">
-  <img src="docs/assets/logo.png" alt="VPS to VPN — Black Fox Group" width="96">
-</p>
+# Smart Support Bot and Manager
 
-<h1 align="center">Smart Support Bot</h1>
+Smart Support Bot is a Telegram support bot that answers product questions from an active catalog. Smart Support Manager 2.1 is the companion interface for creating, editing, publishing, and managing those catalogs with an OpenAI-compatible service.
 
-<p align="center">
-  <strong>Telegram product support for VPS to VPN by Black Fox Group</strong><br>
-  Features · Languages · Catalog · Setup · Deploy · Safety
-</p>
+Both programs use the same product directory on the server:
 
-<p align="center">
-  <a href="https://foxnext.net">Website</a> •
-  <a href="https://foxnext.net/downloads/Black-Fox-Config-Builder.apk">Black-Fox-Config-Builder.apk</a> •
-  <a href="https://github.com/balckfoxgroup/blackfox-vpn-installer">VPS to VPN</a> •
-  <a href="https://github.com/balckfoxgroup/blackfox-config-builder">Black Fox Config Builder</a> •
-  <a href="https://t.me/blackFoxVPNN">Telegram</a>
-</p>
-
-<div dir="rtl">
-
-ربات **Smart Support Bot** به‌صورت رایگان و متن‌باز (**Open Source**) در اختیار عموم قرار گرفته است تا همه بتوانند آزادانه از آن استفاده کنند و در توسعه و بهبود آن مشارکت داشته باشند.
-
-⭐ اگر این پروژه برای شما مفید است، لطفاً با **Star ⭐ در GitHub** از ادامه این مسیر و توسعه پروژه حمایت کنید. حمایت شما انگیزه‌ای برای ادامه و ساخت پروژه‌های بهتر است.
-
-🦊 همچنین خوشحالیم که به خانواده **Black Fox** پیوسته‌اید. 💖
-امیدواریم در کنار هم بتوانیم پروژه‌های کاربردی و متن‌باز بیشتری توسعه دهیم.
-
-🚀 در کنار Smart Support Bot، می‌توانید از سایر پروژه‌های **Black Fox** نیز دیدن کنید و از آن‌ها استفاده کنید.
-
-**از همراهی و حمایت شما سپاسگزاریم. 🙏**
-
-</div>
-
----
-
-## Overview / معرفی
-
-Async Telegram support bot for **VPS to VPN** by **Black Fox Group** (Server Installer & Manager) (ops toolkit).  
-Long polling · **aiogram 3** · OpenAI-compatible chat API · local multilingual knowledge.
-
-Not an image/video/codegen bot.
-
-> Clean open-source release: no recorded user data, no secrets in the repo.  
-> Only the **Contact Creator** card (`knowledge/creator_contact.json`) ships pre-filled.
-
-**Download ZIP:** [foxnext.net/downloads/smart-support-bot.zip](https://foxnext.net/downloads/smart-support-bot.zip)  
-Archive root folder: `Smart Support Bot/`
-
-<div dir="rtl">
-
-ربات پشتیبانی تلگرام برای برنامه **VPS to VPN** از **Black Fox Group** (Server Installer & Manager) — اجرا به‌صورت async با **aiogram 3**، Long Polling، API سازگار با OpenAI و پایگاه دانش چندزبانهٔ محلی.
-
-ربات تولید تصویر/ویدیو/کد عمومی نیست؛ تمرکز روی پشتیبانی محصول است.
-
-> نسخهٔ متن‌باز تمیز است: دادهٔ کاربر و رمز در مخزن نیست.  
-> فقط کارت **تماس با سازنده** (`knowledge/creator_contact.json`) از پیش پر شده است.
-
-**دانلود ZIP:** [foxnext.net/downloads/smart-support-bot.zip](https://foxnext.net/downloads/smart-support-bot.zip)  
-پوشهٔ ریشه داخل آرشیو: `Smart Support Bot/`
-
-</div>
-
-## Features / امکانات
-
-- Languages: `fa`, `en`, `ru`, `zh` (Telegram `language_code` + `/lang`)
-- Intent match from `AI_BOT_DATABASE` (keyword / sample overlap)
-- Low confidence → clarifying question; high confidence → LLM with FAQ + KB snippets
-- **Ask AI** scoped per product (catalog training + RAG; no internal prompt dumps to chat)
-- Per-product catalogs, admin training hub (append-only), product-scoped operator chat
-- Media send only when the user explicitly asks
-- Sales nudge (FOMO, no fake prices) → https://foxnext.net · @HiBlackFoxVpn
-- User language prefs in `data/users.json` (created on first run)
-- Social news job (verified sources → captioned posts)
-- Optional nightly free-config / conversation-analysis jobs
-- **Safe-change watchdog**: backup → apply → observe → admin confirm → keep or auto-restore  
-  (`/safety_drill`, `/safety_status`; `smart-support-bot-watchdog.service`)
-- **Smart Support Manager v2** local UI (`8766`): products, live catalog text, catalog photos, media, upload queue, persistent SSH
-- Map each product source/image/server path on the Products page (two-column cards)
-- Persistent **Connect / Disconnect** to the VPS; Process queue and Retry upload only while connected
-- Upload extra photos from any disk folder (not only the main image folder)
-- AI vision analyze (cached; optional analyze-all + send to catalog); feature dropdown is required
-- Catalog page: edit title/summaries/features; add a feature by hand
-- Catalog photos page: change feature, return to Media, or delete from the server
-
-<div dir="rtl">
-
-- زبان‌ها: `fa`، `en`، `ru`، `zh` (بر اساس `language_code` تلگرام و دستور `/lang`)
-- تشخیص نیت از `AI_BOT_DATABASE`
-- اطمینان پایین → سؤال شفاف‌سازی؛ اطمینان بالا → پاسخ LLM با FAQ و قطعات دانش
-- **سوال از AI** محدود به هر محصول (آموزش کاتالوگ + RAG؛ بدون نشت پرامپت داخلی به چت)
-- کاتالوگ محصول، هاب آموزش ادمین (افزودن متن / append)، گفتگوی اپراتور به‌ازای محصول
-- ارسال عکس فقط وقتی کاربر صریح درخواست کند
-- پیام فروش بدون قیمت جعلی → سایت و @HiBlackFoxVpn
-- ذخیرهٔ زبان کاربر در `data/users.json`
-- ارسال خبرهای تأییدشدهٔ اینترنت
-- جاب‌های اختیاری: کانفیگ شبانه و تحلیل گفتگو
-- **نگهبان تغییر امن**: پشتیبان → اعمال → مشاهده → تأیید ادمین → نگه داشتن یا بازگردانی خودکار
-- **مدیر پشتیبانی هوشمند v2** روی `8766`: محصولات، متن کاتالوگ، عکس کاتالوگ، رسانه، صف آپلود، اتصال پایدار SSH
-- مسیر سورس / تصویر / سرور هر محصول در صفحهٔ محصولات (کارت‌های دوتایی)
-- **اتصال / قطع اتصال** به سرور؛ پردازش صف و تلاش مجدد فقط وقتی وصل است
-- افزودن عکس از هر جای هارد، جدا از پوشهٔ اصلی تصاویر
-- تحلیل بینایی AI (با کش؛ تحلیل کلی و ارسال به کاتالوگ)؛ بدون ویژگی ارسال نمی‌شود
-- صفحهٔ کاتالوگ: ویرایش عنوان و خلاصه و ویژگی؛ افزودن ویژگی دستی
-- صفحهٔ عکس‌های کاتالوگ: تغییر ویژگی، بازگشت به رسانه، یا حذف از سرور
-
-</div>
-
-## Layout / ساختار
-
-VPS install path: `/opt/Smart Support Bot`  
-Safety store (outside install tree): `/opt/smart-support-bot-safety`
-
-```
-Smart Support Bot/
-├── src/
-│   ├── main.py
-│   ├── config.py
-│   ├── ai/                 # client, persona, safety
-│   ├── handlers/           # start, chat, menu, admin, group, safety
-│   ├── knowledge/          # loader, intents, catalogs, RAG, Ask AI memory
-│   ├── safety/             # watchdog, backup, paths
-│   ├── control/            # agent registry & API keys
-│   ├── ui/                 # keyboards & messaging
-│   └── storage/            # users & runtime state helpers
-├── knowledge/
-│   ├── AI_Knowledge_Base_Multilingual/
-│   ├── AI_BOT_DATABASE/
-│   ├── Support_Decision_Tree/
-│   ├── creator_contact.json
-│   ├── social_news_sources.json
-│   ├── product_catalogs/
-│   └── product_guides/
-├── data/.gitkeep
-├── media/
-├── docs/assets/logo.png
-├── deploy/
-│   ├── install.sh
-│   ├── smart-support-bot.service
-│   └── smart-support-bot-watchdog.service
-├── src/manager/            # Smart Support Manager (local UI)
-├── Start-Smart-Support-Manager.bat
-├── Start-Smart-Support-Manager-v2.bat
-├── requirements.txt
-├── .env.example
-└── README.md
+```text
+/opt/smart-support/products/<product-id>/
+├── catalog.json
+└── media/
 ```
 
-<div dir="rtl">
+Website: [foxnext.net](https://foxnext.net)
+Source: [github.com/BlackFoxGroup/smart-support-bot](https://github.com/BlackFoxGroup/smart-support-bot)
 
-مسیر نصب روی VPS: `/opt/Smart Support Bot`  
-مسیر safety (خارج از پوشهٔ نصب): `/opt/smart-support-bot-safety`
+## Download
 
-</div>
+Download the public package:
 
-## Setup / راه‌اندازی
+[smart-support-suite-v2.1.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.1.zip)
 
-### Windows (PowerShell)
+The package contains the raw source for the bot and Manager. It does not contain passwords, tokens, API keys, server addresses, usernames, user data, or Telegram session files.
+
+## Requirements
+
+- Python 3.11 or newer
+- Windows 10/11 for the desktop launcher, or Ubuntu/Debian for server installation
+- A Telegram bot token from `@BotFather`
+- An OpenAI-compatible API endpoint and key when AI features are needed
+
+## Easy Manager installation on Linux
+
+Run this command as a user with `sudo` access:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/BlackFoxGroup/smart-support-bot/main/deploy/install-manager.sh | sudo bash
+```
+
+The installer places the project in `/opt/smart-support` and starts `smart-support-manager.service` on `127.0.0.1:8766`.
+
+Open it through an SSH tunnel:
+
+```bash
+ssh -L 8766:127.0.0.1:8766 USER@SERVER
+```
+
+Then open:
+
+```text
+http://127.0.0.1:8766
+```
+
+## Installing the bot and Manager from the ZIP
+
+1. Extract the ZIP.
+2. Copy `.env.example` to `.env`.
+3. Add `TELEGRAM_BOT_TOKEN`, `BOT_ADMIN_IDS`, and the AI settings you want to use.
+4. Run the installer:
+
+```bash
+sudo bash deploy/install.sh
+sudo bash deploy/install-manager.sh
+```
+
+If the Telegram token is still a placeholder, the installer prepares the bot service without starting it. After editing `/opt/smart-support/.env`, start the services:
+
+```bash
+sudo systemctl enable --now smart-support-bot.service
+sudo systemctl enable --now smart-support-bot-watchdog.service
+```
+
+Check their status:
+
+```bash
+sudo systemctl status smart-support-bot.service --no-pager
+sudo systemctl status smart-support-manager.service --no-pager
+```
+
+## Windows setup
+
+Open PowerShell in the extracted folder:
 
 ```powershell
-cd "Smart Support Bot"
-python -m venv .venv
+py -3 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 Copy-Item .env.example .env
-# Edit .env: TELEGRAM_BOT_TOKEN, AI_API_KEY, BOT_ADMIN_IDS
-python -m src.main
 ```
 
-### Linux / VPS
+Edit `.env`, then start the bot:
+
+```powershell
+py -3 -m src.main
+```
+
+Start Manager with:
+
+```text
+Start-Smart-Support-Manager-v2.bat
+```
+
+Manager opens at `http://127.0.0.1:8766`.
+
+## Catalog workflow
+
+Manager is the main place for catalog work:
+
+1. Add or select a product.
+2. Connect Manager to the server and AI in Settings.
+3. Build catalog text automatically from the product source.
+4. Review and save the text.
+5. Scan and map product images.
+6. Send selected images directly to the catalog.
+7. Activate the catalog.
+
+After activation, the bot reads the same catalog and uses it when answering questions about that product. Catalogs can also be edited from the bot, but Manager has the complete editing workflow.
+
+## Manager pages
+
+- Dashboard: connection state and product summary
+- Products: product source and fixed server storage path
+- Automatic catalog: build, save, map, send images, activate, and roll back
+- Catalog: edit titles, summaries, and features
+- Catalog photos: change image features, return images to Media, or delete them
+- Media: review server images and send them to a catalog
+- Upload queue: upload files to the server with retry and removal controls
+- Settings: server, Manager AI, bot AI, Expert connection, and Stop all
+- Install bot: install a Telegram bot project on a Linux server
+
+Clicking an image in Media, Catalog photos, or Upload queue opens it on the same page. Close it with `Esc`, the close button, or a click outside the image.
+
+## Configuration
+
+Use `.env.example` as the template. Important variables:
+
+```dotenv
+TELEGRAM_BOT_TOKEN=replace-with-botfather-token
+BOT_ADMIN_IDS=replace-with-your-telegram-user-id
+AI_BASE_URL=https://your-ai-provider.example/v1
+AI_API_KEY=replace-with-your-api-key
+AI_MODEL=replace-with-your-model
+```
+
+Manager stores settings locally after Save. New values replace old values. Keep `.env`, Manager settings, runtime JSON files, and Telegram sessions out of Git.
+
+## Security
+
+- Never publish `.env`.
+- Never add `data/`, saved Manager credentials, or Telegram `.session` files to a release.
+- Review a public archive before upload.
+- Replace a token immediately if it was ever committed or shared.
+
+## License and credit
+
+Smart Support Bot and Manager are maintained by Black Fox Group.
+
+---
+
+# ربات و مدیر پشتیبانی هوشمند
+
+ربات `Smart Support Bot` با استفاده از کاتالوگ فعال به پرسش‌های کاربران درباره محصول پاسخ می‌دهد. برنامه `Smart Support Manager 2.1` محیط ساخت، ویرایش و انتشار کاتالوگ است و می‌تواند برای این کار از سرویس‌های سازگار با OpenAI استفاده کند.
+
+ربات و Manager از یک مسیر مشترک روی سرور استفاده می‌کنند:
+
+```text
+/opt/smart-support/products/<product-id>/
+├── catalog.json
+└── media/
+```
+
+وب‌سایت: [foxnext.net](https://foxnext.net)
+سورس پروژه: [github.com/BlackFoxGroup/smart-support-bot](https://github.com/BlackFoxGroup/smart-support-bot)
+
+## دانلود
+
+بسته عمومی را از اینجا دریافت کنید:
+
+[smart-support-suite-v2.1.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.1.zip)
+
+این بسته شامل سورس خام ربات و Manager است. هیچ رمز، توکن، کلید API، نشانی سرور، نام کاربری، اطلاعات کاربران یا فایل نشست تلگرام داخل آن قرار ندارد.
+
+## پیش‌نیازها
+
+- پایتون نسخه ۳.۱۱ یا جدیدتر
+- ویندوز ۱۰ یا ۱۱ برای اجرای محلی، یا اوبونتو و دبیان برای نصب روی سرور
+- توکن ربات تلگرام از `@BotFather`
+- آدرس و کلید سرویس سازگار با OpenAI برای قابلیت‌های هوش مصنوعی
+
+## نصب آسان Manager روی لینوکس
+
+این دستور را با کاربری اجرا کنید که به `sudo` دسترسی دارد:
 
 ```bash
-cd "/opt/Smart Support Bot"
-python3 -m venv .venv
-source .venv/bin/activate
+curl -fsSL https://raw.githubusercontent.com/BlackFoxGroup/smart-support-bot/main/deploy/install-manager.sh | sudo bash
+```
+
+نصب‌کننده پروژه را در مسیر `/opt/smart-support` قرار می‌دهد. سرویس Manager روی `127.0.0.1:8766` اجرا می‌شود.
+
+برای بازکردن صفحه Manager یک تونل SSH بسازید:
+
+```bash
+ssh -L 8766:127.0.0.1:8766 USER@SERVER
+```
+
+سپس این نشانی را باز کنید:
+
+```text
+http://127.0.0.1:8766
+```
+
+## نصب ربات و Manager از فایل ZIP
+
+۱. فایل ZIP را استخراج کنید.
+۲. فایل `.env.example` را با نام `.env` کپی کنید.
+۳. مقادیر `TELEGRAM_BOT_TOKEN` و `BOT_ADMIN_IDS` و تنظیمات دلخواه AI را وارد کنید.
+۴. دستورهای زیر را اجرا کنید:
+
+```bash
+sudo bash deploy/install.sh
+sudo bash deploy/install-manager.sh
+```
+
+اگر توکن تلگرام هنوز نمونه باشد، نصب‌کننده سرویس ربات را آماده می‌کند ولی آن را روشن نمی‌کند. پس از ویرایش فایل `/opt/smart-support/.env` سرویس‌ها را اجرا کنید:
+
+```bash
+sudo systemctl enable --now smart-support-bot.service
+sudo systemctl enable --now smart-support-bot-watchdog.service
+```
+
+برای بررسی وضعیت:
+
+```bash
+sudo systemctl status smart-support-bot.service --no-pager
+sudo systemctl status smart-support-manager.service --no-pager
+```
+
+## نصب روی ویندوز
+
+پنجره PowerShell را در پوشه استخراج‌شده باز کنید:
+
+```powershell
+py -3 -m venv .venv
+.\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-cp .env.example .env
-# edit .env
-python -m src.main
+Copy-Item .env.example .env
 ```
 
-> **`BOT_ADMIN_IDS` is required** for admin / Statistics menus.  
-> Find your numeric Telegram id via `@userinfobot`.
+فایل `.env` را تکمیل کنید و ربات را اجرا کنید:
 
-<div dir="rtl">
-
-> برای منوی ادمین و آمار، تنظیم **`BOT_ADMIN_IDS`** لازم است.  
-> شناسهٔ عددی تلگرام را از ربات‌هایی مثل `@userinfobot` بگیرید.
-
-</div>
-
-## Environment / متغیرهای محیطی
-
-| Variable | Required | Default | Notes |
-|----------|----------|---------|-------|
-| `TELEGRAM_BOT_TOKEN` | yes | — | from @BotFather |
-| `AI_API_KEY` | yes | — | OpenAI-compatible key |
-| `AI_BASE_URL` | no | `https://ai.nube.sh/api/v1` | |
-| `AI_MODEL` | no | `kimi-k2.5` | |
-| `AI_TIMEOUT_SECONDS` | no | `60` | |
-| `AI_MAX_TOKENS` | no | `4096` | |
-| `AI_TEMPERATURE` | no | `0.4` | |
-| `INTENT_CONFIDENCE_THRESHOLD` | no | `0.28` | |
-| `KNOWLEDGE_SNIPPET_CHARS` | no | `12000` | |
-| `LOG_LEVEL` | no | `INFO` | |
-| `BOT_ADMIN_IDS` | recommended | — | comma-separated numeric ids |
-| `AI_BUDGET_USD` | no | `50` | |
-| `AI_USD_PER_MILLION_TOKENS` | no | `2.0` | |
-| `NIGHTLY_ENABLED` | no | `false` | free config to channel |
-| `NIGHTLY_IRAN_TIME` | no | `21:00` | |
-| `NIGHTLY_SUPPORT_CHAT_ID` | no | `@HiBlackFoxVpn` | |
-| `PANEL_BASE_URL` | when nightly on | — | 3x-ui panel |
-| `PANEL_API_TOKEN` | when nightly on | — | |
-| `PANEL_INBOUND_ID` | when nightly on | `1` | |
-| `PANEL_REQUIRED_PORT` | no | `443` | |
-| `SOCIAL_NEWS_ENABLED` | no | `true` | |
-| `SOCIAL_NEWS_CHAT_ID` | no | `@HiBlackFoxVPN` | |
-| `SOCIAL_NEWS_TIMES` | no | `10:00,17:00` | |
-| `CONVO_ANALYSIS_ENABLED` | no | `false` | |
-| `CONVO_ANALYSIS_TIMES` | no | `12:30` | |
-| `CONVO_ANALYSIS_CHAT_ID` | when convo on | — | numeric id |
-| `CONVO_ANALYSIS_TEST_MODE` | no | `true` | |
-| `SAFETY_CONFIRM_CHAT_ID` | for safety drills | — | numeric id |
-| `NEWS_REPORT_ADMIN_IDS` | no | — | extra Stats → Report ids |
-
-Full template: `.env.example`
-
-<div dir="rtl">
-
-جدول بالا همهٔ متغیرهای مهم را نشان می‌دهد. الگوی کامل در `.env.example` است.  
-کلیدها و توکن‌ها را هرگز در Git commit نکنید.
-
-</div>
-
-## systemd / استقرار سرویس
-
-```bash
-sudo cp "/opt/Smart Support Bot/deploy/smart-support-bot.service" /etc/systemd/system/
-sudo cp "/opt/Smart Support Bot/deploy/smart-support-bot-watchdog.service" /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now smart-support-bot
-sudo systemctl enable --now smart-support-bot-watchdog
+```powershell
+py -3 -m src.main
 ```
 
-Or:
+برای اجرای Manager روی فایل زیر دوبار کلیک کنید:
 
-```bash
-sudo bash "/opt/Smart Support Bot/deploy/install.sh"
+```text
+Start-Smart-Support-Manager-v2.bat
 ```
 
-<div dir="rtl">
+صفحه Manager در `http://127.0.0.1:8766` باز می‌شود.
 
-واحدهای systemd مسیر کاری را روی `/opt/Smart Support Bot` تنظیم می‌کنند.  
-می‌توانید از `deploy/install.sh` برای نصب یک‌مرحله‌ای استفاده کنید.
+## روند ساخت کاتالوگ
 
-</div>
+محل اصلی کار با کاتالوگ برنامه Manager است:
 
-## Commands / دستورات
+۱. محصول را اضافه یا انتخاب کنید.
+۲. اتصال سرور و هوش مصنوعی را در تنظیمات برقرار کنید.
+۳. متن کاتالوگ را از سورس محصول به‌صورت خودکار بسازید.
+۴. متن را بررسی و ذخیره کنید.
+۵. تصاویر محصول را اسکن و نگاشت کنید.
+۶. تصاویر انتخابی را مستقیم به کاتالوگ بفرستید.
+۷. کاتالوگ را فعال کنید.
 
-| Command | Description |
-|---------|-------------|
-| `/start` | Greeting / شروع |
-| `/help` | Short help / راهنمای کوتاه |
-| `/lang fa\|en\|ru\|zh` | Persist language / ذخیره زبان |
-| `/safety_drill` | Admin: run safe-change drill |
-| `/safety_status` | Admin: watchdog status |
+ربات پس از فعال‌سازی، همان کاتالوگ را می‌خواند و برای پاسخ به پرسش‌های محصول استفاده می‌کند. ساخت و ویرایش کاتالوگ از داخل ربات هم ممکن است، اما امکانات کامل این کار در Manager قرار دارد.
 
-<div dir="rtl">
+## صفحه‌های Manager
 
-دستورات `/safety_*` فقط برای ادمین (شناسه‌های `BOT_ADMIN_IDS`) فعال‌اند.
+- داشبورد: وضعیت اتصال‌ها و خلاصه محصولات
+- محصولات: سورس محصول و مسیر ثابت ذخیره‌سازی روی سرور
+- ساخت خودکار کاتالوگ: ساخت، ذخیره، نگاشت، ارسال عکس، فعال‌سازی و بازگشت نسخه
+- کاتالوگ: ویرایش عنوان، خلاصه و ویژگی‌ها
+- عکس‌های کاتالوگ: تغییر ویژگی، بازگرداندن عکس به رسانه یا حذف
+- رسانه: بررسی عکس‌های سرور و ارسال آن‌ها به کاتالوگ
+- صف آپلود: آپلود، تلاش دوباره و حذف فایل از صف
+- تنظیمات: سرور، هوش مصنوعی Manager و ربات، اتصال Expert و توقف همه
+- نصب ربات: نصب پروژه یک ربات تلگرام روی سرور لینوکس
 
-</div>
+کلیک روی عکس در رسانه، عکس‌های کاتالوگ یا صف آپلود، تصویر را در همان صفحه باز می‌کند. کلید `Esc`، علامت بستن و کلیک بیرون عکس آن را می‌بندند.
 
-## Ask AI & Catalog / سوال از AI و کاتالوگ
+## تنظیمات
 
-- Admin can store **catalog training text** per product (hub shows status only; Edit shows full text; new text is appended).
-- User **Ask AI** answers from that product’s training + catalog RAG.
-- Failures fall back to a short teaching excerpt — not the full internal prompt.
-- Photos are sent only on explicit request (e.g. «عکسش را بفرست»).
+فایل `.env.example` الگوی تنظیمات است. متغیرهای اصلی:
 
-<div dir="rtl">
+```dotenv
+TELEGRAM_BOT_TOKEN=replace-with-botfather-token
+BOT_ADMIN_IDS=replace-with-your-telegram-user-id
+AI_BASE_URL=https://your-ai-provider.example/v1
+AI_API_KEY=replace-with-your-api-key
+AI_MODEL=replace-with-your-model
+```
 
-- ادمین می‌تواند **متن آموزشی کاتالوگ** را برای هر محصول ذخیره کند (هاب فقط وضعیت؛ ویرایش متن کامل؛ متن جدید به ادامه اضافه می‌شود).
-- **سوال از AI** کاربر از آموزش همان محصول و RAG کاتالوگ پاسخ می‌دهد.
-- در خطا، خلاصهٔ کوتاه آموزشی برمی‌گردد — نه کل پرامپت داخلی.
-- عکس فقط با درخواست صریح کاربر ارسال می‌شود.
+اطلاعات ثبت‌شده در Manager پس از ذخیره روی همان رایانه باقی می‌ماند. اطلاعات جدید جای اطلاعات قبلی را می‌گیرد. فایل `.env`، تنظیمات Manager، فایل‌های اجرایی داخل `data/` و نشست تلگرام را در Git قرار ندهید.
 
-</div>
+## نکات امنیتی
 
-## Safety / product rules / قوانین ایمنی
+- فایل `.env` را منتشر نکنید.
+- پوشه `data/`، اطلاعات ذخیره‌شده Manager و فایل‌های `.session` را داخل نسخه عمومی نگذارید.
+- فایل ZIP را پیش از انتشار بررسی کنید.
+- توکنی را که قبلاً ثبت یا منتشر شده است فوراً عوض کنید.
 
-- No invented versions or prices
-- VPS only via FoxNext Partners on foxnext.net
-- License sales: scarcity framing without fake numbers; link site + @HiBlackFoxVpn
-- Never commit `.env`, runtime `data/*.json`, or Telegram sessions
+## سازنده
 
-<div dir="rtl">
-
-- نسخه یا قیمت جعلی نسازید
-- VPS فقط از طریق شرکای FoxNext در foxnext.net
-- فروش لایسنس بدون عدد ساختگی؛ لینک سایت و @HiBlackFoxVpn
-- هرگز `.env`، فایل‌های runtime در `data/` یا session تلگرام را commit نکنید
-
-</div>
-
-## Recent changes / تغییرات اخیر
-
-- Live product catalog from the desktop app source (scan → validate → version → activate). Previous ACTIVE catalog stays if upload fails.
-- Catalog AI can be turned OFF per product in Telegram Settings; RAG and catalog images are skipped, data is kept.
-- Incremental media: hash, duplicate skip, queue with retry of one file, LOCAL DELETED does not auto-delete the server file.
-- **Smart Support Manager v2**: persistent SSH, catalog text editor, catalog photos, batch AI analyze, extra-disk uploads, two-column product path cards.
-
-<div dir="rtl">
-
-- کاتالوگ زنده از سورس برنامه دسکتاپ (اسکن تا فعال‌سازی). اگر آپلود شکست بخورد نسخهٔ ACTIVE قبلی می‌ماند.
-- کاتالوگ AI را می‌توان برای هر محصول خاموش کرد؛ داده پاک نمی‌شود.
-- رسانهٔ افزایشی: اثرانگشت، جلوگیری از تکراری، صف با Retry تک‌فایل. حذف محلی فایل سرور را خودکار پاک نمی‌کند.
-- **مدیر v2**: اتصال پایدار SSH، ویرایش متن کاتالوگ، عکس کاتالوگ، تحلیل کلی AI، آپلود از هارد، کارت مسیر محصول دوتایی.
-
-</div>
-
-## Smart Support Manager / اسکریپت مدیر
-
-Use **v2** so you get the current UI (old `8765` may hide an older process):
-
-- Windows: `Start-Smart-Support-Manager-v2.bat` → `http://127.0.0.1:8766`
-- Or: `py -3 -m src.manager` with `MANAGER_PORT=8766` and `MANAGER_NAME=Smart Support Manager v2`
-
-**Pages**
-
-| Page | What it does |
-|------|----------------|
-| Products | Edit source / images / server path for each product. Add a new mapping. Two cards per row. |
-| Catalog | Build catalog. Edit title, short/full summary, and features for the selected product. Add a feature by hand. |
-| Catalog photos | Photos already in that catalog. Change feature, return to Media, or delete from the server. |
-| Media | Server photos. Pick a target catalog, AI-analyze one photo, or **analyze all and send**. Feature is required to send. |
-| Upload queue | Process / retry server uploads. Add photos from any disk folder. Needs **Connect** first. |
-| Settings | SSH host and AI endpoint. **Connect** stays up until **Disconnect**. |
-
-Language: فارسی / English / Русский / 中文. Secrets stay in `.env` / Settings — never in Git.
-
-<div dir="rtl">
-
-نسخهٔ **v2** را باز کنید تا UI فعلی بیاید (پورت قدیمی `8765` ممکن است نسخهٔ کهنه را نشان بدهد):
-
-- ویندوز: `Start-Smart-Support-Manager-v2.bat` → `http://127.0.0.1:8766`
-
-**صفحات**
-
-| صفحه | کار |
-|------|------|
-| محصولات | مسیر سورس، تصاویر و سرور هر محصول؛ افزودن نگاشت جدید؛ کارت‌ها دوتایی |
-| کاتالوگ | ساخت کاتالوگ؛ ویرایش عنوان و خلاصه و ویژگی؛ افزودن ویژگی دستی |
-| عکس‌های کاتالوگ | عکس‌های داخل کاتالوگ؛ تغییر ویژگی؛ بازگشت به رسانه؛ حذف از سرور |
-| رسانه | عکس روی سرور؛ انتخاب کاتالوگ؛ تحلیل یک عکس یا **تحلیل کلی و ارسال**؛ بدون ویژگی ارسال نمی‌شود |
-| صف آپلود | پردازش و تلاش مجدد؛ عکس از هر جای هارد؛ اول باید **اتصال** بزنید |
-| تنظیمات | SSH و هوش مصنوعی؛ **اتصال** تا **قطع اتصال** باز می‌ماند |
-
-رمزها فقط در `.env` یا تنظیمات؛ در گیت‌هاب نیستند.
-
-</div>
-
-## License & credit / مجوز و اعتبار
-
-Released free and open source. If it helps you, ⭐ the repo.  
-🦊 Built by **Black Fox** — https://foxnext.net · @HiBlackFoxVpn
-
-<div dir="rtl">
-
-منتشرشده به‌صورت رایگان و متن‌باز. اگر مفید بود، به مخزن ⭐ بدهید.  
-🦊 ساختهٔ **Black Fox** — https://foxnext.net · @HiBlackFoxVpn
-
-</div>
+توسعه و نگهداری پروژه برعهده Black Fox Group است.

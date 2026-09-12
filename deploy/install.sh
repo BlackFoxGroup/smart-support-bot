@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Install Smart Support Bot on Ubuntu (dedicated tiny VPS, runs as root).
+# Install Smart Support Bot from a downloaded public package on Ubuntu.
 set -euo pipefail
 
-INSTALL_DIR="/opt/Smart Support Bot"
+INSTALL_DIR="/opt/smart-support"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
 
@@ -18,6 +18,9 @@ if [[ "${SOURCE_DIR}" != "${INSTALL_DIR}" ]]; then
 fi
 
 mkdir -p "${INSTALL_DIR}/data"
+if [[ ! -f "${INSTALL_DIR}/.env" ]]; then
+  cp "${INSTALL_DIR}/.env.example" "${INSTALL_DIR}/.env"
+fi
 
 echo "==> Creating Python virtualenv and installing dependencies"
 cd "${INSTALL_DIR}"
@@ -32,8 +35,15 @@ echo "==> Installing systemd units"
 install -m 644 "${INSTALL_DIR}/deploy/smart-support-bot.service" /etc/systemd/system/smart-support-bot.service
 install -m 644 "${INSTALL_DIR}/deploy/smart-support-bot-watchdog.service" /etc/systemd/system/smart-support-bot-watchdog.service
 systemctl daemon-reload
-systemctl enable --now smart-support-bot.service
-systemctl enable --now smart-support-bot-watchdog.service
+if grep -Eq '^TELEGRAM_BOT_TOKEN=.+$' "${INSTALL_DIR}/.env" &&
+   ! grep -Eq '^TELEGRAM_BOT_TOKEN=.*replace-' "${INSTALL_DIR}/.env"; then
+  systemctl enable --now smart-support-bot.service
+  systemctl enable --now smart-support-bot-watchdog.service
+else
+  echo "Bot services were installed but not started."
+  echo "Edit ${INSTALL_DIR}/.env, then run:"
+  echo "  systemctl enable --now smart-support-bot.service smart-support-bot-watchdog.service"
+fi
 
 echo "==> Done. Status:"
 systemctl status smart-support-bot.service --no-pager || true
