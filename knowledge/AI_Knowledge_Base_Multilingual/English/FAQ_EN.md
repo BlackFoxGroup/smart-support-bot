@@ -5,8 +5,8 @@
 
 
 ### Q001
-**Question:** What is Black Fox VPN Installer?
-**Answer:** A Windows desktop app that automates multi-location VPN infrastructure with SSH, WireGuard, and the Sanaei / 3X-UI panel. Black Fox VPN Installer (also titled “Black Fox Vpn Installer — Multi-Location VPN Manager”) is an operational toolkit: it stores server credentials, runs SSH deploy flows, installs WireGuard and 3X-UI on a central VPS, adds exits/tunnels/nodes, configures panel clients, DNS/CDN, mesh Link Monitor agents, Mirza bot, proxy, and (in AI Assistant Pro) guided chat actions.
+**Question:** What is VPS to VPN?
+**Answer:** A Windows desktop app that automates multi-location VPN infrastructure with SSH, WireGuard, and the Sanaei / 3X-UI panel. VPS to VPN (also titled “VPS to VPN — Multi-Location VPN Manager”) is an operational toolkit: it stores server credentials, runs SSH deploy flows, installs WireGuard and 3X-UI on a central VPS, adds exits/tunnels/nodes, configures panel clients, DNS/CDN, mesh Link Monitor agents, Mirza bot, proxy, and (in AI Assistant Pro) guided chat actions.
 **Step by step solution:**
 1. Download Setup from foxnext.net.
 2. Install and pick language.

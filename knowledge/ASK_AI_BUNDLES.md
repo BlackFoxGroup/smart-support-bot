@@ -5,7 +5,7 @@ Organized packages synced to GitHub `smart-support-bot` and VPS `/opt/Smart Supp
 ## 01 — Catalog (product facts)
 - `knowledge/product_catalogs/vpn-installer.json`
 - Free Domain: Pro=3, AI Pro=5; Configure auto-activate; Add Domain / Mesh howto
-- Official name: **Black Fox VPN Installer & Android**
+- Official name: **VPS to VPN** by **Black Fox Group** (Server Installer & Manager)
 
 ## 02 — Product guides (MD fallback)
 - `knowledge/product_guides/*`

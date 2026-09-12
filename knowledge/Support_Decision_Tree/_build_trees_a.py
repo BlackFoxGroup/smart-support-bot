@@ -49,7 +49,7 @@ def end_ok(final_solution):
 
 
 META = {
-    "product": "Black Fox VPN Installer",
+    "product": "VPS to VPN",
     "schema_version": "1.0.0",
     "languages": ["fa", "en", "ru", "zh"],
     "intent_db": "AI_BOT_DATABASE/",
