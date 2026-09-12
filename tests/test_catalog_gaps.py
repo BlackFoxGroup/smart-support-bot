@@ -28,7 +28,15 @@ class GapFixesTests(unittest.TestCase):
 
     def test_sftp_test_not_fake(self):
         with tempfile.TemporaryDirectory() as raw:
-            with patch.dict("os.environ", {"BOT_SSH_HOST": "", "BOT_SSH_USER": "", "BOT_SSH_PASS": ""}):
+            with patch.dict(
+                "os.environ",
+                {
+                    "BOT_SSH_HOST": "",
+                    "BOT_SSH_USER": "",
+                    "BOT_SSH_PASS": "",
+                    "MANAGER_CONFIG_DIR": "",
+                },
+            ):
                 out = test_connection(Path(raw) / "data")
             self.assertFalse(out["ok"])
             self.assertEqual(out["status"], "NOT CONFIGURED")

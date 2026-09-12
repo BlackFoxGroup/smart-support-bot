@@ -7,7 +7,18 @@ set "MANAGER_NAME=Smart Support Manager"
 set "MANAGER_VERSION=2.1"
 set "BOT_VERSION=2.0"
 set "MANAGER_PORT=8766"
-start "Smart Support Manager" /min py -3 -m src.manager
+if not exist ".venv\Scripts\python.exe" (
+  py -3 -m venv .venv || goto :error
+  ".venv\Scripts\python.exe" -m pip install -U pip || goto :error
+  ".venv\Scripts\python.exe" -m pip install -r requirements.txt || goto :error
+)
+start "Smart Support Manager" /min ".venv\Scripts\python.exe" -m src.manager
 powershell -NoProfile -Command "Start-Sleep -Seconds 2"
 start "" "http://127.0.0.1:8766"
 endlocal
+exit /b 0
+
+:error
+echo Smart Support Manager setup failed.
+pause
+exit /b 1

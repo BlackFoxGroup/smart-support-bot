@@ -86,53 +86,24 @@ http://127.0.0.1:8766
 ## Installing the bot and Manager from the ZIP
 
 1. Extract the ZIP.
-2. Copy `.env.example` to `.env`.
-3. Add `TELEGRAM_BOT_TOKEN`, `BOT_ADMIN_IDS`, and the AI settings you want to use.
-4. Run the installer:
+2. Install Python 3.11 or newer on Windows.
+3. Double-click `Start-Smart-Support-Manager-v2.bat`. The first run installs the required Python packages.
+4. Open the Install bot page.
+5. Select the extracted Smart Support folder and enter the server login and Telegram token.
+6. Click Install bot, then Install Expert.
+7. Click Activate bot and Expert.
 
-```bash
-sudo bash deploy/install.sh
-sudo bash deploy/install-manager.sh
-```
-
-If the Telegram token is still a placeholder, the installer prepares the bot service without starting it. After editing `/opt/smart-support/.env`, start the services:
-
-```bash
-sudo systemctl enable --now smart-support-bot.service
-sudo systemctl enable --now smart-support-bot-watchdog.service
-```
-
-Check their status:
-
-```bash
-sudo systemctl status smart-support-bot.service --no-pager
-sudo systemctl status smart-support-manager.service --no-pager
-```
+The bot and Expert are stored together in `/opt/smart-support`. After the success message, open the bot in Telegram and send `/start`.
 
 ## Windows setup
 
-Open PowerShell in the extracted folder:
-
-```powershell
-py -3 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-Copy-Item .env.example .env
-```
-
-Edit `.env`, then start the bot:
-
-```powershell
-py -3 -m src.main
-```
-
-Start Manager with:
+Start Manager by double-clicking:
 
 ```text
 Start-Smart-Support-Manager-v2.bat
 ```
 
-Manager opens at `http://127.0.0.1:8766`.
+Manager opens at `http://127.0.0.1:8766`. No terminal command is required after Python is installed.
 
 ## Catalog workflow
 
@@ -244,45 +215,16 @@ http://127.0.0.1:8766
 ## نصب ربات و Manager از فایل ZIP
 
 ۱. فایل ZIP را استخراج کنید.
-۲. فایل `.env.example` را با نام `.env` کپی کنید.
-۳. مقادیر `TELEGRAM_BOT_TOKEN` و `BOT_ADMIN_IDS` و تنظیمات دلخواه AI را وارد کنید.
-۴. دستورهای زیر را اجرا کنید:
+۲. پایتون نسخه ۳.۱۱ یا جدیدتر را روی ویندوز نصب کنید.
+۳. روی `Start-Smart-Support-Manager-v2.bat` دوبار کلیک کنید. برنامه در اولین اجرا بسته‌های لازم را نصب می‌کند.
+۴. صفحه نصب ربات را باز کنید.
+۵. پوشه استخراج‌شده Smart Support، اطلاعات ورود سرور و توکن تلگرام را وارد کنید.
+۶. ابتدا «نصب ربات» و بعد «نصب اکسپرت» را بزنید.
+۷. کلید «فعال‌سازی ربات و اکسپرت» را بزنید.
 
-```bash
-sudo bash deploy/install.sh
-sudo bash deploy/install-manager.sh
-```
-
-اگر توکن تلگرام هنوز نمونه باشد، نصب‌کننده سرویس ربات را آماده می‌کند ولی آن را روشن نمی‌کند. پس از ویرایش فایل `/opt/smart-support/.env` سرویس‌ها را اجرا کنید:
-
-```bash
-sudo systemctl enable --now smart-support-bot.service
-sudo systemctl enable --now smart-support-bot-watchdog.service
-```
-
-برای بررسی وضعیت:
-
-```bash
-sudo systemctl status smart-support-bot.service --no-pager
-sudo systemctl status smart-support-manager.service --no-pager
-```
+ربات و اکسپرت در مسیر مشترک `/opt/smart-support` ذخیره می‌شوند. پس از نمایش پیام موفقیت، ربات را در تلگرام باز کنید و `/start` را بزنید.
 
 ## نصب روی ویندوز
-
-پنجره PowerShell را در پوشه استخراج‌شده باز کنید:
-
-```powershell
-py -3 -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-Copy-Item .env.example .env
-```
-
-فایل `.env` را تکمیل کنید و ربات را اجرا کنید:
-
-```powershell
-py -3 -m src.main
-```
 
 برای اجرای Manager روی فایل زیر دوبار کلیک کنید:
 
@@ -290,7 +232,7 @@ py -3 -m src.main
 Start-Smart-Support-Manager-v2.bat
 ```
 
-صفحه Manager در `http://127.0.0.1:8766` باز می‌شود.
+صفحه Manager در `http://127.0.0.1:8766` باز می‌شود. پس از نصب پایتون، نیازی به اجرای دستور ترمینال نیست.
 
 ## روند ساخت کاتالوگ
 

@@ -236,6 +236,7 @@ def _html(body: str, *, lang: str = "en", title: str | None = None, pick: bool =
 <html lang="{_esc(lang)}" dir="{direction}"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{_esc(title)}</title>
+<link rel="icon" href="/expert-icon" type="image/jpeg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600;700&family=Fira+Code:wght@400;500&family=Vazirmatn:wght@400;600;700&family=Noto+Sans+SC:wght@400;600&display=swap" rel="stylesheet">
 <style>
@@ -274,6 +275,9 @@ table{{border-collapse:collapse;width:100%;min-width:560px}}
 td,th{{border-bottom:1px solid var(--border);padding:10px 8px;text-align:start;font-size:14px;vertical-align:middle}}
 th{{color:var(--muted-fg);font-weight:600;background:var(--muted);position:sticky;top:0}}
 .card{{background:var(--card);color:var(--card-fg);padding:16px;margin:0 0 12px;border-radius:4px;border:1px solid var(--border)}}
+.brand-panel{{display:flex;align-items:center;gap:16px}}
+.brand-icon{{width:96px;height:96px;object-fit:cover;border-radius:18px;border:1px solid var(--border);flex:0 0 96px}}
+.contact-brand{{margin-bottom:12px}}
 .form-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:12px 0}}
 .field{{display:flex;flex-direction:column;gap:4px}}
 .field label{{color:var(--muted-fg);font-size:14px;font-weight:600}}
@@ -613,6 +617,13 @@ class Handler(BaseHTTPRequestHandler):
                 loc = f"{loc}&msg={ok}" if "?" in loc else f"{loc}?msg={ok}"
             self._redir(loc)
             return
+        if path == "/expert-icon":
+            icon = PROJECT_ROOT / "docs" / "assets" / "expert-icon.jpg"
+            if not icon.is_file():
+                self._send(b"missing", 404, "text/plain")
+                return
+            self._send(icon.read_bytes(), 200, "image/jpeg")
+            return
         dash = service.dashboard(PROJECT_ROOT, KNOWLEDGE_ROOT, DATA_DIR)
         if path == "/":
             cards = []
@@ -634,7 +645,12 @@ class Handler(BaseHTTPRequestHandler):
                 f"<div class='card'><h2>{_esc(t(lang, 'guide_title'))}</h2>"
                 f"<div class='guide'><ol>{lis}</ol></div></div>"
             )
-            self._page(guide + "<div class='grid'>" + "".join(cards) + "</div>")
+            brand = (
+                "<div class='card brand-panel'>"
+                "<img class='brand-icon' src='/expert-icon' alt='Black Fox Group'>"
+                f"<div><h2>{_esc(APP_NAME)}</h2><p class='stat'>Black Fox Group</p></div></div>"
+            )
+            self._page(brand + guide + "<div class='grid'>" + "".join(cards) + "</div>")
             return
         if path == "/products":
             if pid:
@@ -893,6 +909,7 @@ class Handler(BaseHTTPRequestHandler):
             tunnel_cmd = "ssh -L 8766:127.0.0.1:8766 USER@SERVER"
             body = f"""
 <div class="card">
+<img class="brand-icon contact-brand" src="/expert-icon" alt="Black Fox Group">
 <h2>{_esc(t(lang,'nav_contact'))}</h2>
 <div class="form-grid">
 <div class="field"><label>{_esc(t(lang,'website'))}</label><a class="ext" href="https://foxnex.net" target="_blank" rel="noopener">foxnex.net</a></div>
@@ -924,7 +941,7 @@ class Handler(BaseHTTPRequestHandler):
 <div class="card">
 <h2>{_esc(t(lang,'nav_install'))}</h2>
 <p class="guide">{_esc(t(lang,'install_help'))}</p>
-<form method="post" action="/api/install-bot">
+<form method="post" action="/api/install-bot" id="suite-install-form">
 <div class="form-grid">
 <div class="field span2"><label>{_esc(t(lang,'install_local'))}</label>{_path_pick('local_path','','local_path',lang)}</div>
 <div class="field"><label>{_esc(t(lang,'host'))}</label><input name="host" required></div>
@@ -932,17 +949,28 @@ class Handler(BaseHTTPRequestHandler):
 <div class="field"><label>{_esc(t(lang,'username'))}</label><input name="username" value="root" required></div>
 <div class="field"><label>{_esc(t(lang,'password'))}</label><input name="password" type="password"></div>
 <div class="field span2"><label>{_esc(t(lang,'install_ssh_key'))}</label><textarea name="ssh_key" rows="4"></textarea></div>
-<div class="field span2"><label>{_esc(t(lang,'install_remote'))}</label><input name="remote_dir" value="/opt/smart-support" required></div>
-<div class="field"><label>{_esc(t(lang,'install_service'))}</label><input name="service_name" value="smart-support-bot" required></div>
-<div class="field"><label>{_esc(t(lang,'install_label'))}</label><input name="bot_label" value="Telegram bot"></div>
-<div class="field"><label>{_esc(t(lang,'install_token'))}</label><input name="bot_token" type="password" required></div>
-<div class="field span2"><label>{_esc(t(lang,'install_start'))}</label><input name="start_cmd" value="python3 -m src.main" required></div>
+<div class="field span2"><label>{_esc(t(lang,'install_remote'))}</label><code class="readonly-path">/opt/smart-support</code></div>
+<div class="field"><label>{_esc(t(lang,'install_token'))}</label><input name="bot_token" type="password"></div>
 <div class="field span2"><label>{_esc(t(lang,'install_extra_env'))}</label><textarea name="extra_env" rows="4" placeholder="ADMIN_IDS=123&#10;TZ=UTC"></textarea></div>
 <div class="field span2"><label>{_esc(t(lang,'install_extra_pip'))}</label><input name="extra_pip" placeholder="aiogram python-dotenv"></div>
 </div>
-<button type="submit">{_esc(t(lang,'install_run'))}</button>
+<div class="toolbar">
+<button type="submit" formaction="/api/install-bot" data-wait="{_esc(t(lang,'installing_bot'))}">{_esc(t(lang,'install_bot_button'))}</button>
+<button type="submit" formaction="/api/install-expert" data-wait="{_esc(t(lang,'installing_expert'))}">{_esc(t(lang,'install_expert_button'))}</button>
+<button type="submit" formaction="/api/activate-suite" data-wait="{_esc(t(lang,'activating_suite'))}">{_esc(t(lang,'activate_suite_button'))}</button>
+</div>
+<p id="install-progress" class="stat" role="status" aria-live="polite"></p>
 </form>
 </div>
+<script>
+document.getElementById('suite-install-form').addEventListener('submit',e=>{{
+  const button=e.submitter;
+  if(!button)return;
+  document.querySelectorAll('#suite-install-form button[type=submit]').forEach(x=>x.disabled=true);
+  button.setAttribute('aria-busy','true');
+  document.getElementById('install-progress').textContent=button.dataset.wait||'';
+}});
+</script>
 """
             self._page(body, t(lang, "nav_install"))
             return
@@ -1707,16 +1735,35 @@ b.disabled=false;b.removeAttribute('aria-busy');toast(txt.textContent,failed===0
                     port=(form.get("port") or ["22"])[0],
                     username=(form.get("username") or [""])[0],
                     password=(form.get("password") or [""])[0],
-                    remote_dir=(form.get("remote_dir") or [""])[0],
-                    service_name=(form.get("service_name") or [""])[0],
                     bot_token=(form.get("bot_token") or [""])[0],
-                    start_cmd=(form.get("start_cmd") or [""])[0],
                     extra_env=(form.get("extra_env") or [""])[0],
                     extra_pip=(form.get("extra_pip") or [""])[0],
-                    bot_label=(form.get("bot_label") or [""])[0],
                     ssh_key=(form.get("ssh_key") or [""])[0],
                 )
-                loc = "/install?msg=ok_install" if out.get("ok") else "/install?err=err_install"
+                loc = "/install?msg=ok_install_bot" if out.get("ok") else "/install?err=err_install_bot"
+            elif u == "/api/install-expert":
+                from src.manager.install_bot import install_expert
+
+                out = install_expert(
+                    local_path=(form.get("local_path") or [""])[0],
+                    host=(form.get("host") or [""])[0],
+                    port=(form.get("port") or ["22"])[0],
+                    username=(form.get("username") or [""])[0],
+                    password=(form.get("password") or [""])[0],
+                    ssh_key=(form.get("ssh_key") or [""])[0],
+                )
+                loc = "/install?msg=ok_install_expert" if out.get("ok") else "/install?err=err_install_expert"
+            elif u == "/api/activate-suite":
+                from src.manager.install_bot import activate_bot_and_expert
+
+                out = activate_bot_and_expert(
+                    host=(form.get("host") or [""])[0],
+                    port=(form.get("port") or ["22"])[0],
+                    username=(form.get("username") or [""])[0],
+                    password=(form.get("password") or [""])[0],
+                    ssh_key=(form.get("ssh_key") or [""])[0],
+                )
+                loc = "/install?msg=ok_activate_suite" if out.get("ok") else "/install?err=err_activate_suite"
             elif u == "/api/cat-feat":
                 rel = (form.get("path") or [""])[0]
                 feat, _hint = _feat_posted(form)

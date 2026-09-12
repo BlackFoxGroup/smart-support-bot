@@ -216,8 +216,8 @@ class Manager21Tests(unittest.TestCase):
         )
         self.assertIn('MANAGER_INSTALL_DIR:-/opt/smart-support', script)
         self.assertIn('Environment="MANAGER_LOCAL_BOT=1"', script)
-        self.assertIn('"/opt/smart-support"', installer)
-        self.assertIn('"/opt/telegram-bot"', installer)
+        self.assertIn('REMOTE_ROOT = "/opt/smart-support"', installer)
+        self.assertNotIn('"/opt/telegram-bot"', installer)
 
     def test_ai_uses_only_enabled_product_catalogs(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
@@ -314,6 +314,93 @@ class Manager21Tests(unittest.TestCase):
         ]
         positions = [app_source.index(name) for name in names]
         self.assertEqual(positions, sorted(positions))
+
+    def test_suite_installer_prepares_bot_without_starting_it(self) -> None:
+        from src.manager import install_bot
+
+        client = SimpleNamespace(close=lambda: None)
+        with (
+            patch.object(install_bot, "_connect", return_value=client),
+            patch.object(install_bot, "_upload_suite", return_value=12),
+            patch.object(install_bot, "_write_env"),
+            patch.object(install_bot, "_execute", return_value=(True, "")) as execute,
+        ):
+            result = install_bot.install_telegram_bot(
+                local_path="suite",
+                host="server.test",
+                port="22",
+                username="root",
+                password="password",
+                bot_token="token",
+            )
+        command = execute.call_args.args[1]
+        self.assertTrue(result["ok"])
+        self.assertIn("/opt/smart-support", command)
+        self.assertIn("smart-support-bot.service", command)
+        self.assertNotIn("enable --now", command)
+
+    def test_suite_installer_prepares_expert_without_starting_it(self) -> None:
+        from src.manager import install_bot
+
+        with tempfile.TemporaryDirectory() as td:
+            root = Path(td)
+            (root / "src" / "manager").mkdir(parents=True)
+            (root / "src" / "manager" / "app.py").write_text("", encoding="utf-8")
+            client = SimpleNamespace(close=lambda: None)
+            with (
+                patch.object(install_bot, "_connect", return_value=client),
+                patch.object(install_bot, "_upload_suite", return_value=15),
+                patch.object(install_bot, "_execute", return_value=(True, "")) as execute,
+            ):
+                result = install_bot.install_expert(
+                    local_path=str(root),
+                    host="server.test",
+                    port="22",
+                    username="root",
+                    password="password",
+                )
+        command = execute.call_args.args[1]
+        self.assertTrue(result["ok"])
+        self.assertIn("smart-support-manager.service", command)
+        self.assertIn('Environment="MANAGER_PORT=8766"', command)
+        self.assertNotIn("enable --now", command)
+
+    def test_suite_activation_starts_and_checks_both_services(self) -> None:
+        from src.manager import install_bot
+
+        client = SimpleNamespace(close=lambda: None)
+        with (
+            patch.object(install_bot, "_connect", return_value=client),
+            patch.object(install_bot, "_execute", return_value=(True, "bot=active\nexpert=active")) as execute,
+        ):
+            result = install_bot.activate_bot_and_expert(
+                host="server.test",
+                port="22",
+                username="root",
+                password="password",
+            )
+        command = execute.call_args.args[1]
+        self.assertEqual(result, {"ok": True, "bot": "active", "expert": "active"})
+        self.assertIn("enable --now smart-support-bot.service smart-support-manager.service", command)
+        self.assertIn("systemctl is-active smart-support-bot.service", command)
+        self.assertIn("systemctl is-active smart-support-manager.service", command)
+
+    def test_install_page_has_fixed_path_and_three_stages(self) -> None:
+        source = (Path(__file__).parents[1] / "src" / "manager" / "app.py").read_text(encoding="utf-8")
+        controls = ["/api/install-bot", "/api/install-expert", "/api/activate-suite"]
+        positions = [source.index(f'formaction="{path}"') for path in controls]
+        self.assertEqual(positions, sorted(positions))
+        self.assertNotIn('name="remote_dir"', source)
+        self.assertNotIn('name="start_cmd"', source)
+        self.assertIn('<code class="readonly-path">/opt/smart-support</code>', source)
+        self.assertIn('aria-live="polite"', source)
+
+    def test_public_expert_icon_is_served_by_manager(self) -> None:
+        root = Path(__file__).parents[1]
+        source = (root / "src" / "manager" / "app.py").read_text(encoding="utf-8")
+        self.assertTrue((root / "docs" / "assets" / "expert-icon.jpg").is_file())
+        self.assertIn('path == "/expert-icon"', source)
+        self.assertIn('src="/expert-icon"', source)
 
     def test_ai_and_server_settings_persist_in_manager_directory(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
