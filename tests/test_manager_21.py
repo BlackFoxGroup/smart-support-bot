@@ -189,6 +189,10 @@ class Manager21Tests(unittest.TestCase):
                 patch.object(sftp_conn, "_restart_local_bot", return_value={"ok": True}),
             ):
                 self.assertTrue(sftp_conn.session_status()["connected"])
+                sftp_conn.disconnect_session()
+                self.assertFalse(sftp_conn.session_status()["connected"])
+                self.assertTrue(sftp_conn.connect_session(root / "data")["ok"])
+                self.assertTrue(sftp_conn.session_status()["connected"])
                 settings = sftp_conn.load_sftp_settings(root / "data")
                 self.assertEqual(settings["remote_bot_root"], str(root))
                 out = push_catalog_json_to_bot(

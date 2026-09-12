@@ -176,6 +176,8 @@ def _password(data_dir: Path, settings: dict[str, Any]) -> str:
 _SESS_LOCK = threading.Lock()
 _SFTP_IO_LOCK = threading.RLock()
 _SESS: dict[str, Any] = {"client": None, "sftp": None, "host": ""}
+_LOCAL_SESSION_ENABLED = threading.Event()
+_LOCAL_SESSION_ENABLED.set()
 
 
 def ssh_ready(data_dir: Path) -> bool:
@@ -186,7 +188,11 @@ def ssh_ready(data_dir: Path) -> bool:
 def session_status() -> dict[str, Any]:
     local = _local_bot_root()
     if local is not None:
-        return {"connected": True, "host": "localhost", "local": True}
+        return {
+            "connected": _LOCAL_SESSION_ENABLED.is_set(),
+            "host": "localhost" if _LOCAL_SESSION_ENABLED.is_set() else "",
+            "local": True,
+        }
     with _SESS_LOCK:
         client = _SESS.get("client")
         alive = False
@@ -200,6 +206,10 @@ def session_status() -> dict[str, Any]:
 
 def connect_session(data_dir: Path) -> dict[str, Any]:
     raise_if_stopped()
+    local = _local_bot_root()
+    if local is not None:
+        _LOCAL_SESSION_ENABLED.set()
+        return {"ok": True, "status": CONNECTED, "host": "localhost", "local": True}
     s = load_sftp_settings(data_dir)
     if not s["host"] or not s["username"]:
         return {"ok": False, "status": "NOT CONFIGURED", "error": "host/username missing"}
@@ -228,6 +238,8 @@ def connect_session(data_dir: Path) -> dict[str, Any]:
 
 
 def disconnect_session() -> None:
+    if _local_bot_root() is not None:
+        _LOCAL_SESSION_ENABLED.clear()
     with _SESS_LOCK:
         sftp = _SESS.get("sftp")
         client = _SESS.get("client")
