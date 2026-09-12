@@ -30,7 +30,7 @@ from src.knowledge.source_catalog.products import (
     save_registry,
     load_registry,
 )
-from src.knowledge.source_catalog.sftp_conn import load_sftp_settings, ssh_ready, test_connection
+from src.knowledge.source_catalog.sftp_conn import load_sftp_settings, session_status, ssh_ready, test_connection
 from src.knowledge.source_catalog.store import (
     append_history,
     load_global_queue,
@@ -159,9 +159,31 @@ def sync_catalog(
     if ssh_ready(data_dir) or os.getenv("BOT_SSH_HOST"):
         scp = try_remote_scp(cat_file, f"knowledge/source_catalog/versions/{product_id}/v{gen['version']}/catalog.json")
         if not scp.get("ok"):
-            append_history(data_dir, product_id, {"action": "upload", "result": "FAILED", "error": scp.get("error")})
+            append_history(
+                data_dir,
+                product_id,
+                {
+                    "action": "upload",
+                    "result": "FAILED",
+                    "filename": cat_file.name,
+                    "error": scp.get("error"),
+                    "source_section": "catalog",
+                    "server": session_status().get("host") or "",
+                },
+            )
             return {"ok": False, "error": scp.get("error"), "local_active": True, "remote": scp}
-    append_history(data_dir, product_id, {"action": "upload", "result": "ok", "new_version": gen["version"]})
+    append_history(
+        data_dir,
+        product_id,
+        {
+            "action": "upload",
+            "result": "ok",
+            "filename": cat_file.name,
+            "new_version": gen["version"],
+            "source_section": "catalog",
+            "server": session_status().get("host") or "",
+        },
+    )
     return {"ok": True, "version": gen["version"], "upload": upload, "remote": scp}
 
 
@@ -230,6 +252,7 @@ def delete_server_media(data_dir: Path, product_id: str, media_ids: list[str], *
     index = load_media_index(data_dir, product_id)
     warnings = []
     deleted = []
+    deleted_files = []
     keep = []
     for item in index.get("items") or []:
         if not isinstance(item, dict):
@@ -249,10 +272,22 @@ def delete_server_media(data_dir: Path, product_id: str, media_ids: list[str], *
         elif str(item.get("server_path") or "").startswith("/"):
             delete_remote(data_dir, str(item.get("server_path")))
         deleted.append(mid)
+        deleted_files.append(str(item.get("filename") or ""))
     if warnings and not force:
         return {"ok": False, "warnings": warnings, "deleted": []}
     save_media_index(data_dir, product_id, {"items": keep})
-    append_history(data_dir, product_id, {"action": "delete_media", "result": "ok", "object": deleted})
+    append_history(
+        data_dir,
+        product_id,
+        {
+            "action": "delete_media",
+            "result": "ok",
+            "filename": deleted_files,
+            "object": deleted,
+            "source_section": "media",
+            "server": session_status().get("host") or "",
+        },
+    )
     return {"ok": True, "deleted": deleted}
 
 

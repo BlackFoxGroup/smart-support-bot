@@ -21,6 +21,29 @@ def test_excerpt_shorter_than_full() -> None:
 def test_media_followup_hint() -> None:
     assert wants_send_media("عکسش را بفرست") is True
     assert wants_send_media("اسکریپت چه جوری کار میکنه؟") is False
+    assert wants_send_media("عکس از ui برنامه هم داری؟") is True
+    assert wants_send_media("عکس از di برنامه داری؟") is True
+
+
+def test_overview_ui_three_photos() -> None:
+    from pathlib import Path
+
+    from src.knowledge.catalog_index import wants_overview_ui
+    from src.knowledge.catalog_rag import retrieve_catalog_context
+    from src.knowledge.product_catalogs import load_product_catalogs
+
+    q = "عکس از ui برنامه هم داری؟"
+    assert wants_overview_ui(q) is True
+    root = Path(__file__).resolve().parents[1]
+    load_product_catalogs(root / "knowledge")
+    r = retrieve_catalog_context(q, lang="fa", project_root=root, product_id="vpn-installer")
+    assert r.insufficient is False
+    assert r.attach_media is True
+    names = {p.name for p in r.media_paths}
+    assert len(r.media_paths) == 3
+    assert "logo.png" in names
+    assert any("operations-pro" in n for n in names)
+    assert any("operations-basic" in n for n in names)
 
 
 def test_validate_media_same_product_and_ref(tmp_path) -> None:

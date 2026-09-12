@@ -125,9 +125,9 @@ async def _ai_describe(
         from PIL import Image
 
         im = Image.open(BytesIO(image_bytes)).convert("RGB")
-        im.thumbnail((640, 640))
+        im.thumbnail((448, 448))
         buf = BytesIO()
-        im.save(buf, format="JPEG", quality=70)
+        im.save(buf, format="JPEG", quality=65, optimize=True)
         raw = buf.getvalue()
     except Exception:
         raw = image_bytes
@@ -146,7 +146,7 @@ async def _ai_describe(
             [raw],
             system="Look at the image. Reply with compact JSON only.",
             max_images=1,
-            max_tokens=400,
+            max_tokens=240,
         )
     except Exception as exc:  # noqa: BLE001
         logger.warning("image AI analysis failed: %s", exc)
@@ -312,11 +312,28 @@ def analyze_and_send(
     product_id: str,
     media_id: str,
     catalog_id: str = "",
+    feature_id: str = "",
 ) -> dict[str, Any]:
     from src.knowledge.source_catalog.queue import send_mapped_media_to_catalog
 
+    chosen = str(feature_id or "").strip()
+    if chosen:
+        sent = send_mapped_media_to_catalog(
+            project_root,
+            knowledge_root,
+            data_dir,
+            product_id,
+            media_id,
+            chosen,
+            catalog_id=catalog_id or product_id,
+            ai_hint=chosen,
+        )
+        sent["feature_id"] = chosen
+        sent["analysis_skipped"] = True
+        return sent
+
     result = analyze_media(knowledge_root, data_dir, product_id, media_id, force=False)
-    feat = str(result.get("likely_feature") or "").strip()
+    feat = str(feature_id or "").strip() or str(result.get("likely_feature") or "").strip()
     if not feat:
         cands = result.get("candidates") or []
         if cands:
@@ -331,6 +348,7 @@ def analyze_and_send(
         media_id,
         feat,
         catalog_id=catalog_id or product_id,
+        ai_hint=feat,
     )
     sent["filename"] = result.get("filename")
     sent["feature_id"] = feat

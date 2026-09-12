@@ -24,13 +24,50 @@ T: dict[str, dict[str, str]] = {
     "nav_cat_photos": {"fa": "عکس‌های کاتالوگ", "en": "Catalog photos", "ru": "Фото каталога", "zh": "目录图片"},
     "nav_media": {"fa": "رسانه", "en": "Media", "ru": "Медиа", "zh": "媒体"},
     "nav_queue": {"fa": "صف آپلود", "en": "Upload Queue", "ru": "Очередь", "zh": "上传队列"},
+    "nav_install": {"fa": "نصب ربات", "en": "Install bot", "ru": "Установка бота", "zh": "安装机器人"},
     "nav_server": {"fa": "سرور", "en": "Server", "ru": "Сервер", "zh": "服务器"},
+    "feat_manual": {"fa": "ویژگی دستی برای AI", "en": "Manual feature for AI", "ru": "Свой признак для ИИ", "zh": "给 AI 的手动特征"},
+    "install_help": {
+        "fa": "پوشهٔ ربات تلگرام را از این رایانه انتخاب کن. به هر سرور لینوکسی وصل می‌شود، فایل‌ها را می‌فرستد، سرویس را می‌سازد و با توکن روشن می‌کند.",
+        "en": "Pick a Telegram bot folder on this PC. It uploads to any Linux server, creates a service, and starts it with the token.",
+        "ru": "Выберите папку Telegram-бота. Загрузка на Linux-сервер, systemd и запуск по токену.",
+        "zh": "选择本机 Telegram 机器人目录，上传到任意 Linux 服务器并启动。",
+    },
+    "install_local": {"fa": "پوشهٔ ربات روی این سیستم", "en": "Bot folder on this PC", "ru": "Папка бота", "zh": "本机机器人目录"},
+    "install_remote": {"fa": "پوشه روی سرور", "en": "Folder on server", "ru": "Папка на сервере", "zh": "服务器目录"},
+    "install_service": {"fa": "نام سرویس", "en": "Service name", "ru": "Имя службы", "zh": "服务名"},
+    "install_token": {"fa": "توکن تلگرام", "en": "Telegram token", "ru": "Токен Telegram", "zh": "Telegram 令牌"},
+    "install_start": {"fa": "دستور اجرا", "en": "Start command", "ru": "Команда запуска", "zh": "启动命令"},
+    "install_label": {"fa": "نام نمایش سرویس", "en": "Service display name", "ru": "Имя службы", "zh": "服务显示名"},
+    "install_extra_env": {"fa": "متغیرهای محیط اضافه (هر خط KEY=VALUE)", "en": "Extra env lines (KEY=VALUE)", "ru": "Доп. env (KEY=VALUE)", "zh": "额外环境变量"},
+    "install_extra_pip": {"fa": "بستهٔ پایتون اضافه", "en": "Extra pip packages", "ru": "Доп. pip пакеты", "zh": "额外 pip 包"},
+    "install_ssh_key": {"fa": "کلید خصوصی SSH", "en": "SSH private key", "ru": "SSH ключ", "zh": "SSH 私钥"},
+    "install_run": {"fa": "نصب و فعال‌سازی", "en": "Install and start", "ru": "Установить и запустить", "zh": "安装并启动"},
+    "expert_link_card": {"fa": "اتصال اکسپرت", "en": "Expert connection", "ru": "Подключение эксперта", "zh": "专家连接"},
+    "loose_auto": {
+        "fa": "عکس را انتخاب کن تا مستقیم وارد صف پردازش شود.",
+        "en": "Choose photos to add them to the processing queue at once.",
+        "ru": "Выберите фото — они сразу попадут в очередь.",
+        "zh": "选择图片后会立刻加入处理队列。",
+    },
+    "ok_install": {"fa": "ربات روی سرور نصب و روشن شد.", "en": "The bot was installed and started on the server.", "ru": "Бот установлен и запущен.", "zh": "机器人已安装并启动。"},
+    "err_install": {"fa": "نصب ربات انجام نشد.", "en": "Bot install failed.", "ru": "Установка не удалась.", "zh": "安装失败。"},
     "nav_history": {"fa": "تاریخچه", "en": "History", "ru": "История", "zh": "历史"},
     "nav_settings": {"fa": "تنظیمات", "en": "Settings", "ru": "Настройки", "zh": "设置"},
+    "nav_contact": {"fa": "تماس", "en": "Contact", "ru": "Контакты", "zh": "联系"},
+    "website": {"fa": "سایت", "en": "Website", "ru": "Сайт", "zh": "网站"},
+    "github_project": {"fa": "گیت‌هاب پروژه", "en": "Project GitHub", "ru": "GitHub проекта", "zh": "项目 GitHub"},
+    "expert_name": {"fa": "نام اکسپرت", "en": "Expert name", "ru": "Имя эксперта", "zh": "专家名称"},
+    "bot_name": {"fa": "نام ربات", "en": "Bot name", "ru": "Имя бота", "zh": "机器人名称"},
+    "expert_version": {"fa": "نسخهٔ اکسپرت", "en": "Expert version", "ru": "Версия эксперта", "zh": "专家版本"},
+    "bot_version": {"fa": "نسخهٔ ربات", "en": "Bot version", "ru": "Версия бота", "zh": "机器人版本"},
+    "creator": {"fa": "سازنده", "en": "Creator", "ru": "Создатель", "zh": "创建者"},
+    "linux_install": {"fa": "نصب آسان روی لینوکس", "en": "Easy Linux install", "ru": "Установка в Linux", "zh": "Linux 简易安装"},
+    "ssh_tunnel": {"fa": "دسترسی امن با تونل SSH", "en": "Secure SSH tunnel", "ru": "Безопасный SSH-туннель", "zh": "安全 SSH 隧道"},
     "guide_title": {"fa": "راهنمای کوتاه", "en": "Quick guide", "ru": "Краткая справка", "zh": "简要说明"},
     "guide_body": {
-        "fa": "۱) در تنظیمات مسیر سورس و مسیر سرور هر محصول را ویرایش کن. ۲) سورس می‌تواند پوشهٔ برنامه یا فایل نوشتاری کالای فیزیکی باشد؛ پسوند نوشتار: txt md json csv html rst و برای کد go یا py. ۳) API و نقطه پایان هوش مصنوعی را در تنظیمات ذخیره کن تا ربات و ساخت کاتالوگ یکی شوند. ۴) ساخت کاتالوگ از همان سورس با AI کاتالوگ کامل می‌سازد. ۵) عکس را در صف بگذار؛ پردازش صف آن‌ها را به ترتیب روی سرور می‌فرستد. ۶) نقطهٔ چشمک‌زن یعنی در حال آپلود. ۷) بعد از آپلود کامل از صف می‌رود و در رسانه می‌ماند. ۸) رسانه فقط عکس روی سرور است؛ کلیک عکس را تمام‌صفحه باز می‌کند. ۹) بعد از تحلیل AI ویژگی را از آبشار انتخاب کن و همان عکس را به کاتالوگ بفرست. ۱۰) بدون انتخاب ویژگی ارسال به کاتالوگ ممکن نیست. ۱۱) ذخیره تنظیمات رمز یا کلید SSH را نگه می‌دارد.",
-        "en": "1) In Settings edit each product source path and server path. 2) Source may be an app folder or a written file for a physical product; text suffixes txt md json csv html rst, or code go/py. 3) Save the AI API endpoint and key so the bot and catalog build share them. 4) Build catalog uses AI on that source. 5) Queue photos; Process queue uploads them to the server in order. 6) The flashing dot means an upload is running. 7) After a full upload the photo leaves the queue and appears in Media. 8) Media is server photos only; click opens full size. 9) After AI analyze pick a feature and send that photo to the catalog. 10) A photo with no feature cannot go to any catalog. 11) Save stores the SSH password or key.",
+        "fa": "۱) در تنظیمات مسیر سورس و مسیر سرور هر محصول را ویرایش کن. ۲) سورس می‌تواند پوشهٔ برنامه یا فایل نوشتاری کالای فیزیکی باشد؛ پسوند نوشتار: txt - md - json - csv - html - rst - pdf - docx و برای کد go - py. ۳) API و نقطه پایان هوش مصنوعی را در تنظیمات ذخیره کن تا ربات و ساخت کاتالوگ یکی شوند. ۴) ساخت کاتالوگ از همان سورس با AI کاتالوگ کامل می‌سازد. ۵) عکس را در صف بگذار؛ پردازش صف آن‌ها را به ترتیب روی سرور می‌فرستد. ۶) نقطهٔ چشمک‌زن یعنی در حال آپلود. ۷) بعد از آپلود کامل از صف می‌رود و در رسانه می‌ماند. ۸) رسانه فقط عکس روی سرور است؛ کلیک عکس را تمام‌صفحه باز می‌کند. ۹) بعد از تحلیل AI ویژگی را از آبشار انتخاب کن یا دستی بنویس و همان عکس را به کاتالوگ بفرست. ۱۰) بدون ویژگی ارسال به کاتالوگ ممکن نیست. ۱۱) ذخیره تنظیمات رمز یا کلید SSH را نگه می‌دارد.",
+        "en": "1) In Settings edit each product source path and server path. 2) Source may be an app folder or a written file for a physical product; text suffixes: txt - md - json - csv - html - rst - pdf - docx, or code go - py. 3) Save the AI API endpoint and key so the bot and catalog build share them. 4) Build catalog uses AI on that source. 5) Queue photos; Process queue uploads them to the server in order. 6) The flashing dot means an upload is running. 7) After a full upload the photo leaves the queue and appears in Media. 8) Media is server photos only; click opens full size. 9) After AI analyze pick a feature or type one, then send that photo to the catalog. 10) A photo with no feature cannot go to any catalog. 11) Save stores the SSH password or key.",
         "ru": "1) В настройках правьте путь исходника и путь сервера. 2) Источник — папка программы или текстовый файл товара; суффиксы txt md json csv html rst, код go/py. 3) Сохраните API endpoint и ключ ИИ для бота и каталога. 4) Сборка каталога идёт через ИИ. 5) Обработать очередь грузит фото на сервер по порядку. 6) Мигающая точка — идёт загрузка. 7) После 100% фото уходит из очереди в Медиа. 8) Медиа — только сервер; клик открывает фото. 9) Выбранные фото можно отправить только в каталог. 10) После подтверждения ИИ фото используется для темы. 11) Сохранить пишет пароль или ключ SSH.",
         "zh": "1）在设置中编辑每个产品的源路径和服务器路径。2）源可以是程序目录或实体商品说明；文本后缀 txt md json csv html rst，代码 go/py。3）保存 AI 接口和密钥，机器人和构建目录共用。4）构建目录用 AI 读源。5）处理队列按顺序上传到服务器。6）闪烁点表示正在上传。7）上传完成后离开队列并进入媒体。8）媒体仅为服务器图片；点击全屏。9）可将所选图片只发到目录。10）确认 AI 分析后该图用于该主题。11）保存会记下 SSH 密码或密钥。",
     },
@@ -38,6 +75,7 @@ T: dict[str, dict[str, str]] = {
     "idle": {"fa": "آپلود نیست", "en": "Not uploading", "ru": "Нет загрузки", "zh": "未在上传"},
     "to_catalog": {"fa": "ارسال به کاتالوگ", "en": "Send to catalog", "ru": "В каталог", "zh": "发送到目录"},
     "send_catalog": {"fa": "ارسال به کاتالوگ", "en": "Send to catalog", "ru": "В каталог", "zh": "发送到目录"},
+    "sending": {"fa": "در حال ارسال…", "en": "Sending…", "ru": "Отправка…", "zh": "正在发送…"},
     "choose_feature": {"fa": "ویژگی را انتخاب کنید", "en": "Choose a feature", "ru": "Выберите функцию", "zh": "选择功能"},
     "choose_product": {"fa": "محصول را انتخاب کنید", "en": "Choose a product", "ru": "Выберите продукт", "zh": "选择产品"},
     "loose_title": {"fa": "عکس جدا از پوشهٔ اصلی", "en": "Photos outside the main folder", "ru": "Фото вне основной папки", "zh": "主目录外的图片"},
@@ -94,8 +132,8 @@ T: dict[str, dict[str, str]] = {
     },
     "ok_catalog": {"fa": "کاتالوگ با هوش مصنوعی ساخته شد.", "en": "Catalog built with AI.", "ru": "Каталог собран ИИ.", "zh": "已用 AI 构建目录。"},
     "source_help": {
-        "fa": "سورس می‌تواند پوشهٔ برنامه باشد یا یک فایل نوشتاری برای کالای فیزیکی. پسوند مناسب نوشتار: .txt .md .json .csv .html .rst. برای نرم‌افزار پوشه با کد (.go .py) یا همان فایل‌های نوشتاری. فایل باید موضوع، ویژگی‌ها و مراحل را روشن بگوید.",
-        "en": "Source can be an app folder or a written file for a physical product. Written suffixes: .txt .md .json .csv .html .rst. Software may use a code folder (.go .py) or those text files. The file should name the product, features, and steps.",
+        "fa": "سورس می‌تواند پوشهٔ برنامه باشد یا یک فایل نوشتاری برای کالای فیزیکی. پسوند مناسب نوشتار: txt - md - json - csv - html - rst - pdf - docx. برای نرم‌افزار پوشه با کد (go - py) یا همان فایل‌های نوشتاری. فایل باید موضوع، ویژگی‌ها و مراحل را روشن بگوید.",
+        "en": "Source can be an app folder or a written file for a physical product. Written suffixes: txt - md - json - csv - html - rst - pdf - docx. Software may use a code folder (go - py) or those text files. The file should name the product, features, and steps.",
         "ru": "Источник — папка программы или текстовый файл для физического товара. Текст: .txt .md .json .csv .html .rst. Для ПО — папка с кодом (.go .py) или тот же текст. В файле должны быть продукт, функции и шаги.",
         "zh": "源可以是程序文件夹，或实体商品的说明文件。文本后缀：.txt .md .json .csv .html .rst。软件可用代码目录（.go .py）或上述文本。文件应写清产品、功能和步骤。",
     },
@@ -139,9 +177,26 @@ T: dict[str, dict[str, str]] = {
     "connected": {"fa": "متصل", "en": "Connected", "ru": "Подключено", "zh": "已连接"},
     "disconnected": {"fa": "قطع", "en": "Disconnected", "ru": "Отключено", "zh": "未连接"},
     "conn_state": {"fa": "وضعیت اتصال", "en": "Connection", "ru": "Состояние", "zh": "连接状态"},
+    "status_server": {"fa": "سرور", "en": "Server", "ru": "Сервер", "zh": "服务器"},
+    "status_expert_ai": {"fa": "اکسپرت و AI", "en": "Expert + AI", "ru": "Эксперт + ИИ", "zh": "专家 + AI"},
+    "status_expert_bot_ai": {"fa": "اکسپرت، ربات و AI", "en": "Expert + bot + AI", "ru": "Эксперт + бот + ИИ", "zh": "专家 + 机器人 + AI"},
+    "ai_connect": {"fa": "اتصال به AI", "en": "Connect to AI", "ru": "Подключить AI", "zh": "连接 AI"},
+    "ai_disconnect": {"fa": "قطع اتصال AI", "en": "Disconnect AI", "ru": "Отключить AI", "zh": "断开 AI"},
+    "ok_ai_connect": {"fa": "اتصال اکسپرت به AI برقرار شد.", "en": "Expert connected to AI.", "ru": "Эксперт подключён к ИИ.", "zh": "专家已连接 AI。"},
+    "err_ai_connect": {"fa": "اتصال اکسپرت به AI برقرار نشد.", "en": "Expert could not connect to AI.", "ru": "Не удалось подключить ИИ.", "zh": "无法连接 AI。"},
+    "ok_ai_disconnect": {"fa": "اتصال اکسپرت به AI قطع شد.", "en": "Expert disconnected from AI.", "ru": "ИИ отключён.", "zh": "AI 已断开。"},
     "ok_connect": {"fa": "به سرور وصل شد و وصل می‌ماند.", "en": "Connected to the server and staying connected.", "ru": "Подключено.", "zh": "已连接并将保持。"},
     "err_connect": {"fa": "اتصال به سرور برقرار نشد.", "en": "Could not connect to the server.", "ru": "Нет соединения.", "zh": "无法连接。"},
     "ok_disconnect": {"fa": "اتصال قطع شد.", "en": "Disconnected.", "ru": "Отключено.", "zh": "已断开。"},
+    "link_bot_ai": {"fa": "اتصال اکسپرت به ربات و AI", "en": "Connect Expert to bot and AI", "ru": "Подключить эксперт к боту и ИИ", "zh": "连接专家、机器人和 AI"},
+    "link_bot_ai_note": {
+        "fa": "پس از اتصال به سرور، تنظیمات AI در ربات ادغام می‌شود و سرویس ربات دوباره راه‌اندازی می‌شود.",
+        "en": "After server connection, AI settings are merged into the bot and its service is restarted.",
+        "ru": "После подключения настройки ИИ объединяются с ботом, затем служба перезапускается.",
+        "zh": "连接服务器后，AI 设置会合并到机器人并重启服务。",
+    },
+    "ok_link_ai": {"fa": "اکسپرت، ربات و AI متصل شدند.", "en": "Expert, bot, and AI are connected.", "ru": "Эксперт, бот и ИИ подключены.", "zh": "专家、机器人和 AI 已连接。"},
+    "err_link_ai": {"fa": "اتصال اکسپرت به ربات و AI انجام نشد.", "en": "Could not connect Expert to bot and AI.", "ru": "Не удалось подключить эксперт к боту и ИИ.", "zh": "无法连接专家、机器人和 AI。"},
     "err_offline": {"fa": "اول در تنظیمات دکمهٔ اتصال را بزن.", "en": "Connect in Settings first.", "ru": "Сначала подключитесь в настройках.", "zh": "请先在设置中连接。"},
     "target_catalog": {"fa": "کاتالوگ مقصد", "en": "Target catalog", "ru": "Каталог", "zh": "目标目录"},
     "cat_photos_help": {
@@ -151,7 +206,26 @@ T: dict[str, dict[str, str]] = {
         "zh": "已发送到此目录的图片。可改功能、退回媒体或从服务器删除。",
     },
     "return_media": {"fa": "بازگشت به رسانه", "en": "Return to media", "ru": "Вернуть в медиа", "zh": "退回媒体"},
+    "publish_catalog": {"fa": "استفاده از کاتالوگ در ربات", "en": "Use catalog in bot", "ru": "Использовать каталог в боте", "zh": "在机器人中使用目录"},
+    "disable_catalog": {"fa": "قطع استفاده از کاتالوگ", "en": "Stop using catalog", "ru": "Отключить каталог", "zh": "停止使用目录"},
+    "catalog_in_use": {"fa": "در حال استفاده", "en": "In use", "ru": "Используется", "zh": "正在使用"},
+    "catalog_not_in_use": {"fa": "غیرفعال", "en": "Inactive", "ru": "Неактивен", "zh": "未启用"},
+    "building_catalog": {"fa": "در حال ساخت…", "en": "Building…", "ru": "Создание…", "zh": "正在构建…"},
+    "publishing_catalog": {"fa": "در حال ثبت در ربات…", "en": "Publishing to bot…", "ru": "Публикация…", "zh": "正在发布…"},
+    "disconnecting_catalog": {"fa": "در حال قطع…", "en": "Disconnecting…", "ru": "Отключение…", "zh": "正在断开…"},
+    "ok_catalog_publish": {"fa": "کاتالوگ در ربات و AI فعال شد.", "en": "Catalog is active in the bot and AI.", "ru": "Каталог активирован в боте и ИИ.", "zh": "目录已在机器人和 AI 中启用。"},
+    "err_catalog_publish": {"fa": "انتشار کاتالوگ در ربات انجام نشد.", "en": "Catalog could not be published to the bot.", "ru": "Не удалось опубликовать каталог.", "zh": "无法向机器人发布目录。"},
+    "ok_catalog_disable": {"fa": "استفادهٔ ربات و AI از کاتالوگ قطع شد.", "en": "Bot and AI stopped using the catalog.", "ru": "Каталог отключён.", "zh": "机器人和 AI 已停止使用目录。"},
+    "err_catalog_disable": {"fa": "قطع استفاده از کاتالوگ انجام نشد.", "en": "Catalog use could not be disabled.", "ru": "Не удалось отключить каталог.", "zh": "无法停用目录。"},
     "del_server": {"fa": "حذف از سرور", "en": "Delete from server", "ru": "Удалить с сервера", "zh": "从服务器删除"},
+    "del_all_photos": {"fa": "حذف عکس", "en": "Delete photos", "ru": "Удалить фото", "zh": "删除图片"},
+    "del_all_confirm": {
+        "fa": "همهٔ عکس‌های این کاتالوگ از سرور حذف شوند؟",
+        "en": "Delete every photo of this catalog from the server?",
+        "ru": "Удалить все фото этого каталога с сервера?",
+        "zh": "要从服务器删除此目录的全部图片吗？",
+    },
+    "ok_del_all": {"fa": "عکس‌های این کاتالوگ از سرور حذف شد.", "en": "Catalog photos were deleted from the server.", "ru": "Фото каталога удалены с сервера.", "zh": "目录图片已从服务器删除。"},
     "save_feat": {"fa": "ذخیره ویژگی", "en": "Save feature", "ru": "Сохранить функцию", "zh": "保存功能"},
     "cat_texts": {"fa": "متن کاتالوگ", "en": "Catalog text", "ru": "Текст каталога", "zh": "目录文本"},
     "short_sum": {"fa": "خلاصه کوتاه", "en": "Short summary", "ru": "Кратко", "zh": "简短摘要"},
@@ -168,7 +242,18 @@ T: dict[str, dict[str, str]] = {
     "ok_del_cat": {"fa": "عکس از کاتالوگ و سرور حذف شد.", "en": "Photo removed from catalog and server.", "ru": "Фото удалено.", "zh": "已从目录和服务器删除。"},
     "title_label": {"fa": "عنوان", "en": "Title", "ru": "Название", "zh": "标题"},
     "analyze_again": {"fa": "تحلیل دوباره", "en": "Analyze again", "ru": "Анализ снова", "zh": "重新分析"},
-    "batch_analyze": {"fa": "تحلیل کلی عکس‌ها و ارسال به کاتالوگ", "en": "Analyze all photos and send to catalog", "ru": "Анализ всех и в каталог", "zh": "分析全部并发送到目录"},
+    "batch_analyze": {"fa": "تحلیل عکس و ارسال به کاتالوگ", "en": "Analyze photos and send to catalog", "ru": "Анализ фото в каталог", "zh": "分析并发送到目录"},
+    "choose_path": {"fa": "انتخاب فایل یا پوشه", "en": "Choose file or folder", "ru": "Файл или папка", "zh": "选择文件或文件夹"},
+    "pick_here": {"fa": "همین پوشه", "en": "Use this folder", "ru": "Эта папка", "zh": "使用此文件夹"},
+    "err_pick": {"fa": "اول عکس را با تیک انتخاب کن.", "en": "Tick the photos first.", "ru": "Сначала отметьте фото.", "zh": "请先勾选图片。"},
+    "keys_help": {
+        "fa": "کاتالوگ AI: ساخت متن کاتالوگ از سورس.\nاسکن تصاویر: خواندن پوشهٔ عکس.\nنگاشت خودکار: حدس ویژگی از نام فایل.\nساخت کاتالوگ: ذخیرهٔ نسخه.\nصف رسانه: فرستادن عکس به سرور.\nبازگشت نسخه: نسخهٔ قبلی کاتالوگ.",
+        "en": "Catalog AI: build catalog text from the source.\nScan images: read the image folder.\nAuto-map: guess features from filenames.\nBuild catalog: save a version.\nMedia queue: send photos to the server.\nRollback: previous catalog version.",
+        "ru": "ИИ-каталог: текст из источника.\nСкан: папка фото.\nАвтопривязка: функции по имени.\nСборка: версия.\nЗагрузка: на сервер.\nОткат: прошлый каталог.",
+        "zh": "目录 AI：从源生成目录。\n扫描：读图片夹。\n自动映射：按文件名猜功能。\n构建：保存版本。\n上传：发到服务器。\n回滚：上一版本。",
+    },
+    "choose_files": {"fa": "انتخاب فایل", "en": "Choose files", "ru": "Выбрать файлы", "zh": "选择文件"},
+    "no_file": {"fa": "فایلی انتخاب نشده", "en": "No file chosen", "ru": "Файл не выбран", "zh": "未选择文件"},
     "batch_wait": {"fa": "در حال تحلیل و ارسال", "en": "Analyzing and sending", "ru": "Анализ и отправка", "zh": "正在分析并发送"},
     "ok_batch": {"fa": "تحلیل کلی تمام شد.", "en": "Batch analyze finished.", "ru": "Пакетный анализ готов.", "zh": "批量分析完成。"},
     "err_no_file": {"fa": "فایل عکس روی این رایانه پیدا نشد.", "en": "The photo file was not found on this computer.", "ru": "Файл фото не найден.", "zh": "本机找不到该图片。"},
@@ -203,6 +288,11 @@ T: dict[str, dict[str, str]] = {
     "key_path": {"fa": "مسیر کلید", "en": "Private key path", "ru": "Путь ключа", "zh": "私钥路径"},
     "password": {"fa": "رمز", "en": "Password", "ru": "Пароль", "zh": "密码"},
     "remote_path": {"fa": "مسیر رسانهٔ ریموت", "en": "Remote media path", "ru": "Удалённый путь", "zh": "远程媒体路径"},
+    "remote_bot_root": {"fa": "مسیر نصب ربات روی سرور", "en": "Remote bot install path", "ru": "Путь установки бота", "zh": "机器人安装路径"},
+    "history_object": {"fa": "نام فایل یا شیء", "en": "File or object", "ru": "Файл или объект", "zh": "文件或对象"},
+    "history_action": {"fa": "عملیات", "en": "Action", "ru": "Действие", "zh": "操作"},
+    "history_section": {"fa": "بخش مبدأ", "en": "Source section", "ru": "Раздел", "zh": "来源部分"},
+    "history_time": {"fa": "زمان", "en": "Time", "ru": "Время", "zh": "时间"},
     "auth_key": {"fa": "کلید خصوصی", "en": "Private key", "ru": "Ключ", "zh": "私钥"},
     "auth_pass": {"fa": "رمز عبور", "en": "Password", "ru": "Пароль", "zh": "密码"},
     "pass_note": {
@@ -243,9 +333,11 @@ def t(lang: str, key: str) -> str:
 
 
 def lang_file(data_dir) -> "Path":
+    import os
     from pathlib import Path
 
-    p = Path(data_dir) / "live_catalog" / "manager_lang.txt"
+    configured = (os.getenv("MANAGER_CONFIG_DIR") or "").strip()
+    p = (Path(configured) if configured else Path(data_dir) / "live_catalog") / "manager_lang.txt"
     p.parent.mkdir(parents=True, exist_ok=True)
     return p
 
@@ -257,7 +349,12 @@ def save_lang(data_dir, lang: str) -> None:
 
 
 def load_saved_lang(data_dir) -> str:
+    from pathlib import Path
+
     path = lang_file(data_dir)
+    legacy = Path(data_dir) / "live_catalog" / "manager_lang.txt"
+    if not path.is_file() and legacy.is_file() and legacy != path:
+        path = legacy
     if not path.is_file():
         return ""
     val = path.read_text(encoding="utf-8").strip()

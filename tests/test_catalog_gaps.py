@@ -223,6 +223,18 @@ class GapFixesTests(unittest.TestCase):
             self.assertTrue(out.get("ok"))
             copied = list((root / "media" / "catalogs" / "p1").glob("*"))
             self.assertTrue(copied)
+            (kr / "p2.json").write_text('{"product_id":"p2","media":[]}', encoding="utf-8")
+            dest = send_mapped_media_to_catalog(
+                root, root / "knowledge", data, "p1", "m1", "overview", catalog_id="p2"
+            )
+            self.assertTrue(dest.get("ok"))
+            self.assertTrue((root / "media" / "catalogs" / "p2").exists())
+            from src.knowledge.source_catalog.catalog_edit import catalog_media_list, delete_all_catalog_media
+
+            self.assertTrue(catalog_media_list(root / "knowledge", "p2"))
+            wiped = delete_all_catalog_media(root, root / "knowledge", data, "p2")
+            self.assertTrue(wiped.get("ok"))
+            self.assertFalse(catalog_media_list(root / "knowledge", "p2"))
 
     def test_checksum_not_synced(self):
         with tempfile.TemporaryDirectory() as raw:

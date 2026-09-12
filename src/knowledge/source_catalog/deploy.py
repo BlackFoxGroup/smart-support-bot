@@ -94,7 +94,22 @@ def upload_media_files(
         item["uploaded_at"] = dest.stat().st_mtime
         uploaded.append(mid)
     save_media_index(data_dir, product_id, index)
-    append_history(data_dir, product_id, {"action": "media_upload", "result": "ok" if not failed else "partial", "object": uploaded})
+    append_history(
+        data_dir,
+        product_id,
+        {
+            "action": "media_upload",
+            "result": "ok" if not failed else "partial",
+            "filename": [
+                str(x.get("filename") or "")
+                for x in (index.get("items") or [])
+                if isinstance(x, dict) and str(x.get("media_id") or "") in uploaded
+            ],
+            "object": uploaded,
+            "source_section": "media",
+            "server": str(dest_media),
+        },
+    )
     return {"ok": not failed, "uploaded": uploaded, "failed": failed}
 
 

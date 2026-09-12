@@ -176,6 +176,37 @@ def delete_catalog_media(
     return {"ok": True}
 
 
+def delete_all_catalog_media(
+    project_root: Path,
+    knowledge_root: Path,
+    data_dir: Path,
+    product_id: str,
+) -> dict[str, Any]:
+    from src.knowledge.source_catalog.sftp_conn import load_sftp_settings
+
+    rows = list(catalog_media_list(knowledge_root, product_id))
+    removed = 0
+    remote_ok = 0
+    remote_root = str(load_sftp_settings(data_dir).get("remote_media_path") or "").rstrip("/")
+    for row in rows:
+        rel = str(row.get("path") or "")
+        if not rel:
+            continue
+        out = delete_catalog_media(project_root, knowledge_root, data_dir, product_id, rel, from_server=True)
+        if out.get("ok"):
+            removed += 1
+        remote = f"{remote_root}/{product_id}/{Path(rel).name}" if remote_root else ""
+        try:
+            from src.knowledge.source_catalog.sftp_conn import delete_remote
+
+            got = delete_remote(data_dir, remote) if remote else {"ok": False}
+            if got.get("ok"):
+                remote_ok += 1
+        except Exception:
+            pass
+    return {"ok": True, "removed": removed, "remote": remote_ok}
+
+
 def save_catalog_texts(
     knowledge_root: Path,
     product_id: str,

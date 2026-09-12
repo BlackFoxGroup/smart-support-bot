@@ -15,6 +15,11 @@ HANDOFF.md
 # Local secrets and live manager state
 data/users.json
 data/*.tmp
+data/ai.json
+data/sftp.json
+data/.sftp_key
+data/sftp_user_key
+data/manager_lang.txt
 data/live_catalog/
 data/live_catalog/**
 

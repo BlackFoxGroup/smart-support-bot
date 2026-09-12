@@ -61,19 +61,21 @@ async def _heartbeat_loop() -> None:
 
 async def _register_bot_commands(bot: Bot, settings: Settings) -> None:
     """Public slash menu for everyone; admin commands only in admin private chats."""
-    await bot.set_my_commands(BOT_COMMANDS)
-    await bot.set_my_commands(BOT_COMMANDS_FA, language_code="fa")
-    await bot.set_my_commands(BOT_COMMANDS_RU, language_code="ru")
-    await bot.set_my_commands(BOT_COMMANDS_ZH, language_code="zh")
+    log = logging.getLogger("smart-support-bot")
+    try:
+        await bot.set_my_commands(BOT_COMMANDS)
+        await bot.set_my_commands(BOT_COMMANDS_FA, language_code="fa")
+        await bot.set_my_commands(BOT_COMMANDS_RU, language_code="ru")
+        await bot.set_my_commands(BOT_COMMANDS_ZH, language_code="zh")
+    except Exception as exc:  # noqa: BLE001
+        log.warning("Could not set public bot commands: %s", exc)
     public_plus_admin = BOT_COMMANDS + BOT_COMMANDS_ADMIN
     for admin_id in settings.bot_admin_ids:
         try:
             scope = BotCommandScopeChat(chat_id=admin_id)
             await bot.set_my_commands(public_plus_admin, scope=scope)
         except Exception:  # noqa: BLE001
-            logging.getLogger("smart-support-bot").warning(
-                "Could not set admin command scope for chat_id=%s", admin_id
-            )
+            log.warning("Could not set admin command scope for chat_id=%s", admin_id)
 
 
 async def run() -> None:

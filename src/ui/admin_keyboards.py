@@ -216,8 +216,8 @@ _LABELS: dict[str, dict[Lang, str]] = {
         "en": "👁 Toggle Menu Visibility",
     },
     "products_catalog_ai": {
-        "fa": "📗 کاتالوگ محصول AI",
-        "en": "📗 Product Catalog AI",
+        "fa": "📗 استفادهٔ AI از کاتالوگ",
+        "en": "📗 Use catalog with AI",
     },
     "products_delete": {
         "fa": "🗑 حذف محصول",
@@ -1100,7 +1100,9 @@ def msg(key: str, lang: str | None) -> str:
 def texts(action: str) -> frozenset[str]:
     from src.ui.system_layout import rename_for
 
-    table = _LABELS[action]
+    table = _LABELS.get(action)
+    if not table:
+        return frozenset()
     out = set(table.values())
     ren = rename_for(action)
     if ren:

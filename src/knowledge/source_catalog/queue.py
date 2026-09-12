@@ -82,13 +82,11 @@ def enqueue_media(data_dir: Path, product_id: str, media_ids: list[str]) -> list
 
 def cancel_job(data_dir: Path, job_id: str) -> bool:
     queue = load_global_queue(data_dir)
-    found = False
-    for job in queue:
-        if job.get("job_id") == job_id and job.get("status") in {WAITING, FAILED, UPLOADING}:
-            job["status"] = CANCELLED
-            found = True
-    save_global_queue(data_dir, queue)
-    return found
+    kept = [job for job in queue if str(job.get("job_id") or "") != str(job_id or "")]
+    if len(kept) == len(queue):
+        return False
+    save_global_queue(data_dir, kept)
+    return True
 
 
 def retry_job(data_dir: Path, job_id: str) -> bool:
@@ -187,12 +185,14 @@ def send_mapped_media_to_catalog(
     media_id: str,
     feature_id: str,
     catalog_id: str = "",
+    ai_hint: str = "",
 ) -> dict[str, Any]:
-    """Copy one mapped photo into the product catalog. Feature is required."""
+    """Copy one mapped photo into the product catalog. Feature or manual hint is required."""
     import json
     import shutil
 
-    feat = str(feature_id or "").strip()
+    hint = str(ai_hint or "").strip()
+    feat = str(feature_id or hint or "").strip()
     if not feat:
         return {"ok": False, "error": "no_feature"}
     pid = str(product_id or "").strip()
@@ -214,14 +214,25 @@ def send_mapped_media_to_catalog(
     rel = str(dest.relative_to(project_root)).replace("\\", "/")
     item["catalog_path"] = rel
     item["catalog_feature_id"] = feat
+    if hint:
+        item["ai_hint"] = hint
     fids = [str(x) for x in (item.get("feature_ids") or []) if str(x).strip()]
     if feat not in fids:
         fids.append(feat)
     item["feature_ids"] = fids
     save_media_index(data_dir, pid, index)
     from src.knowledge.product_catalogs import product_json_path
+    from src.knowledge.source_catalog.sftp_conn import (
+        pull_remote_catalogs,
+        push_catalog_photo_and_json,
+        session_status,
+    )
 
     cat = product_json_path(knowledge_root, dest_pid)
+    # Catalogs are pulled when the SSH session connects. Avoid a full remote
+    # directory round-trip for every photo unless this catalog is missing.
+    if session_status().get("connected") and not cat.is_file():
+        pull_remote_catalogs(data_dir, knowledge_root)
     data: dict[str, Any] = {}
     if cat.is_file():
         try:
@@ -238,7 +249,8 @@ def send_mapped_media_to_catalog(
             "slot": feat,
             "feature_ids": [feat],
             "path": rel,
-            "note": src.name,
+            "note": hint or src.name,
+            "ai_hint": hint,
         }
     )
     data["media"] = media
@@ -249,7 +261,22 @@ def send_mapped_media_to_catalog(
     from src.knowledge.product_catalogs import load_product_catalogs
 
     load_product_catalogs(knowledge_root)
-    return {"ok": True, "path": rel, "feature_id": feat}
+    remote = {"ok": False, "error": "not connected"}
+    if session_status().get("connected"):
+        remote = push_catalog_photo_and_json(data_dir, dest, dest_pid, cat)
+    append_history(
+        data_dir,
+        pid,
+        {
+            "action": "send_to_catalog",
+            "result": "ok",
+            "filename": str(item.get("filename") or src.name),
+            "object": mid,
+            "source_section": "media",
+            "server": session_status().get("host") or "",
+        },
+    )
+    return {"ok": True, "path": rel, "feature_id": feat, "on_server": bool(remote.get("ok"))}
 
 
 def _run_job(project_root: Path, data_dir: Path, job: dict[str, Any]) -> dict[str, Any]:
@@ -297,7 +324,19 @@ def _run_job(project_root: Path, data_dir: Path, job: dict[str, Any]) -> dict[st
         job["error"] = str(out.get("error") or "upload failed")
         item["status"] = FAILED
         save_media_index(data_dir, pid, index)
-        append_history(data_dir, pid, {"action": "sftp_upload", "result": "FAILED", "object": mid, "error": job["error"]})
+        append_history(
+            data_dir,
+            pid,
+            {
+                "action": "sftp_upload",
+                "result": "FAILED",
+                "filename": str(job.get("filename") or src.name),
+                "object": mid,
+                "error": job["error"],
+                "source_section": "queue",
+                "server": session_status().get("host") or "",
+            },
+        )
         return job
     item["status"] = SYNCED
     item["server_path"] = out.get("remote") or ""
@@ -307,7 +346,18 @@ def _run_job(project_root: Path, data_dir: Path, job: dict[str, Any]) -> dict[st
     job["progress"] = 100
     job["error"] = ""
     save_media_index(data_dir, pid, index)
-    append_history(data_dir, pid, {"action": "sftp_upload", "result": "ok", "object": mid})
+    append_history(
+        data_dir,
+        pid,
+        {
+            "action": "sftp_upload",
+            "result": "ok",
+            "filename": str(job.get("filename") or src.name),
+            "object": mid,
+            "source_section": "queue",
+            "server": session_status().get("host") or "",
+        },
+    )
     return job
 
 
@@ -403,12 +453,28 @@ def ingest_loose_files(
         hashes.add(digest)
     scan_local_media(project_root, data_dir, product_id)
     index = load_media_index(data_dir, product_id)
+    resolved = {str(Path(p).resolve()) for p in imported}
     new_ids = []
-    for path in imported:
-        p = Path(path)
-        for item in index.get("items") or []:
-            if str(item.get("path")) == str(p):
-                new_ids.append(str(item.get("media_id")))
+    for item in index.get("items") or []:
+        raw = str(item.get("path") or "")
+        if not raw:
+            continue
+        try:
+            same = str(Path(raw).resolve()) in resolved
+        except OSError:
+            same = raw in imported
+        if same:
+            new_ids.append(str(item.get("media_id")))
+    if not new_ids and imported:
+        new_ids = [str(i.get("media_id")) for i in (index.get("items") or []) if str(i.get("path") or "") in imported]
+    dup_hashes = {str(d.get("hash") or "") for d in duplicates}
+    for item in index.get("items") or []:
+        if str(item.get("hash") or "") in dup_hashes:
+            mid = str(item.get("media_id") or "")
+            if mid and mid not in new_ids:
+                new_ids.append(mid)
     save_media_index(data_dir, product_id, index)
     jobs = enqueue_media(data_dir, product_id, new_ids) if new_ids else []
+    if imported and not jobs:
+        return {"ok": False, "error": "queue add failed", "duplicates": duplicates}
     return {"ok": True, "imported": new_ids, "duplicates": duplicates, "jobs": [j["job_id"] for j in jobs]}

@@ -9,7 +9,9 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(
+    (os.getenv("BOT_ROOT") or "").strip() or Path(__file__).resolve().parent.parent
+).expanduser().resolve()
 KNOWLEDGE_ROOT = PROJECT_ROOT / "knowledge"
 DATA_DIR = PROJECT_ROOT / "data"
 USERS_DB_PATH = DATA_DIR / "users.json"

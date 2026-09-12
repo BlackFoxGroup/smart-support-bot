@@ -66,6 +66,9 @@ def append_history(data_dir: Path, product_id: str, event: dict[str, Any]) -> No
     event = dict(event)
     event.setdefault("timestamp", time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
     event.setdefault("product_id", product_id)
+    event.setdefault("filename", "")
+    event.setdefault("source_section", "")
+    event.setdefault("server", "")
     with path.open("a", encoding="utf-8") as fh:
         fh.write(json.dumps(event, ensure_ascii=False) + "\n")
 
@@ -84,6 +87,18 @@ def read_history(data_dir: Path, product_id: str, limit: int = 80) -> list[dict[
         if isinstance(item, dict):
             out.append(item)
     return list(reversed(out))
+
+
+def read_all_history(data_dir: Path, limit: int = 200) -> list[dict[str, Any]]:
+    root = live_root(data_dir)
+    events: list[dict[str, Any]] = []
+    if not root.is_dir():
+        return events
+    for path in root.glob("*/history.jsonl"):
+        product_id = path.parent.name
+        events.extend(read_history(data_dir, product_id, limit=limit))
+    events.sort(key=lambda item: str(item.get("timestamp") or ""), reverse=True)
+    return events[:limit]
 
 
 def load_queue(data_dir: Path, product_id: str) -> list[dict[str, Any]]:

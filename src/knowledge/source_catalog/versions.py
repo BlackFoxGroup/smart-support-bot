@@ -102,7 +102,11 @@ def generate_version(
     if missing:
         state["catalog_status"] = "FAILED"
         save_state(data_dir, product_id, state)
-        append_history(data_dir, product_id, {"action": "validate", "result": "FAILED", "error": "missing features"})
+        append_history(
+            data_dir,
+            product_id,
+            {"action": "validate", "result": "FAILED", "error": "missing features", "source_section": "catalog"},
+        )
         return {"ok": False, "error": "validation failed", "missing": missing, "status": "FAILED"}
     n = next_version_number(knowledge_root, product_id)
     dest = versions_dir(knowledge_root, product_id) / f"v{n}"
@@ -127,7 +131,11 @@ def generate_version(
     state["catalog_status"] = "VALID"
     state["draft_version"] = n
     save_state(data_dir, product_id, state)
-    append_history(data_dir, product_id, {"action": "generate", "result": "VALID", "new_version": n})
+    append_history(
+        data_dir,
+        product_id,
+        {"action": "generate", "result": "VALID", "new_version": n, "source_section": "catalog"},
+    )
     return {"ok": True, "version": n, "status": "VALID", "stats": body["stats"], "unchanged": previous and previous.get("source_revision") == payload.get("source_revision") and not force}
 
 
@@ -157,7 +165,17 @@ def activate_version(knowledge_root: Path, data_dir: Path, product_id: str, vers
     state["active_version"] = version
     state["catalog_status"] = "ACTIVE"
     save_state(data_dir, product_id, state)
-    append_history(data_dir, product_id, {"action": "activate", "result": "ACTIVE", "new_version": version, "old_version": state.get("previous_version")})
+    append_history(
+        data_dir,
+        product_id,
+        {
+            "action": "activate",
+            "result": "ACTIVE",
+            "new_version": version,
+            "old_version": state.get("previous_version"),
+            "source_section": "catalog",
+        },
+    )
     return {"ok": True, "version": version, "status": "ACTIVE"}
 
 
@@ -171,6 +189,10 @@ def rollback(knowledge_root: Path, data_dir: Path, product_id: str) -> dict[str,
         state = load_state(data_dir, product_id)
         state["catalog_status"] = "ROLLED_BACK"
         save_state(data_dir, product_id, state)
-        append_history(data_dir, product_id, {"action": "rollback", "result": "ROLLED_BACK", "new_version": prev})
+        append_history(
+            data_dir,
+            product_id,
+            {"action": "rollback", "result": "ROLLED_BACK", "new_version": prev, "source_section": "products"},
+        )
         result["status"] = "ROLLED_BACK"
     return result

@@ -28,6 +28,8 @@ from src.ai.persona import (
 )
 from src.ai.safety import (
     ResponseBudget,
+    bounded_ask_timeout,
+    bounded_ask_tokens,
     is_safe_to_persist,
     is_transient_ai_error,
     prepare_user_reply,
@@ -64,6 +66,16 @@ from src.ui import admin_keyboards, keyboards, messaging, texts
 logger = logging.getLogger(__name__)
 
 router = Router(name="chat")
+
+ASK_AI_KNOWLEDGE_CHARS = 6000
+
+
+def _ask_ai_timeout(settings: Settings) -> float:
+    return bounded_ask_timeout(settings.ai_timeout_seconds)
+
+
+def _ask_ai_max_tokens(settings: Settings) -> int:
+    return bounded_ask_tokens(settings.ai_max_tokens)
 
 
 class _AskTiming:
@@ -295,7 +307,8 @@ def setup_chat_router(
 
         match = None if ask_product else intents.match(text, lang, prior_blob=history_blob)
         wait = await message.answer(texts.t(texts.THINKING, lang))
-        budget = ResponseBudget(min(float(settings.ai_timeout_seconds or 60) + 12.0, 72.0))
+        request_timeout = _ask_ai_timeout(settings)
+        budget = ResponseBudget(request_timeout + 8.0)
         stages.mark("wait_msg")
 
         intent_name = match.record.intent if match and match.record else None
@@ -317,9 +330,9 @@ def setup_chat_router(
                 text,
                 lang,
                 faq_refs=faq_refs,
-                limit_chars=settings.knowledge_snippet_chars,
+                limit_chars=min(ASK_AI_KNOWLEDGE_CHARS, settings.knowledge_snippet_chars),
                 include_community=wants_contact_links(text) and not ask_product,
-                max_chunks=4 if ask_product else 6,
+                max_chunks=3 if ask_product else 4,
                 product_id=ask_product,
             )
 
@@ -500,7 +513,7 @@ def setup_chat_router(
                     catalog_snip,
                     site_snip,
                 ],
-                11000,
+                7000,
             )
 
         history_section = history_blob or "(none)"
@@ -556,29 +569,35 @@ def setup_chat_router(
                 "Explain the asked part in a few lines. No file headers."
             )
             try:
-                return await ai.chat(
-                    [
-                        {"role": "system", "content": system},
-                        {"role": "user", "content": compact},
-                    ],
-                    max_tokens=max(1024, min(2048, int(settings.ai_max_tokens or 2048))),
+                return await asyncio.wait_for(
+                    ai.chat(
+                        [
+                            {"role": "system", "content": system},
+                            {"role": "user", "content": compact},
+                        ],
+                        max_tokens=min(1024, _ask_ai_max_tokens(settings)),
+                    ),
+                    timeout=max(8.0, min(12.0, budget.remaining())),
                 )
-            except AIClientError:
+            except (AIClientError, asyncio.TimeoutError):
                 logger.exception("Ask AI compact retry failed")
                 return ""
 
         try:
-            answer = await ai.chat(
-                [
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": user_prompt},
-                ],
-                max_tokens=max(4096, int(settings.ai_max_tokens or 4096)),
+            answer = await asyncio.wait_for(
+                ai.chat(
+                    [
+                        {"role": "system", "content": system},
+                        {"role": "user", "content": user_prompt},
+                    ],
+                    max_tokens=_ask_ai_max_tokens(settings),
+                ),
+                timeout=request_timeout,
             )
-        except AIClientError as exc:
+        except (AIClientError, asyncio.TimeoutError) as exc:
             logger.exception("AI chat failed: %s", exc)
             retry = ""
-            if is_transient_ai_error(exc) and budget.can_retry():
+            if not isinstance(exc, asyncio.TimeoutError) and is_transient_ai_error(exc) and budget.can_retry():
                 retry = await _compact_retry()
             safe_retry = prepare_user_reply(retry) if retry else ""
             if safe_retry:

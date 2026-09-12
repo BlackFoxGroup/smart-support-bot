@@ -24,6 +24,9 @@ TEXT_EXTS = {
     ".py",
     ".ts",
     ".js",
+    ".pdf",
+    ".docx",
+    ".doc",
 }
 IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp", ".gif"}
 
@@ -54,6 +57,29 @@ def _load_build_prompt(inbox: Path) -> str:
     )
 
 
+def _read_source_text(path: Path) -> str:
+    suf = path.suffix.lower()
+    if suf == ".docx":
+        try:
+            with zipfile.ZipFile(path) as zf:
+                xml = zf.read("word/document.xml").decode("utf-8", errors="replace")
+            return re.sub(r"<[^>]+>", " ", xml)
+        except (OSError, zipfile.BadZipFile, KeyError):
+            return path.name
+    if suf == ".pdf":
+        try:
+            from pypdf import PdfReader
+
+            pages = PdfReader(str(path)).pages
+            return "\n".join((p.extract_text() or "") for p in pages[:40])
+        except Exception:
+            raw = path.read_bytes()[:200000]
+            return raw.decode("latin-1", errors="replace")
+    if suf == ".doc":
+        return path.read_bytes().decode("latin-1", errors="replace")
+    return path.read_text(encoding="utf-8", errors="replace")
+
+
 def _folder_payload(folder: Path) -> str:
     parts: list[str] = [f"Folder name (product_id hint): {folder.name}"]
     media_names: list[str] = []
@@ -66,7 +92,7 @@ def _folder_payload(folder: Path) -> str:
         rel = str(path.relative_to(folder))
         if suf in TEXT_EXTS:
             try:
-                text = path.read_text(encoding="utf-8", errors="replace")
+                text = _read_source_text(path)
             except OSError:
                 continue
             if len(text) > 8000:
@@ -165,6 +191,13 @@ def prepare_work_folder(
             staging.mkdir(parents=True, exist_ok=True)
             with zipfile.ZipFile(candidate, "r") as zf:
                 zf.extractall(staging)
+            source = staging
+        elif candidate.is_file():
+            staging = inbox / "_staging_file"
+            if staging.exists():
+                shutil.rmtree(staging, ignore_errors=True)
+            staging.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(candidate, staging / candidate.name)
             source = staging
         else:
             raise FileNotFoundError(f"Folder not found: {folder_path}")

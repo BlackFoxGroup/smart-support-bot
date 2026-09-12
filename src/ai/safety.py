@@ -12,6 +12,17 @@ from src.ai.persona import (
     strip_reasoning_leak,
 )
 
+ASK_AI_TIMEOUT_SECONDS = 20.0
+ASK_AI_MAX_TOKENS = 2048
+
+
+def bounded_ask_timeout(configured: float | int | None) -> float:
+    return max(12.0, min(ASK_AI_TIMEOUT_SECONDS, float(configured or 30)))
+
+
+def bounded_ask_tokens(configured: float | int | None) -> int:
+    return max(768, min(ASK_AI_MAX_TOKENS, int(configured or ASK_AI_MAX_TOKENS)))
+
 
 def is_transient_ai_error(exc: BaseException) -> bool:
     msg = str(exc or "").lower()

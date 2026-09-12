@@ -169,7 +169,7 @@ async def _show_product_detail(
         f"id: `{product_id}`\n"
         f"{'وضعیت منو' if (lang or '').startswith('fa') else 'Menu'}: "
         f"{'روشن' if on else 'خاموش' if (lang or '').startswith('fa') else ('on' if on else 'off')}\n"
-        f"{'کاتالوگ AI' if (lang or '').startswith('fa') else 'Product Catalog'}: "
+        f"{'استفادهٔ AI از کاتالوگ' if (lang or '').startswith('fa') else 'AI catalog use'}: "
         f"{'🟢 Enabled' if cat_on else '🔴 Disabled'}\n\n"
         f"{summary}"
     )
@@ -1413,6 +1413,19 @@ def setup_admin_settings_router(
                 cur = bool((data or {}).get("catalog_enabled", True))
                 update_product_fields(settings.knowledge_root, pid, catalog_enabled=not cur)
                 await audit.write("product_catalog_ai", admin_id=uid, detail=f"{pid}:{not cur}")
+                if (lang or "").startswith("fa"):
+                    feedback = (
+                        "استفادهٔ AI از این کاتالوگ روشن شد."
+                        if not cur
+                        else "استفادهٔ AI از این کاتالوگ خاموش شد."
+                    )
+                else:
+                    feedback = (
+                        "AI catalog use was enabled."
+                        if not cur
+                        else "AI catalog use was disabled."
+                    )
+                await message.answer(feedback)
                 await bot_settings.set_session(
                     uid, {"mode": "product_detail", "product_id": pid}
                 )
