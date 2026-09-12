@@ -1,23 +1,17 @@
-# Smart Support Bot and Manager
-@@ -1,6 +1,40 @@
-# Smart Support Bot — Telegram product support
 <p align="center">
   <img src="docs/assets/logo.jpg" alt="Black Fox VPN Logo" width="96">
 </p>
 
-Async Telegram support bot (**Smart Support Bot**) for **Black Fox VPN Installer** (ops toolkit).
-<h1 align="center">Smart Support Bot</h1>
+<h1 align="center"> Smart Support Bot and Manager</h1>
 
 <p align="center">
-  <strong>Telegram product support for Black Fox VPN Installer</strong><br>
   Features · Languages · Catalog · Setup · Deploy · Safety
 </p>
 
 <p align="center">
   <a href="https://foxnext.net">Website</a> •
-  <a href="https://foxnext.net/downloads/Black-Fox-Config-Builder.apk">Black-Fox-Config-Builder.apk</a> •
-  <a href="https://github.com/balckfoxgroup/blackfox-vpn-installer">Black Fox Vpn Installer</a> •
-  <a href="https://github.com/balckfoxgroup/blackfox-config-builder">Black Fox Config Builder</a> •
+  <a href="https://github.com/BlackFoxGroup/VPS to VPN">VPS to VPNr</a> •
+  <a href="https://github.com/BlackFoxGroup/blackfox-config-builder">Black Fox Config Builder</a> •
   <a href="https://t.me/blackFoxVPNN">Telegram</a>
 </p>
 
