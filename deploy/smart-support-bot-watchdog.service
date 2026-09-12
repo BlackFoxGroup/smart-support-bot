@@ -5,9 +5,9 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-WorkingDirectory=/opt/Smart Support Bot
-EnvironmentFile=/opt/Smart Support Bot/.env
-ExecStart="/opt/Smart Support Bot/.venv/bin/python" -m src.safety.watchdog_main
+WorkingDirectory=/opt/smart-support
+EnvironmentFile=/opt/smart-support/.env
+ExecStart=/opt/smart-support/.venv/bin/python -m src.safety.watchdog_main
 Restart=always
 RestartSec=3
 # Needs rights to restart the bot unit and write safety/install trees

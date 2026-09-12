@@ -8,10 +8,11 @@ from __future__ import annotations
 
 from pathlib import Path
 
-# Bot package root = /opt/Smart Support Bot (legacy: /opt/smart-support-bot)
+# Bot package root = /opt/smart-support
 INSTALL_ROOT = Path(__file__).resolve().parents[2]
 
 _VPS_INSTALL_ROOTS = {
+    Path("/opt/smart-support"),
     Path("/opt/Smart Support Bot"),
     Path("/opt/smart-support-bot"),
 }
