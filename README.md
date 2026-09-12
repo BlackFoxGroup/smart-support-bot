@@ -77,6 +77,7 @@ The installer asks for the Linux server login and Telegram token. It then:
 4. opens the local Expert in the browser.
 
 Python 3.11 or newer must be installed on Windows. No other terminal command is required.
+The local Expert runs without a console window and stops after its last browser page is closed.
 
 ## Installing the bot and Manager from the ZIP
 
@@ -84,9 +85,10 @@ Python 3.11 or newer must be installed on Windows. No other terminal command is 
 2. Install Python 3.11 or newer on Windows.
 3. Double-click `Start-Smart-Support-Manager-v2.bat`. The first run installs the required Python packages.
 4. Open the Install bot page.
-5. Enter the server login and Telegram token.
-6. Click Install bot, then Install Expert.
-7. Click Activate bot and Expert.
+5. Select the local bot and Expert folder, then enter the server login and Telegram token.
+6. Choose `Polling` for a simple installation, or `Webhook` when a public HTTPS reverse proxy is already configured.
+7. Click Install bot, then Install Expert.
+8. Click Activate bot and Expert.
 
 The bot and Expert are stored together in `/opt/smart-support`. After the success message, open the bot in Telegram and send `/start`.
 
@@ -201,6 +203,7 @@ irm https://raw.githubusercontent.com/BlackFoxGroup/smart-support-bot/main/deplo
 ۴. Expert محلی را در مرورگر باز می‌کند.
 
 پایتون نسخه ۳.۱۱ یا جدیدتر باید روی ویندوز نصب باشد. دستور دیگری لازم نیست.
+برنامه Expert بدون پنجره ترمینال اجرا می‌شود و پس از بسته‌شدن آخرین صفحه مرورگر آن متوقف می‌شود.
 
 ## نصب ربات و Manager از فایل ZIP
 
@@ -208,9 +211,10 @@ irm https://raw.githubusercontent.com/BlackFoxGroup/smart-support-bot/main/deplo
 ۲. پایتون نسخه ۳.۱۱ یا جدیدتر را روی ویندوز نصب کنید.
 ۳. روی `Start-Smart-Support-Manager-v2.bat` دوبار کلیک کنید. برنامه در اولین اجرا بسته‌های لازم را نصب می‌کند.
 ۴. صفحه نصب ربات را باز کنید.
-۵. اطلاعات ورود سرور و توکن تلگرام را وارد کنید.
-۶. ابتدا «نصب ربات» و بعد «نصب اکسپرت» را بزنید.
-۷. کلید «فعال‌سازی ربات و اکسپرت» را بزنید.
+۵. مسیر پوشه محلی ربات و Expert را انتخاب کنید و اطلاعات ورود سرور و توکن تلگرام را وارد کنید.
+۶. برای نصب ساده `Polling` را انتخاب کنید. حالت `Webhook` به دامنه عمومی HTTPS و پراکسی آماده نیاز دارد.
+۷. ابتدا «نصب ربات» و بعد «نصب اکسپرت» را بزنید.
+۸. کلید «فعال‌سازی ربات و اکسپرت» را بزنید.
 
 ربات و اکسپرت در مسیر مشترک `/opt/smart-support` ذخیره می‌شوند. پس از نمایش پیام موفقیت، ربات را در تلگرام باز کنید و `/start` را بزنید.
 

@@ -1,4 +1,4 @@
-"""VPS to VPN Telegram support bot — long-polling entrypoint."""
+"""VPS to VPN Telegram support bot — polling or webhook entrypoint."""
 
 from __future__ import annotations
 
@@ -302,11 +302,46 @@ async def run() -> None:
         run_health_report_job(settings, bot, bot_settings),
         name="health-report-job",
     )
+    webhook_runner = None
     try:
-        # Drop pending updates so restart does not replay a backlog
-        await bot.delete_webhook(drop_pending_updates=True)
-        await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())
+        update_mode = (os.getenv("BOT_UPDATE_MODE") or "polling").strip().lower()
+        allowed_updates = dp.resolve_used_update_types()
+        if update_mode == "webhook":
+            from aiohttp import web
+            from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
+
+            webhook_url = (os.getenv("BOT_WEBHOOK_URL") or "").strip()
+            webhook_path = (os.getenv("BOT_WEBHOOK_PATH") or "/telegram/webhook").strip()
+            webhook_secret = (os.getenv("BOT_WEBHOOK_SECRET") or "").strip()
+            webhook_port = int(os.getenv("BOT_WEBHOOK_PORT") or "8080")
+            if not webhook_url.startswith("https://"):
+                raise RuntimeError("BOT_WEBHOOK_URL must be a public HTTPS URL")
+            app = web.Application()
+            SimpleRequestHandler(
+                dispatcher=dp,
+                bot=bot,
+                secret_token=webhook_secret or None,
+            ).register(app, path=webhook_path)
+            setup_application(app, dp, bot=bot)
+            webhook_runner = web.AppRunner(app)
+            await webhook_runner.setup()
+            site = web.TCPSite(webhook_runner, host="0.0.0.0", port=webhook_port)
+            await site.start()
+            await bot.set_webhook(
+                url=webhook_url,
+                secret_token=webhook_secret or None,
+                drop_pending_updates=True,
+                allowed_updates=allowed_updates,
+            )
+            log.info("Telegram webhook is active on port %s", webhook_port)
+            await asyncio.Event().wait()
+        else:
+            # Drop pending updates so restart does not replay a backlog.
+            await bot.delete_webhook(drop_pending_updates=True)
+            await dp.start_polling(bot, allowed_updates=allowed_updates)
     finally:
+        if webhook_runner is not None:
+            await webhook_runner.cleanup()
         if heartbeat_task:
             heartbeat_task.cancel()
             with contextlib.suppress(asyncio.CancelledError):

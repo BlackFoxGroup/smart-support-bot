@@ -55,7 +55,9 @@ class _RemoteHandle:
     def read(self):
         return bytes(self.buffer)
 
-    def write(self, value: bytes) -> None:
+    def write(self, value: bytes | str) -> None:
+        if isinstance(value, str):
+            value = value.encode("utf-8")
         self.buffer = bytearray(value)
 
 
@@ -85,6 +87,9 @@ class _Sftp:
 
     def posix_rename(self, source: str, target: str) -> None:
         self.files[target] = self.files.pop(source)
+
+    def close(self) -> None:
+        return None
 
 
 class _Channel:
@@ -394,10 +399,47 @@ class Manager21Tests(unittest.TestCase):
         self.assertNotIn('name="start_cmd"', source)
         self.assertNotIn('name="extra_env"', source)
         self.assertNotIn('name="extra_pip"', source)
-        self.assertIn('type="hidden" name="local_path"', source)
+        self.assertIn("_path_pick('local_path',str(PROJECT_ROOT),'local_path',lang)", source)
+        self.assertIn('name="bot_mode"', source)
+        self.assertIn('name="webhook_url"', source)
         self.assertIn('<code class="readonly-path">/opt/smart-support</code>', source)
         self.assertIn('class="install-actions"', source)
         self.assertIn('aria-live="polite"', source)
+
+    def test_webhook_install_writes_mode_and_secret(self) -> None:
+        from src.manager import install_bot
+
+        files: dict[str, bytes] = {}
+        sftp = _Sftp(files)
+        client = SimpleNamespace(open_sftp=lambda: sftp)
+        install_bot._write_env(
+            client,
+            token="telegram-token",
+            extra_env="",
+            bot_mode="webhook",
+            webhook_url="https://bot.example.com",
+            webhook_port="8080",
+        )
+        env = files["/opt/smart-support/.env"].decode()
+        self.assertIn("BOT_UPDATE_MODE=webhook", env)
+        self.assertIn("BOT_WEBHOOK_URL=https://bot.example.com/telegram/webhook", env)
+        self.assertIn("BOT_WEBHOOK_SECRET=", env)
+
+    def test_bot_entrypoint_supports_polling_and_webhook(self) -> None:
+        source = (Path(__file__).parents[1] / "src" / "main.py").read_text(encoding="utf-8")
+        self.assertIn('update_mode == "webhook"', source)
+        self.assertIn("SimpleRequestHandler", source)
+        self.assertIn("dp.start_polling", source)
+
+    def test_desktop_launcher_is_hidden_and_closes_with_browser(self) -> None:
+        root = Path(__file__).parents[1]
+        batch = (root / "Start-Smart-Support-Manager-v2.bat").read_text(encoding="utf-8")
+        app = (root / "src" / "manager" / "app.py").read_text(encoding="utf-8")
+        self.assertIn("MANAGER_DESKTOP_SESSION=1", batch)
+        self.assertIn("pythonw.exe", batch)
+        self.assertIn("/api/desktop-heartbeat", app)
+        self.assertIn("/api/desktop-close", app)
+        self.assertIn("pagehide", app)
 
     def test_one_command_installer_covers_local_and_remote_setup(self) -> None:
         root = Path(__file__).parents[1]

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import secrets
 from pathlib import Path
 from typing import Any
 
@@ -107,10 +108,27 @@ def _upload_suite(client, local_path: str) -> int:
         sftp.close()
 
 
-def _write_env(client, *, token: str, extra_env: str) -> None:
-    updates: dict[str, str] = {}
+def _write_env(
+    client,
+    *,
+    token: str,
+    extra_env: str,
+    bot_mode: str = "polling",
+    webhook_url: str = "",
+    webhook_port: str = "8080",
+) -> None:
+    updates: dict[str, str] = {"BOT_UPDATE_MODE": bot_mode}
     if token.strip():
         updates["TELEGRAM_BOT_TOKEN"] = token.strip()
+    if bot_mode == "webhook":
+        updates.update(
+            {
+                "BOT_WEBHOOK_URL": webhook_url.rstrip("/") + "/telegram/webhook",
+                "BOT_WEBHOOK_PATH": "/telegram/webhook",
+                "BOT_WEBHOOK_PORT": webhook_port,
+                "BOT_WEBHOOK_SECRET": secrets.token_urlsafe(24),
+            }
+        )
     for line in (extra_env or "").splitlines():
         row = line.strip()
         if not row or row.startswith("#") or "=" not in row:
@@ -181,11 +199,25 @@ def install_telegram_bot(
     extra_env: str = "",
     extra_pip: str = "",
     ssh_key: str = "",
+    bot_mode: str = "polling",
+    webhook_url: str = "",
+    webhook_port: str = "8080",
     **_legacy: str,
 ) -> dict[str, Any]:
     """Upload the shared suite and prepare the bot service without starting it."""
     if not (bot_token or "").strip():
         return {"ok": False, "error": "missing bot token"}
+    mode = (bot_mode or "polling").strip().lower()
+    if mode not in {"polling", "webhook"}:
+        return {"ok": False, "error": "invalid bot mode"}
+    if mode == "webhook" and not (webhook_url or "").strip().lower().startswith("https://"):
+        return {"ok": False, "error": "webhook requires HTTPS URL"}
+    try:
+        hook_port = str(int(webhook_port or "8080"))
+        if not 1 <= int(hook_port) <= 65535:
+            raise ValueError
+    except ValueError:
+        return {"ok": False, "error": "invalid webhook port"}
     client = None
     try:
         client = _connect(
@@ -196,7 +228,14 @@ def install_telegram_bot(
             ssh_key=ssh_key,
         )
         uploaded = _upload_suite(client, local_path)
-        _write_env(client, token=bot_token, extra_env=extra_env)
+        _write_env(
+            client,
+            token=bot_token,
+            extra_env=extra_env,
+            bot_mode=mode,
+            webhook_url=webhook_url.strip(),
+            webhook_port=hook_port,
+        )
         extra = _safe_pip_packages(extra_pip)
         pip_extra = f"{REMOTE_ROOT}/.venv/bin/pip install {extra}; " if extra else ""
         unit = (

@@ -61,12 +61,25 @@ try {
     $Password = Read-PlainSecret "SSH password"
     $BotToken = Read-PlainSecret "Telegram bot token"
     if (-not $Password -or -not $BotToken) { throw "SSH password and Telegram token are required." }
+    $BotMode = (Read-Host "Bot mode: polling or webhook [polling]").Trim().ToLower()
+    if (-not $BotMode) { $BotMode = "polling" }
+    if ($BotMode -eq "hook") { $BotMode = "webhook" }
+    if ($BotMode -notin @("polling", "webhook")) { throw "Bot mode must be polling or webhook." }
+    $WebhookUrl = ""
+    $WebhookPort = "8080"
+    if ($BotMode -eq "webhook") {
+        $WebhookUrl = Read-Required "Public HTTPS base URL"
+        $WebhookPort = Read-Required "Internal webhook port [8080]" "8080"
+    }
 
     $env:SS_HOST = $HostName
     $env:SS_PORT = $Port
     $env:SS_USER = $UserName
     $env:SS_PASSWORD = $Password
     $env:SS_BOT_TOKEN = $BotToken
+    $env:SS_BOT_MODE = $BotMode
+    $env:SS_WEBHOOK_URL = $WebhookUrl
+    $env:SS_WEBHOOK_PORT = $WebhookPort
     $env:SS_INSTALL_DIR = $InstallDir
     $env:MANAGER_CONFIG_DIR = Join-Path $InstallDir "data"
 
@@ -89,6 +102,9 @@ print("1/3 Installing bot...")
 result = install_telegram_bot(
     local_path=root,
     bot_token=os.environ["SS_BOT_TOKEN"],
+    bot_mode=os.environ["SS_BOT_MODE"],
+    webhook_url=os.environ["SS_WEBHOOK_URL"],
+    webhook_port=os.environ["SS_WEBHOOK_PORT"],
     **common,
 )
 if not result.get("ok"):
@@ -135,7 +151,9 @@ save_sftp_settings(
     $env:MANAGER_VERSION = "2.1"
     $env:BOT_VERSION = "2.0"
     $env:MANAGER_PORT = "8766"
-    Start-Process -FilePath $VenvPython -ArgumentList "-m", "src.manager" -WorkingDirectory $InstallDir -WindowStyle Hidden
+    $env:MANAGER_DESKTOP_SESSION = "1"
+    $VenvPythonw = Join-Path $InstallDir ".venv\Scripts\pythonw.exe"
+    Start-Process -FilePath $VenvPythonw -ArgumentList "-m", "src.manager" -WorkingDirectory $InstallDir -WindowStyle Hidden
     Start-Sleep -Seconds 3
     Start-Process "http://127.0.0.1:8766"
     Write-Host "The bot is ready. Open it in Telegram and send /start." -ForegroundColor Green

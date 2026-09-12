@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, quote, unquote, urlparse
@@ -63,6 +64,35 @@ PORT = int(os.getenv("MANAGER_PORT") or "8765")
 APP_NAME = (os.getenv("MANAGER_NAME") or "Smart Support Manager").strip()
 MANAGER_VERSION = (os.getenv("MANAGER_VERSION") or "2.1").strip()
 BOT_VERSION = (os.getenv("BOT_VERSION") or "2.0").strip()
+_DESKTOP_MODE = (os.getenv("MANAGER_DESKTOP_SESSION") or "").strip() == "1"
+_DESKTOP_TIMER: threading.Timer | None = None
+_DESKTOP_LOCK = threading.Lock()
+
+
+def _desktop_heartbeat() -> None:
+    global _DESKTOP_TIMER
+    if not _DESKTOP_MODE:
+        return
+    with _DESKTOP_LOCK:
+        if _DESKTOP_TIMER is not None:
+            _DESKTOP_TIMER.cancel()
+            _DESKTOP_TIMER = None
+
+
+def _desktop_close_later(server: ThreadingHTTPServer) -> None:
+    global _DESKTOP_TIMER
+    if not _DESKTOP_MODE:
+        return
+
+    def close() -> None:
+        server.shutdown()
+
+    with _DESKTOP_LOCK:
+        if _DESKTOP_TIMER is not None:
+            _DESKTOP_TIMER.cancel()
+        _DESKTOP_TIMER = threading.Timer(4.0, close)
+        _DESKTOP_TIMER.daemon = True
+        _DESKTOP_TIMER.start()
 NAV_KEYS = (
     ("/", "nav_dash"),
     ("/products", "nav_products"),
@@ -448,6 +478,14 @@ document.addEventListener('click',e=>{
   e.preventDefault();openLb(link.getAttribute('href'));
 });
 </script>'''}
+<script>
+(()=>{{
+  const beat=()=>fetch('/api/desktop-heartbeat',{{method:'POST',keepalive:true}}).catch(()=>{{}});
+  beat();
+  setInterval(beat,2000);
+  addEventListener('pagehide',()=>navigator.sendBeacon('/api/desktop-close',''));
+}})();
+</script>
 <div id="browser"></div><div id="toast"></div>
 <div id="lightbox" role="dialog" aria-modal="true" hidden>
 <button type="button" class="x" id="lbx" aria-label="close">×</button>
@@ -958,7 +996,6 @@ class Handler(BaseHTTPRequestHandler):
 <p class="guide">{_esc(t(lang,'install_help'))}</p>
 </div>
 <form method="post" action="/api/install-bot" id="suite-install-form">
-<input type="hidden" name="local_path" value="{_esc(str(PROJECT_ROOT))}">
 <div class="install-grid">
 <section class="card install-section">
 <h3>{_esc(t(lang,'install_server_title'))}</h3>
@@ -978,9 +1015,15 @@ class Handler(BaseHTTPRequestHandler):
 <h3>{_esc(t(lang,'install_package_title'))}</h3>
 <p class="stat">{_esc(t(lang,'install_package_help'))}</p>
 <div class="form-grid">
-<div class="field span2"><label>{_esc(t(lang,'install_local'))}</label><code class="readonly-path">{_esc(str(PROJECT_ROOT))}</code></div>
+<div class="field span2"><label>{_esc(t(lang,'install_local'))}</label>{_path_pick('local_path',str(PROJECT_ROOT),'local_path',lang)}</div>
 <div class="field span2"><label>{_esc(t(lang,'install_remote'))}</label><code class="readonly-path">/opt/smart-support</code></div>
 <div class="field"><label>{_esc(t(lang,'install_token'))}</label><input name="bot_token" type="password"></div>
+<div class="field"><label for="bot-mode">{_esc(t(lang,'install_mode'))}</label><select id="bot-mode" name="bot_mode"><option value="polling">{_esc(t(lang,'install_polling'))}</option><option value="webhook">{_esc(t(lang,'install_webhook'))}</option></select></div>
+<div id="webhook-fields" class="span2 form-grid" hidden>
+<div class="field span2"><label for="webhook-url">{_esc(t(lang,'install_webhook_url'))}</label><input id="webhook-url" name="webhook_url" type="url" placeholder="https://bot.example.com" disabled></div>
+<div class="field"><label for="webhook-port">{_esc(t(lang,'install_webhook_port'))}</label><input id="webhook-port" name="webhook_port" type="number" min="1" max="65535" value="8080" disabled></div>
+<p class="stat span2">{_esc(t(lang,'install_webhook_help'))}</p>
+</div>
 </div>
 </section>
 </div>
@@ -1003,6 +1046,16 @@ document.getElementById('suite-install-form').addEventListener('submit',e=>{{
   button.setAttribute('aria-busy','true');
   document.getElementById('install-progress').textContent=button.dataset.wait||'';
 }});
+const mode=document.getElementById('bot-mode');
+const webhookFields=document.getElementById('webhook-fields');
+function updateInstallMode(){{
+  const on=mode.value==='webhook';
+  webhookFields.hidden=!on;
+  webhookFields.querySelectorAll('input').forEach(input=>input.disabled=!on);
+  document.getElementById('webhook-url').required=on;
+}}
+mode.addEventListener('change',updateInstallMode);
+updateInstallMode();
 </script>
 """
             self._page(body, t(lang, "nav_install"))
@@ -1412,6 +1465,14 @@ b.disabled=false;b.removeAttribute('aria-busy');toast(txt.textContent,failed===0
         pid = (form.get("id") or [""])[0]
         lang = self._lang() or "en"
         u = urlparse(self.path).path
+        if u == "/api/desktop-heartbeat":
+            _desktop_heartbeat()
+            self._send(b'{"ok":true}', 200, "application/json")
+            return
+        if u == "/api/desktop-close":
+            _desktop_close_later(self.server)
+            self._send(b"", 204, "text/plain")
+            return
         loc = f"/products?id={pid}" if pid else "/"
         if u == "/api/stop-all":
             stop_all_operations()
@@ -1769,9 +1830,10 @@ b.disabled=false;b.removeAttribute('aria-busy');toast(txt.textContent,failed===0
                     username=(form.get("username") or [""])[0],
                     password=(form.get("password") or [""])[0],
                     bot_token=(form.get("bot_token") or [""])[0],
-                    extra_env=(form.get("extra_env") or [""])[0],
-                    extra_pip=(form.get("extra_pip") or [""])[0],
                     ssh_key=(form.get("ssh_key") or [""])[0],
+                    bot_mode=(form.get("bot_mode") or ["polling"])[0],
+                    webhook_url=(form.get("webhook_url") or [""])[0],
+                    webhook_port=(form.get("webhook_port") or ["8080"])[0],
                 )
                 loc = "/install?msg=ok_install_bot" if out.get("ok") else "/install?err=err_install_bot"
             elif u == "/api/install-expert":
@@ -2040,7 +2102,10 @@ def run(host: str = HOST, port: int = PORT) -> None:
     set_upload_state(DATA_DIR, busy=False, filename="")
     httpd = ThreadingHTTPServer((host, port), Handler)
     print(f"{APP_NAME} http://{host}:{port}")
-    httpd.serve_forever()
+    try:
+        httpd.serve_forever()
+    finally:
+        httpd.server_close()
 
 
 if __name__ == "__main__":
