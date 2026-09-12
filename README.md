@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="main/logo.jpg" alt="Black Fox VPN Logo" width="96">
+  <img src="docs/assets/BLACKFOX.png" alt="Black Fox VPN Logo" width="96">
 </p>
 
 <h1 align="center"> Smart Support Bot and Manager</h1>
