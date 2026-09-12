@@ -17,9 +17,18 @@ from src.manager.ai_store import (
     save_ai_settings,
     set_ai_connection_state,
 )
+from src.operation_control import (
+    OperationStopped,
+    begin_operation,
+    raise_if_stopped,
+    stop_all_operations,
+)
 from src.knowledge.source_catalog.analyze import analyze_and_send
 from src.knowledge.catalog_rag import build_catalog_units
-from src.knowledge.product_catalogs import load_product_catalogs, update_product_fields
+from src.knowledge.product_catalogs import (
+    load_product_catalogs,
+    update_product_fields,
+)
 
 
 class _RemoteHandle:
@@ -153,11 +162,11 @@ class Manager21Tests(unittest.TestCase):
                 )
             self.assertTrue(out["ok"])
             self.assertEqual(
-                files["/srv/bot/knowledge/product_catalogs/demo.json"],
+                files["/srv/bot/products/demo/catalog.json"],
                 catalog.read_bytes(),
             )
             self.assertNotIn(
-                "/srv/bot/knowledge/product_catalogs/demo.json.uploading", files
+                "/srv/bot/products/demo/catalog.json.uploading", files
             )
             self.assertIn("systemctl restart smart-support-bot.service", client.command)
 
@@ -228,6 +237,42 @@ class Manager21Tests(unittest.TestCase):
             }
             self.assertIn("disabled", ids)
         load_product_catalogs(KNOWLEDGE_ROOT)
+
+    def test_legacy_catalog_and_media_migrate_to_fixed_product_folder(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            knowledge = root / "knowledge"
+            legacy_catalog = knowledge / "product_catalogs" / "demo.json"
+            legacy_catalog.parent.mkdir(parents=True)
+            legacy_catalog.write_text(
+                '{"product_id":"demo","media":[{"path":"media/catalogs/demo/a.png"}]}',
+                encoding="utf-8",
+            )
+            legacy_media = root / "media" / "catalogs" / "demo"
+            legacy_media.mkdir(parents=True)
+            (legacy_media / "a.png").write_bytes(b"image")
+
+            load_product_catalogs(knowledge)
+
+            catalog = root / "products" / "demo" / "catalog.json"
+            self.assertTrue(catalog.is_file())
+            self.assertTrue((root / "products" / "demo" / "media" / "a.png").is_file())
+            self.assertIn("products/demo/media/a.png", catalog.read_text(encoding="utf-8"))
+
+    def test_product_server_path_is_read_only_in_manager_ui(self) -> None:
+        app_source = (
+            Path(__file__).resolve().parents[1] / "src" / "manager" / "app.py"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("name='server_media'", app_source)
+        self.assertIn("t(lang,'auto_catalog')", app_source)
+
+    def test_stop_all_cancels_existing_work_but_allows_new_work(self) -> None:
+        begin_operation()
+        stop_all_operations()
+        with self.assertRaises(OperationStopped):
+            raise_if_stopped()
+        begin_operation()
+        raise_if_stopped()
 
     def test_ai_and_server_settings_persist_in_manager_directory(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:

@@ -10,12 +10,16 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Awaitable, Callable
 
-from src.knowledge.catalog_builder import IMAGE_EXTS, TEXT_EXTS, media_catalogs_dir
+from src.knowledge.catalog_builder import IMAGE_EXTS, TEXT_EXTS
 from src.knowledge.catalog_rag import enrich_media_entry_from_filename
 from src.knowledge.product_catalogs import (
     load_product_catalogs,
     product_json_path,
+    product_media_dir,
+    product_media_relative,
+    resolve_product_json_path,
 )
+from src.operation_control import raise_if_stopped
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +77,7 @@ async def _ai_tag_image(
         "(subset of known ids if possible), stage (one of setup|ops|mesh|domain|ai|other)."
     )
     try:
+        raise_if_stopped()
         answer = await ai.chat_with_images(
             prompt,
             [image_bytes],
@@ -82,6 +87,7 @@ async def _ai_tag_image(
             ),
             max_images=1,
         )
+        raise_if_stopped()
     except Exception as exc:  # noqa: BLE001
         logger.warning("media AI tag failed: %s", exc)
         return None
@@ -137,7 +143,7 @@ async def ingest_files_to_product_catalog(
     ai: Any | None = None,
     ai_guides: dict[str, str] | None = None,
 ) -> IngestResult:
-    """Copy uploads into media/catalogs/<product_id>, update JSON, reload cache."""
+    """Copy uploads into products/<product_id>/media, update JSON, reload cache."""
     pid = (product_id or "").strip()
     if not pid:
         return IngestResult(
@@ -148,11 +154,9 @@ async def ingest_files_to_product_catalog(
             message_en="No product selected. Open a product in Products first.",
             detail="missing product_id",
         )
-    catalog_path = product_json_path(knowledge_root, pid)
-    if not catalog_path.is_file():
-        # try exact filename
-        alt = knowledge_root / "product_catalogs" / f"{pid}.json"
-        catalog_path = alt if alt.is_file() else catalog_path
+    catalog_path = resolve_product_json_path(knowledge_root, pid) or product_json_path(
+        knowledge_root, pid
+    )
     if not catalog_path.is_file():
         return IngestResult(
             ok=False,
@@ -188,8 +192,7 @@ async def ingest_files_to_product_catalog(
         if str(m.get("path") or "").strip()
     }
 
-    out_dir = media_catalogs_dir(project_root) / pid
-    out_dir.mkdir(parents=True, exist_ok=True)
+    out_dir = product_media_dir(project_root, pid)
     added: list[str] = []
     errors: list[str] = []
 
@@ -213,7 +216,7 @@ async def ingest_files_to_product_catalog(
             if dest.exists():
                 dest = out_dir / f"{src.stem}-{src.stat().st_mtime_ns}{src.suffix}"
             shutil.copy2(src, dest)
-            rel = f"media/catalogs/{pid}/{dest.name}"
+            rel = product_media_relative(pid, dest.name)
             if dest.name.lower() in existing_names:
                 # replace path entry if same name
                 media_list = [
@@ -320,9 +323,9 @@ async def reindex_product_media_with_ai(
     ai: Any,
 ) -> IngestResult:
     """Re-tag existing media entries for a product (no new uploads)."""
-    catalog_path = product_json_path(knowledge_root, product_id)
-    if not catalog_path.is_file():
-        catalog_path = knowledge_root / "product_catalogs" / f"{product_id}.json"
+    catalog_path = resolve_product_json_path(
+        knowledge_root, product_id
+    ) or product_json_path(knowledge_root, product_id)
     if not catalog_path.is_file():
         return IngestResult(
             ok=False,

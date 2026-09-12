@@ -71,8 +71,10 @@ def file_hash_cache_path(data_dir: Path) -> Path:
 
 
 def load_manual_catalog(knowledge_root: Path) -> dict[str, Any]:
-    path = knowledge_root / "product_catalogs" / "vpn-installer.json"
-    if not path.is_file():
+    from src.knowledge.product_catalogs import resolve_product_json_path
+
+    path = resolve_product_json_path(knowledge_root, "vpn-installer")
+    if path is None or not path.is_file():
         return {}
     try:
         return json.loads(path.read_text(encoding="utf-8"))

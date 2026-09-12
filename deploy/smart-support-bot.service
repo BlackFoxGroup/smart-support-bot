@@ -14,7 +14,7 @@ RestartSec=5
 NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=full
-ReadWritePaths=/opt/smart-support/data /opt/smart-support/media /opt/smart-support/knowledge/product_catalogs
+ReadWritePaths=/opt/smart-support/data /opt/smart-support/products /opt/smart-support/media /opt/smart-support/knowledge/product_catalogs
 
 [Install]
 WantedBy=multi-user.target

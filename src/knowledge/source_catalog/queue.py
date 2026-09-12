@@ -7,6 +7,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+from src.knowledge.product_catalogs import product_media_dir
 from src.knowledge.source_catalog.media import scan_local_media
 from src.knowledge.source_catalog.sftp_conn import session_status, upload_and_verify
 from src.knowledge.source_catalog.store import (
@@ -17,6 +18,7 @@ from src.knowledge.source_catalog.store import (
     save_global_queue,
     save_media_index,
 )
+from src.operation_control import raise_if_stopped
 
 WAITING = "WAITING"
 UPLOADING = "UPLOADING"
@@ -166,6 +168,7 @@ def process_waiting(project_root: Path, data_dir: Path, *, limit: int | None = N
     results = []
     try:
         for job in waiting:
+            raise_if_stopped()
             set_upload_state(data_dir, busy=True, filename=str(job.get("filename") or ""))
             save_global_queue(data_dir, queue)
             results.append(_run_job(project_root, data_dir, job))
@@ -207,8 +210,7 @@ def send_mapped_media_to_catalog(
     src = _resolve_image(project_root, data_dir, pid, item)
     if src is None or not src.is_file():
         return {"ok": False, "error": "local file missing"}
-    dest_dir = project_root / "media" / "catalogs" / dest_pid
-    dest_dir.mkdir(parents=True, exist_ok=True)
+    dest_dir = product_media_dir(project_root, dest_pid)
     dest = dest_dir / f"{mid}{src.suffix.lower() or Path(str(item.get('filename') or 'img.png')).suffix.lower() or '.png'}"
     shutil.copy2(src, dest)
     rel = str(dest.relative_to(project_root)).replace("\\", "/")
@@ -280,6 +282,7 @@ def send_mapped_media_to_catalog(
 
 
 def _run_job(project_root: Path, data_dir: Path, job: dict[str, Any]) -> dict[str, Any]:
+    raise_if_stopped()
     pid = str(job.get("product_id") or "")
     mid = str(job.get("media_id") or "")
     index = load_media_index(data_dir, pid)
@@ -300,7 +303,7 @@ def _run_job(project_root: Path, data_dir: Path, job: dict[str, Any]) -> dict[st
         job["progress"] = int(100 * done / max(1, total))
         job["speed"] = int(speed)
 
-    remote_rel = f"{pid}/{mid}{src.suffix.lower()}"
+    remote_rel = f"{pid}/media/{mid}{src.suffix.lower()}"
     if not session_status().get("connected"):
         job["status"] = PENDING_UPLOAD
         job["on_server"] = False

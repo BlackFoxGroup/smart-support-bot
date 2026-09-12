@@ -401,7 +401,9 @@ async def _execute_catalog_build(
             p.is_file() for p in staging.rglob("*") if p.name != "_enrich_notes.json"
         )
         if not has_staging and not folder_path:
-            media_dir = settings.project_root / "media" / "catalogs" / hint
+            from src.knowledge.product_catalogs import product_media_dir
+
+            media_dir = product_media_dir(settings.project_root, hint)
             if media_dir.is_dir() and any(media_dir.iterdir()):
                 folder_path = str(media_dir)
         folder = prepare_work_folder(

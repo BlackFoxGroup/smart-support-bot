@@ -6,13 +6,17 @@ import json
 from pathlib import Path
 from typing import Any
 
-from src.knowledge.product_catalogs import load_product_catalogs, product_json_path
+from src.knowledge.product_catalogs import (
+    load_product_catalogs,
+    product_json_path,
+    resolve_product_json_path,
+)
 from src.knowledge.source_catalog.store import load_media_index, save_media_index
 
 
 def read_catalog(knowledge_root: Path, product_id: str) -> dict[str, Any]:
-    path = product_json_path(knowledge_root, product_id)
-    if not path.is_file():
+    path = resolve_product_json_path(knowledge_root, product_id)
+    if path is None or not path.is_file():
         return {}
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -63,15 +67,22 @@ def catalog_feature_ids(knowledge_root: Path, product_id: str) -> list[str]:
 
 def _safe_rel(project_root: Path, rel: str) -> Path | None:
     raw = (rel or "").replace("\\", "/").lstrip("/")
-    if not raw.startswith("media/catalogs/"):
+    if not (raw.startswith("products/") or raw.startswith("media/catalogs/")):
         return None
     dest = (project_root / raw).resolve()
-    root = (project_root / "media" / "catalogs").resolve()
-    try:
-        dest.relative_to(root)
-    except ValueError:
+    roots = (
+        (project_root / "products").resolve(),
+        (project_root / "media" / "catalogs").resolve(),
+    )
+    if not any(dest.is_relative_to(root) for root in roots):
         return None
     return dest
+
+
+def _same_media_path(left: str, right: str) -> bool:
+    a = (left or "").replace("\\", "/").strip("/")
+    b = (right or "").replace("\\", "/").strip("/")
+    return a == b or (bool(a) and bool(b) and Path(a).name == Path(b).name)
 
 
 def set_catalog_media_feature(
@@ -123,13 +134,13 @@ def return_catalog_media_to_index(
     media = [
         m
         for m in (data.get("media") or [])
-        if not (isinstance(m, dict) and str(m.get("path") or "").replace("\\", "/") == want)
+        if not (isinstance(m, dict) and _same_media_path(str(m.get("path") or ""), want))
     ]
     data["media"] = media
     write_catalog(knowledge_root, product_id, data)
     index = load_media_index(data_dir, product_id)
     for item in index.get("items") or []:
-        if str(item.get("catalog_path") or "").replace("\\", "/") == want:
+        if _same_media_path(str(item.get("catalog_path") or ""), want):
             item["catalog_path"] = ""
     save_media_index(data_dir, product_id, index)
     return {"ok": True}
@@ -149,7 +160,7 @@ def delete_catalog_media(
     data["media"] = [
         m
         for m in (data.get("media") or [])
-        if not (isinstance(m, dict) and str(m.get("path") or "").replace("\\", "/") == want)
+        if not (isinstance(m, dict) and _same_media_path(str(m.get("path") or ""), want))
     ]
     write_catalog(knowledge_root, product_id, data)
     local = _safe_rel(project_root, want)
@@ -160,7 +171,7 @@ def delete_catalog_media(
             pass
     index = load_media_index(data_dir, product_id)
     for item in index.get("items") or []:
-        if str(item.get("catalog_path") or "").replace("\\", "/") != want:
+        if not _same_media_path(str(item.get("catalog_path") or ""), want):
             continue
         item["catalog_path"] = ""
         if from_server:
@@ -195,7 +206,7 @@ def delete_all_catalog_media(
         out = delete_catalog_media(project_root, knowledge_root, data_dir, product_id, rel, from_server=True)
         if out.get("ok"):
             removed += 1
-        remote = f"{remote_root}/{product_id}/{Path(rel).name}" if remote_root else ""
+        remote = f"{remote_root}/{product_id}/media/{Path(rel).name}" if remote_root else ""
         try:
             from src.knowledge.source_catalog.sftp_conn import delete_remote
 

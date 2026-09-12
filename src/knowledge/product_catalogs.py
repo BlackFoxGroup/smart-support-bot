@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import logging
 import re
+import shutil
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -86,19 +87,96 @@ _CACHE: list[ProductCatalog] = []
 
 
 def product_catalogs_dir(knowledge_root: Path) -> Path:
+    """Legacy flat catalog directory kept for migration reads."""
     return knowledge_root / "product_catalogs"
 
 
+def products_root(knowledge_root: Path) -> Path:
+    project_root = knowledge_root.parent if knowledge_root.name == "knowledge" else knowledge_root
+    return project_root / "products"
+
+
+def product_root(knowledge_root: Path, product_id: str) -> Path:
+    safe = slugify_product_id(product_id) if product_id else "product"
+    return products_root(knowledge_root) / safe
+
+
+def product_media_relative(product_id: str, filename: str = "") -> str:
+    safe = slugify_product_id(product_id) if product_id else "product"
+    base = f"products/{safe}/media"
+    return f"{base}/{Path(filename).name}" if filename else base
+
+
+def migrate_legacy_product_layout(knowledge_root: Path) -> dict[str, int]:
+    """Copy legacy flat catalogs/media into the fixed per-product layout."""
+    project_root = knowledge_root.parent if knowledge_root.name == "knowledge" else knowledge_root
+    migrated_catalogs = 0
+    migrated_media = 0
+    legacy_dir = product_catalogs_dir(knowledge_root)
+    if not legacy_dir.is_dir():
+        return {"catalogs": 0, "media": 0}
+    for legacy in sorted(legacy_dir.glob("*.json")):
+        try:
+            legacy_data = json.loads(legacy.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if not isinstance(legacy_data, dict):
+            continue
+        pid = slugify_product_id(str(legacy_data.get("product_id") or legacy.stem))
+        destination = product_json_path(knowledge_root, pid)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        data = legacy_data
+        if destination.is_file():
+            try:
+                current = json.loads(destination.read_text(encoding="utf-8"))
+                if isinstance(current, dict):
+                    data = current
+            except (OSError, json.JSONDecodeError):
+                pass
+        old_media = project_root / "media" / "catalogs" / pid
+        new_media = product_media_dir(project_root, pid)
+        if old_media.is_dir():
+            for source in old_media.iterdir():
+                if not source.is_file():
+                    continue
+                target = new_media / source.name
+                if not target.exists():
+                    shutil.copy2(source, target)
+                    migrated_media += 1
+        changed = not destination.is_file()
+        for item in data.get("media") or []:
+            if not isinstance(item, dict):
+                continue
+            rel = str(item.get("path") or "").replace("\\", "/")
+            legacy_prefix = f"media/catalogs/{pid}/"
+            if rel.startswith(legacy_prefix):
+                item["path"] = product_media_relative(pid, Path(rel).name)
+                changed = True
+            if str(item.get("local_folder") or "").replace("\\", "/") == legacy_prefix.rstrip("/"):
+                item["local_folder"] = product_media_relative(pid)
+                changed = True
+        if changed:
+            destination.write_text(
+                json.dumps(data, ensure_ascii=False, indent=2) + "\n",
+                encoding="utf-8",
+            )
+            migrated_catalogs += 1
+    return {"catalogs": migrated_catalogs, "media": migrated_media}
+
+
 def load_product_catalogs(knowledge_root: Path) -> list[ProductCatalog]:
-    """Scan knowledge/product_catalogs/*.json and cache enabled products."""
+    """Scan canonical product folders, with legacy flat-file compatibility."""
     global _CACHE
-    folder = product_catalogs_dir(knowledge_root)
+    migrated = migrate_legacy_product_layout(knowledge_root)
+    if migrated["catalogs"] or migrated["media"]:
+        logger.info("Migrated product layout: %s", migrated)
     out: list[ProductCatalog] = []
-    if not folder.is_dir():
-        logger.warning("product_catalogs folder missing: %s", folder)
+    paths = list_product_files(knowledge_root)
+    if not paths:
+        logger.warning("product catalogs missing under: %s", products_root(knowledge_root))
         _CACHE = []
         return _CACHE
-    for path in sorted(folder.glob("*.json")):
+    for path in paths:
         try:
             data = json.loads(path.read_text(encoding="utf-8"))
         except (OSError, json.JSONDecodeError) as exc:
@@ -106,7 +184,8 @@ def load_product_catalogs(knowledge_root: Path) -> list[ProductCatalog]:
             continue
         if not isinstance(data, dict) or not data.get("enabled", True):
             continue
-        product_id = str(data.get("product_id") or path.stem).strip()
+        fallback_id = path.parent.name if path.name == "catalog.json" else path.stem
+        product_id = str(data.get("product_id") or fallback_id).strip()
         if not product_id:
             continue
         title = data.get("title") if isinstance(data.get("title"), dict) else {}
@@ -484,15 +563,20 @@ def _lang_map(text: str) -> dict[str, str]:
 
 
 def product_json_path(knowledge_root: Path, product_id: str) -> Path:
-    safe = slugify_product_id(product_id) if product_id else "product"
-    return product_catalogs_dir(knowledge_root) / f"{safe}.json"
+    return product_root(knowledge_root, product_id) / "catalog.json"
 
 
 def list_product_files(knowledge_root: Path) -> list[Path]:
-    folder = product_catalogs_dir(knowledge_root)
-    if not folder.is_dir():
-        return []
-    return sorted(p for p in folder.glob("*.json") if p.is_file())
+    canonical = sorted(
+        p for p in products_root(knowledge_root).glob("*/catalog.json") if p.is_file()
+    )
+    canonical_ids = {p.parent.name for p in canonical}
+    legacy = sorted(
+        p
+        for p in product_catalogs_dir(knowledge_root).glob("*.json")
+        if p.is_file() and slugify_product_id(p.stem) not in canonical_ids
+    )
+    return canonical + legacy
 
 
 def list_all_product_dicts(knowledge_root: Path) -> list[dict[str, Any]]:
@@ -521,16 +605,15 @@ def create_product_stub(
     menu_order: int | None = None,
 ) -> ProductCatalog:
     """Create a minimal enabled catalog JSON and reload cache."""
-    folder = product_catalogs_dir(knowledge_root)
-    folder.mkdir(parents=True, exist_ok=True)
     pid = slugify_product_id(product_id or title)
-    path = folder / f"{pid}.json"
+    path = product_json_path(knowledge_root, pid)
     n = 1
     base = pid
     while path.exists():
         n += 1
         pid = f"{base}-{n}"
-        path = folder / f"{pid}.json"
+        path = product_json_path(knowledge_root, pid)
+    path.parent.mkdir(parents=True, exist_ok=True)
     order = menu_order
     if order is None:
         existing = load_product_catalogs(knowledge_root)
@@ -583,12 +666,8 @@ def update_product_fields(
     catalog_enabled: bool | None = None,
     menu_order: int | None = None,
 ) -> ProductCatalog:
-    path = product_catalogs_dir(knowledge_root) / f"{slugify_product_id(product_id)}.json"
-    # Also try exact id filename
-    alt = product_catalogs_dir(knowledge_root) / f"{product_id}.json"
-    if not path.is_file() and alt.is_file():
-        path = alt
-    if not path.is_file():
+    path = resolve_product_json_path(knowledge_root, product_id)
+    if path is None or not path.is_file():
         raise FileNotFoundError(product_id)
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict):
@@ -636,6 +715,7 @@ def update_product_fields(
 def delete_product(knowledge_root: Path, product_id: str) -> bool:
     folder = product_catalogs_dir(knowledge_root)
     candidates = [
+        product_json_path(knowledge_root, product_id),
         folder / f"{product_id}.json",
         folder / f"{slugify_product_id(product_id)}.json",
     ]
@@ -670,6 +750,7 @@ def find_product_by_label(label: str, *, lang: str = "en") -> ProductCatalog | N
 def resolve_product_json_path(knowledge_root: Path, product_id: str) -> Path | None:
     folder = product_catalogs_dir(knowledge_root)
     for cand in (
+        product_json_path(knowledge_root, product_id),
         folder / f"{product_id}.json",
         folder / f"{slugify_product_id(product_id)}.json",
     ):
@@ -692,7 +773,7 @@ def load_product_raw(knowledge_root: Path, product_id: str) -> dict[str, Any] | 
 def save_product_raw(knowledge_root: Path, product_id: str, data: dict[str, Any]) -> None:
     path = resolve_product_json_path(knowledge_root, product_id)
     if path is None:
-        path = product_catalogs_dir(knowledge_root) / f"{slugify_product_id(product_id)}.json"
+        path = product_json_path(knowledge_root, product_id)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     load_product_catalogs(knowledge_root)
@@ -703,7 +784,7 @@ def save_product_raw(knowledge_root: Path, product_id: str, data: dict[str, Any]
 
 def product_media_dir(project_root: Path, product_id: str) -> Path:
     pid = slugify_product_id(product_id) if product_id else "product"
-    path = project_root / "media" / "catalogs" / pid
+    path = project_root / "products" / pid / "media"
     path.mkdir(parents=True, exist_ok=True)
     return path
 
@@ -731,11 +812,14 @@ def count_product_photos(
         rel = str(media.get("path") or "").strip().replace("\\", "/")
         if rel:
             names.add(Path(rel).name.lower())
-    media_dir = project_root / "media" / "catalogs" / product_id
-    if media_dir.is_dir():
-        for path in media_dir.iterdir():
-            if path.is_file() and path.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp", ".gif"}:
-                names.add(path.name.lower())
+    for media_dir in (
+        product_media_dir(project_root, product_id),
+        project_root / "media" / "catalogs" / product_id,
+    ):
+        if media_dir.is_dir():
+            for path in media_dir.iterdir():
+                if path.is_file() and path.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp", ".gif"}:
+                    names.add(path.name.lower())
     if staging is not None and staging.is_dir():
         for path in staging.rglob("*"):
             if path.is_file() and path.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp", ".gif"}:

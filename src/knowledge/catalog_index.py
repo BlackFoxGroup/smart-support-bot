@@ -7,7 +7,11 @@ from pathlib import Path
 from typing import Any
 
 from src.knowledge.catalog_builder import IMAGE_EXTS
-from src.knowledge.product_catalogs import get_product_catalogs
+from src.knowledge.product_catalogs import (
+    get_product_catalogs,
+    product_media_dir,
+    product_media_relative,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -96,7 +100,7 @@ def listed_image_paths(project_root: Path, product_id: str, *, limit: int = 8) -
                 continue
             _add(root / rel)
 
-    folder = root / "media" / "catalogs" / pid
+    folder = product_media_dir(root, pid)
     if folder.is_dir():
         for path in sorted(folder.iterdir()):
             if path.suffix.lower() in IMAGE_EXTS:
@@ -135,7 +139,7 @@ def build_catalog_index_markdown(*, product_id: str | None = None) -> str:
             and Path(str(m.get("path"))).suffix.lower() in IMAGE_EXTS
         ]
         lines.append(f"photo_count: {len(images)}")
-        lines.append(f"folder: media/catalogs/{cat.product_id}/")
+        lines.append(f"folder: {product_media_relative(cat.product_id)}/")
         if not images:
             lines.append("- (no photos indexed yet)")
             lines.append("")
@@ -181,7 +185,7 @@ def write_catalog_indexes(knowledge_root: Path, project_root: Path) -> list[Path
     for cat in get_product_catalogs():
         body = build_catalog_index_markdown(product_id=cat.product_id)
         guide = guides_dir / f"{cat.product_id}-catalog-index.md"
-        media_md = project_root / "media" / "catalogs" / cat.product_id / "CATALOG_INDEX.md"
+        media_md = product_media_dir(project_root, cat.product_id) / "CATALOG_INDEX.md"
         for path in (guide, media_md):
             try:
                 path.parent.mkdir(parents=True, exist_ok=True)

@@ -12,6 +12,7 @@ from typing import Any
 
 from src.control.secrets import decrypt_secret, encrypt_secret
 from src.knowledge.source_catalog.store import live_root
+from src.operation_control import raise_if_stopped
 
 AUTH_FAILED = "AUTHENTICATION FAILED"
 HOST_UNREACHABLE = "HOST UNREACHABLE"
@@ -102,9 +103,7 @@ def load_sftp_settings(data_dir: Path) -> dict[str, Any]:
     user = str(stored.get("username") or os.getenv("BOT_SSH_USER") or "").strip()
     port = int(stored.get("port") or os.getenv("BOT_SSH_PORT") or 22)
     remote = str(
-        stored.get("remote_media_path")
-        or os.getenv("BOT_REMOTE_MEDIA")
-        or ((os.getenv("BOT_REMOTE_ROOT") or DEFAULT_BOT_ROOT).rstrip("/") + "/media/catalogs")
+        ((os.getenv("BOT_REMOTE_ROOT") or DEFAULT_BOT_ROOT).rstrip("/") + "/products")
     ).strip()
     auth = str(stored.get("auth_method") or ("password" if os.getenv("BOT_SSH_PASS") else "key")).strip() or "key"
     return {
@@ -151,7 +150,10 @@ def save_sftp_settings(
         "username": str(fields.get("username") or current["username"]).strip(),
         "auth_method": str(fields.get("auth_method") or current["auth_method"]).strip(),
         "key_path": key_path,
-        "remote_media_path": str(fields.get("remote_media_path") or current["remote_media_path"]).strip(),
+        "remote_media_path": (
+            str(fields.get("remote_bot_root") or current["remote_bot_root"]).strip().rstrip("/")
+            + "/products"
+        ),
         "remote_bot_root": str(fields.get("remote_bot_root") or current["remote_bot_root"]).strip().rstrip("/"),
         "timeout": int(fields.get("timeout") or current["timeout"] or 20),
         "password_enc": password_enc,
@@ -197,14 +199,16 @@ def session_status() -> dict[str, Any]:
 
 
 def connect_session(data_dir: Path) -> dict[str, Any]:
+    raise_if_stopped()
     s = load_sftp_settings(data_dir)
     if not s["host"] or not s["username"]:
         return {"ok": False, "status": "NOT CONFIGURED", "error": "host/username missing"}
     disconnect_session()
     try:
         client, settings = _client(data_dir)
+        raise_if_stopped()
         sftp = client.open_sftp()
-        remote = settings["remote_media_path"]
+        remote = f"{settings['remote_bot_root'].rstrip('/')}/products"
         try:
             sftp.stat(remote)
         except FileNotFoundError:
@@ -328,12 +332,13 @@ def upload_and_verify(
         sftp, settings = _live_sftp(data_dir)
         if sftp is None:
             return {"ok": False, "status": "FAILED", "error": "not connected"}
-        remote_root = str(settings["remote_media_path"]).rstrip("/").replace("\\", "/")
+        remote_root = f"{remote_install_root(data_dir)}/products"
         remote = f"{remote_root}/{remote_rel.lstrip('/')}"
         parent = remote.rsplit("/", 1)[0]
         _mkdirs(sftp, parent)
 
         def _cb(transferred: int, total: int) -> None:
+            raise_if_stopped()
             if progress_cb:
                 elapsed = max(0.001, time.time() - started)
                 progress_cb(transferred, total, transferred / elapsed)
@@ -373,7 +378,7 @@ def list_remote(data_dir: Path, product_id: str) -> dict[str, Any]:
     try:
         client, settings = _client(data_dir)
         sftp = client.open_sftp()
-        remote = f"{settings['remote_media_path'].rstrip('/')}/{product_id}"
+        remote = f"{remote_install_root(data_dir)}/products/{product_id}/media"
         try:
             names = sftp.listdir_attr(remote)
         except FileNotFoundError:
@@ -396,7 +401,11 @@ def download_remote(data_dir: Path, remote_path: str, dest: Path) -> dict[str, A
         sftp, _settings = _live_sftp(data_dir)
         if sftp is None:
             return {"ok": False, "error": "not connected"}
-        sftp.get(remote_path, str(dest))
+        sftp.get(
+            remote_path,
+            str(dest),
+            callback=lambda _done, _total: raise_if_stopped(),
+        )
         return {"ok": dest.is_file()}
     except Exception as exc:  # noqa: BLE001
         return {"ok": False, "error": _classify_error(exc)}
@@ -432,14 +441,14 @@ def _pull_remote_catalogs_unlocked(
 ) -> dict[str, Any]:
     local_root = _local_bot_root()
     if local_root is not None:
-        source = local_root / "knowledge" / "product_catalogs"
-        if source.resolve() != (knowledge_root / "product_catalogs").resolve():
-            import shutil
+        source = local_root / "products"
+        if local_root.resolve() != knowledge_root.parent.resolve():
+            from src.knowledge.product_catalogs import product_json_path
 
-            destination = knowledge_root / "product_catalogs"
-            destination.mkdir(parents=True, exist_ok=True)
-            for file in source.glob("*.json"):
-                shutil.copy2(file, destination / file.name)
+            for file in source.glob("*/catalog.json"):
+                destination = product_json_path(knowledge_root, file.parent.name)
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                destination.write_bytes(file.read_bytes())
         from src.knowledge.product_catalogs import load_product_catalogs
 
         loaded = load_product_catalogs(knowledge_root)
@@ -447,22 +456,29 @@ def _pull_remote_catalogs_unlocked(
     sftp, _settings = _live_sftp(data_dir)
     if sftp is None:
         return {"ok": False, "error": "not connected", "ids": []}
-    remote = f"{remote_install_root(data_dir)}/knowledge/product_catalogs"
-    dest = knowledge_root / "product_catalogs"
-    dest.mkdir(parents=True, exist_ok=True)
+    remote = f"{remote_install_root(data_dir)}/products"
     ids: list[str] = []
     try:
         names = sftp.listdir(remote)
     except FileNotFoundError:
         return {"ok": False, "error": "remote catalogs missing", "ids": []}
+    from src.knowledge.product_catalogs import product_json_path
+
     for name in names:
-        if not name.endswith(".json"):
+        raise_if_stopped()
+        if name.startswith("."):
             continue
-        local = dest / name
+        remote_catalog = f"{remote}/{name}/catalog.json"
+        try:
+            sftp.stat(remote_catalog)
+        except (FileNotFoundError, OSError):
+            continue
+        local = product_json_path(knowledge_root, name)
+        local.parent.mkdir(parents=True, exist_ok=True)
         temp = local.with_suffix(local.suffix + ".pulling")
-        sftp.get(f"{remote}/{name}", str(temp))
+        sftp.get(remote_catalog, str(temp))
         temp.replace(local)
-        ids.append(name[:-5])
+        ids.append(name)
     from src.knowledge.product_catalogs import load_product_catalogs
 
     load_product_catalogs(knowledge_root)
@@ -490,15 +506,17 @@ def _push_catalog_json_to_bot_unlocked(
     restart: bool = False,
 ) -> dict[str, Any]:
     """Atomically replace one catalog JSON in the canonical bot directory."""
-    from src.knowledge.product_catalogs import product_json_path
+    from src.knowledge.product_catalogs import product_json_path, resolve_product_json_path
 
     pid = str(product_id or "").strip()
-    catalog = product_json_path(knowledge_root, pid)
+    catalog = resolve_product_json_path(knowledge_root, pid) or product_json_path(
+        knowledge_root, pid
+    )
     if not pid or not catalog.is_file():
         return {"ok": False, "error": "catalog missing"}
     local_root = _local_bot_root()
     if local_root is not None:
-        destination = local_root / "knowledge" / "product_catalogs" / catalog.name
+        destination = local_root / "products" / pid / "catalog.json"
         if destination.resolve() != catalog.resolve():
             destination.parent.mkdir(parents=True, exist_ok=True)
             temp = destination.with_suffix(destination.suffix + ".uploading")
@@ -512,7 +530,7 @@ def _push_catalog_json_to_bot_unlocked(
         client = _SESS.get("client")
     if sftp is None or client is None:
         return {"ok": False, "error": "not connected"}
-    remote = f"{remote_install_root(data_dir)}/knowledge/product_catalogs/{catalog.name}"
+    remote = f"{remote_install_root(data_dir)}/products/{pid}/catalog.json"
     temp = remote + ".uploading"
     try:
         _mkdirs(sftp, remote.rsplit("/", 1)[0])
@@ -563,11 +581,11 @@ def _push_catalog_photo_and_json_unlocked(
     if local_root is not None:
         import shutil
 
-        image_dest = local_root / "media" / "catalogs" / dest_pid / local_image.name
+        image_dest = local_root / "products" / dest_pid / "media" / local_image.name
         image_dest.parent.mkdir(parents=True, exist_ok=True)
         if image_dest.resolve() != local_image.resolve():
             shutil.copy2(local_image, image_dest)
-        json_dest = local_root / "knowledge" / "product_catalogs" / local_json.name
+        json_dest = local_root / "products" / dest_pid / "catalog.json"
         json_dest.parent.mkdir(parents=True, exist_ok=True)
         if local_json.is_file() and json_dest.resolve() != local_json.resolve():
             temp = json_dest.with_suffix(json_dest.suffix + ".uploading")
@@ -577,11 +595,9 @@ def _push_catalog_photo_and_json_unlocked(
     sftp, _settings = _live_sftp(data_dir)
     if sftp is None:
         return {"ok": False, "error": "not connected"}
-    # Catalog JSON stores media/catalogs/... paths relative to the bot root.
-    # Publish to that exact location; remote_media_path is the source-media inbox.
-    media_root = f"{remote_install_root(data_dir)}/media/catalogs"
-    remote_img = f"{media_root}/{dest_pid}/{local_image.name}"
-    remote_json = f"{remote_install_root(data_dir)}/knowledge/product_catalogs/{dest_pid}.json"
+    media_root = f"{remote_install_root(data_dir)}/products/{dest_pid}/media"
+    remote_img = f"{media_root}/{local_image.name}"
+    remote_json = f"{remote_install_root(data_dir)}/products/{dest_pid}/catalog.json"
     try:
         _mkdirs(sftp, remote_img.rsplit("/", 1)[0])
         sftp.put(str(local_image), remote_img)
@@ -622,10 +638,12 @@ def _publish_catalog_to_bot_unlocked(
     """Upload one complete catalog and its referenced media, then reload the bot."""
     import json
 
-    from src.knowledge.product_catalogs import product_json_path
+    from src.knowledge.product_catalogs import product_json_path, resolve_product_json_path
 
     pid = str(product_id or "").strip()
-    catalog = product_json_path(knowledge_root, pid)
+    catalog = resolve_product_json_path(knowledge_root, pid) or product_json_path(
+        knowledge_root, pid
+    )
     if not pid or not catalog.is_file():
         return {"ok": False, "error": "catalog missing"}
     local_root = _local_bot_root()
@@ -636,6 +654,7 @@ def _publish_catalog_to_bot_unlocked(
         media = payload.get("media") if isinstance(payload, dict) else []
         uploaded = 0
         for item in media if isinstance(media, list) else []:
+            raise_if_stopped()
             if not isinstance(item, dict):
                 continue
             rel = str(item.get("path") or "").replace("\\", "/").lstrip("/")
@@ -646,7 +665,7 @@ def _publish_catalog_to_bot_unlocked(
                 shutil.copy2(source, destination)
             if source.is_file():
                 uploaded += 1
-        catalog_dest = local_root / "knowledge" / "product_catalogs" / catalog.name
+        catalog_dest = local_root / "products" / pid / "catalog.json"
         if catalog_dest.resolve() != catalog.resolve():
             catalog_dest.parent.mkdir(parents=True, exist_ok=True)
             temp = catalog_dest.with_suffix(catalog_dest.suffix + ".uploading")
@@ -664,6 +683,7 @@ def _publish_catalog_to_bot_unlocked(
         media = payload.get("media") if isinstance(payload, dict) else []
         uploaded = 0
         for item in media if isinstance(media, list) else []:
+            raise_if_stopped()
             if not isinstance(item, dict):
                 continue
             rel = str(item.get("path") or "").replace("\\", "/").lstrip("/")
@@ -678,7 +698,7 @@ def _publish_catalog_to_bot_unlocked(
             _mkdirs(sftp, remote_image.rsplit("/", 1)[0])
             sftp.put(str(local), remote_image)
             uploaded += 1
-        remote_catalog = f"{remote_install_root(data_dir)}/knowledge/product_catalogs/{catalog.name}"
+        remote_catalog = f"{remote_install_root(data_dir)}/products/{pid}/catalog.json"
         temp_catalog = remote_catalog + ".uploading"
         _mkdirs(sftp, remote_catalog.rsplit("/", 1)[0])
         sftp.put(str(catalog), temp_catalog)

@@ -54,6 +54,7 @@ from src.manager.ai_store import (
     test_ai_connection,
 )
 from src.manager.i18n import LABELS, LANGS, load_saved_lang, save_lang, t
+from src.operation_control import begin_operation, stop_all_operations
 
 HOST = "127.0.0.1"
 PORT = int(os.getenv("MANAGER_PORT") or "8765")
@@ -275,6 +276,7 @@ th{{color:var(--muted-fg);font-weight:600;background:var(--muted);position:stick
 .field{{display:flex;flex-direction:column;gap:4px}}
 .field label{{color:var(--muted-fg);font-size:14px;font-weight:600}}
 .field input,.field select,.field textarea{{width:100%;margin:0}}
+.readonly-path{{display:block;padding:10px 12px;border:1px solid var(--border);border-radius:4px;background:var(--primary);direction:ltr;text-align:left;overflow-wrap:anywhere}}
 .span2{{grid-column:1/-1}}
 button,input[type=submit],a.btn{{background:var(--accent);color:var(--on-accent);border:0;padding:10px 14px;min-height:44px;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;font:inherit;border-radius:4px;font-weight:600}}
 .sr-only{{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}}
@@ -578,14 +580,12 @@ class Handler(BaseHTTPRequestHandler):
                 loc = f"{loc}&msg={ok}" if "?" in loc else f"{loc}?msg={ok}"
             self._redir(loc)
             return
-        if path in {"/catalog", "/catalog-photos", "/media"} and session_status().get("connected"):
-            pull_remote_catalogs(DATA_DIR, KNOWLEDGE_ROOT)
         dash = service.dashboard(PROJECT_ROOT, KNOWLEDGE_ROOT, DATA_DIR)
         if path == "/":
             cards = []
             for p in dash["products"]:
                 cards.append(
-                    f"<div class='card'><h3><a href='/products?id={_esc(p['product_id'])}'>{_esc(p['title'])}</a></h3>"
+                    f"<div class='card'><h3>{_esc(p['title'])}</h3>"
                     f"<p class='stat'>{_esc(t(lang,'catalog_ai'))}: {_esc(p['catalog_status'])}<br>"
                     f"{_esc(t(lang,'version'))}: {_esc(p['catalog_version'])}<br>"
                     f"{_esc(t(lang,'queue_n'))}: {_esc(dash.get('queue_count'))} · "
@@ -632,10 +632,10 @@ class Handler(BaseHTTPRequestHandler):
                     f"{_path_pick('source', src, 's-'+str(m.get('product_id')), lang)}</div>"
                     f"<div class='field span2'><label for='i-{_esc(m.get('product_id'))}'>{t(lang,'col_images')}</label>"
                     f"{_path_pick('images', imgs, 'i-'+str(m.get('product_id')), lang)}</div>"
-                    f"<div class='field span2'><label for='r-{_esc(m.get('product_id'))}'>{t(lang,'server')}</label>"
-                    f"<input id='r-{_esc(m.get('product_id'))}' name='server_media' value='{_esc(m.get('server_media'))}'></div>"
+                    f"<div class='field span2'><label>{t(lang,'storage_path')}</label>"
+                    f"<code class='readonly-path'>{_esc(m.get('server_media'))}</code></div>"
                     f"</div><div class='toolbar'><button>{t(lang,'edit_row')}</button>"
-                    f"<a class='btn ghost' href='/products?id={_esc(m.get('product_id'))}'>{_esc(t(lang,'open'))}</a></div></form></div>"
+                    f"<a class='btn ghost' href='/products?id={_esc(m.get('product_id'))}'>{_esc(t(lang,'auto_catalog'))}</a></div></form></div>"
                 )
             save_card = (
                 f"<div class='card'><h2>{t(lang,'save_map')}</h2>"
@@ -645,7 +645,6 @@ class Handler(BaseHTTPRequestHandler):
                 f"<div class='field'><label for='newdisp'>{t(lang,'display')}</label><input id='newdisp' name='display'></div>"
                 f"<div class='field span2'><label for='newsrc'>{t(lang,'col_source')}</label>{_path_pick('source','','newsrc',lang)}</div>"
                 f"<div class='field span2'><label for='newimg'>{t(lang,'col_images')}</label>{_path_pick('images','','newimg',lang)}</div>"
-                f"<div class='field span2'><label for='newsrv'>{t(lang,'server')}</label><input id='newsrv' name='server_media'></div>"
                 f"</div><button>{t(lang,'save_map')}</button></form></div>"
             )
             self._page(
@@ -747,13 +746,18 @@ class Handler(BaseHTTPRequestHandler):
             return
         if path == "/cmedia":
             rel = (q.get("p") or [""])[0].replace("\\", "/").lstrip("/")
-            file = (PROJECT_ROOT / rel).resolve() if rel.startswith("media/catalogs/") else None
-            root = (PROJECT_ROOT / "media" / "catalogs").resolve()
+            allowed = rel.startswith("products/") or rel.startswith("media/catalogs/")
+            file = (PROJECT_ROOT / rel).resolve() if allowed else None
+            roots = (
+                (PROJECT_ROOT / "products").resolve(),
+                (PROJECT_ROOT / "media" / "catalogs").resolve(),
+            )
             if file is None or not file.is_file():
                 self._send(b"missing", 404, "text/plain")
                 return
             try:
-                file.relative_to(root)
+                if not any(file.is_relative_to(root) for root in roots):
+                    raise ValueError
             except ValueError:
                 self._send(b"missing", 404, "text/plain")
                 return
@@ -922,6 +926,7 @@ class Handler(BaseHTTPRequestHandler):
             body = f"""
 {flash}
 <div class="pair-grid">
+<div class="stack">
 <div class="card">
 <h2>{t(lang, 'server_conn')}</h2>
 <p class="stat">{t(lang,'pass_note')}</p>
@@ -947,6 +952,14 @@ class Handler(BaseHTTPRequestHandler):
 <form method="post" action="/api/disconnect"><button class="danger" type="submit">{t(lang,'disconnect')}</button></form>
 </div>
 </div>
+<div class="card">
+<h2>{_esc(t(lang,'stop_all_title'))}</h2>
+<p class="guide">{_esc(t(lang,'stop_all_help'))}</p>
+<form method="post" action="/api/stop-all">
+<button class="danger" type="submit">{_esc(t(lang,'stop_all_button'))}</button>
+</form>
+</div>
+</div>
 <div class="stack">
 <div class="card">
 <h2>{t(lang,'ai_box')}</h2>
@@ -968,13 +981,10 @@ class Handler(BaseHTTPRequestHandler):
 <div class="card">
 <h2>{_esc(t(lang,'expert_link_card'))}</h2>
 <p class="guide">{_esc(t(lang,'link_bot_ai_note'))}</p>
-<form method="post" action="/api/sftp">
 <div class="form-grid">
-<div class="field span2"><label for="remote_bot_root">{t(lang,'remote_bot_root')}</label><input id="remote_bot_root" name="remote_bot_root" value="{_esc(s['remote_bot_root'])}"></div>
-<div class="field span2"><label for="remote_media_path">{t(lang,'remote_path')}</label><input id="remote_media_path" name="remote_media_path" value="{_esc(s['remote_media_path'])}"></div>
+<div class="field span2"><label>{t(lang,'remote_bot_root')}</label><code class="readonly-path">/opt/smart-support</code></div>
+<div class="field span2"><label>{t(lang,'storage_path')}</label><code class="readonly-path">/opt/smart-support/products/&lt;product-id&gt;</code></div>
 </div>
-<div class="toolbar"><button>{t(lang,'save')}</button></div>
-</form>
 <form method="post" action="/api/link-bot-ai">
 <button type="submit" {"disabled" if not session_status().get("connected") or not ai.get("connected") else ""}>{_esc(t(lang,'link_bot_ai'))}</button>
 </form>
@@ -1064,10 +1074,10 @@ class Handler(BaseHTTPRequestHandler):
             flash += f"<p class='warn'>{_esc(t(lang, err_key) if err_key.startswith('err_') else err_key)}</p>"
         body = f"""
 <div class="card">
-<h2>{_esc(p.get('title') or pid)}</h2>
+<h2>{_esc(t(lang,'auto_catalog'))} — {_esc(p.get('title') or pid)}</h2>
 <p>ID {_esc(pid)} {_esc(t(lang,'nav_catalog'))} {_esc(p.get('catalog_status'))} v{_esc(p.get('catalog_version'))}
 {_esc(t(lang,'catalog_ai'))} {'ON' if p.get('catalog_enabled') else 'OFF'}</p>
-<p>{_esc(t(lang,'col_source'))}: {_esc(p.get('source'))}<br>{_esc(t(lang,'col_images'))}: {_esc(p.get('pic_dir'))}<br>{_esc(t(lang,'server'))}: {_esc(p.get('server_media'))}</p>
+<p>{_esc(t(lang,'col_source'))}: {_esc(p.get('source'))}<br>{_esc(t(lang,'col_images'))}: {_esc(p.get('pic_dir'))}<br>{_esc(t(lang,'storage_path'))}: <code class="readonly-path">{_esc(p.get('server_media'))}</code></p>
 {flash}
 <div class="toolbar">
 <a class="btn" href="/run/toggle?id={_esc(pid)}">{_esc(t(lang, 'toggle'))}</a>
@@ -1289,6 +1299,21 @@ b.disabled=false;b.removeAttribute('aria-busy');toast(txt.textContent,failed===0
         lang = self._lang() or "en"
         u = urlparse(self.path).path
         loc = f"/products?id={pid}" if pid else "/"
+        if u == "/api/stop-all":
+            stop_all_operations()
+            disconnect_session()
+            append_history(
+                DATA_DIR,
+                "_manager",
+                {
+                    "action": "stop_all_operations",
+                    "result": "ok",
+                    "source_section": "settings",
+                },
+            )
+            self._redir("/settings?msg=ok_stop_all")
+            return
+        begin_operation()
         catalog_mutations = {
             "/api/catalog-build",
             "/api/catalog-publish",

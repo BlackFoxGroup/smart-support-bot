@@ -221,14 +221,14 @@ class GapFixesTests(unittest.TestCase):
             self.assertFalse(blocked.get("ok"))
             out = send_mapped_media_to_catalog(root, root / "knowledge", data, "p1", "m1", "overview")
             self.assertTrue(out.get("ok"))
-            copied = list((root / "media" / "catalogs" / "p1").glob("*"))
+            copied = list((root / "products" / "p1" / "media").glob("*"))
             self.assertTrue(copied)
             (kr / "p2.json").write_text('{"product_id":"p2","media":[]}', encoding="utf-8")
             dest = send_mapped_media_to_catalog(
                 root, root / "knowledge", data, "p1", "m1", "overview", catalog_id="p2"
             )
             self.assertTrue(dest.get("ok"))
-            self.assertTrue((root / "media" / "catalogs" / "p2").exists())
+            self.assertTrue((root / "products" / "p2" / "media").exists())
             from src.knowledge.source_catalog.catalog_edit import catalog_media_list, delete_all_catalog_media
 
             self.assertTrue(catalog_media_list(root / "knowledge", "p2"))

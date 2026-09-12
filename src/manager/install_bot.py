@@ -6,6 +6,8 @@ import re
 from pathlib import Path
 from typing import Any
 
+from src.operation_control import raise_if_stopped
+
 _SKIP = {".git", ".venv", "venv", "data", "__pycache__", ".pytest_cache", "node_modules"}
 
 
@@ -79,6 +81,7 @@ def install_telegram_bot(
         _mkdirs(sftp, remote)
         uploaded = 0
         for path in src.rglob("*"):
+            raise_if_stopped()
             if not path.is_file():
                 continue
             if any(part in _SKIP for part in path.parts):
@@ -88,7 +91,11 @@ def install_telegram_bot(
             rel = path.relative_to(src).as_posix()
             dest = f"{remote}/{rel}"
             _mkdirs(sftp, dest.rsplit("/", 1)[0])
-            sftp.put(str(path), dest)
+            sftp.put(
+                str(path),
+                dest,
+                callback=lambda _done, _total: raise_if_stopped(),
+            )
             uploaded += 1
         updates = {"TELEGRAM_BOT_TOKEN": token}
         for line in (extra_env or "").splitlines():
@@ -143,6 +150,7 @@ def install_telegram_bot(
             f"cat > /etc/systemd/system/{svc}.service << 'EOF'\n{unit}EOF\n"
             f"systemctl daemon-reload && systemctl enable --now {svc}.service && systemctl is-active {svc}.service"
         )
+        raise_if_stopped()
         _stdin, stdout, stderr = client.exec_command(cmd, timeout=300)
         code = stdout.channel.recv_exit_status()
         active = stdout.read().decode("utf-8", "replace").strip().splitlines()

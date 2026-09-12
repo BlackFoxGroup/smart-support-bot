@@ -322,14 +322,13 @@ def product_page(project_root: Path, knowledge_root: Path, data_dir: Path, produ
     }
 
 
-def save_product_paths(data_dir: Path, product_id: str, source: str, images: str, server_media: str, display: str = "") -> None:
+def save_product_paths(data_dir: Path, product_id: str, source: str, images: str, server_media: str = "", display: str = "") -> None:
     reg = load_registry(data_dir)
     paths = dict(reg.get("paths") or {})
     paths[product_id] = {
         "display": display or paths.get(product_id, {}).get("display") or product_id,
         "source": source,
         "images": images,
-        "server_media": server_media,
     }
     aliases = dict(reg.get("aliases") or {})
     if display:
@@ -342,7 +341,9 @@ def build_ai_catalog(project_root: Path, knowledge_root: Path, data_dir: Path, p
     import asyncio
     import shutil
     import tempfile
+    from src.operation_control import raise_if_stopped
 
+    raise_if_stopped()
     src = source_root_for(data_dir, product_id)
     if src is None:
         return {"ok": False, "error": "err_source"}
@@ -376,6 +377,7 @@ def build_ai_catalog(project_root: Path, knowledge_root: Path, data_dir: Path, p
                 await ai.close()
 
         asyncio.run(_run())
+        raise_if_stopped()
     except Exception as exc:  # noqa: BLE001
         return {"ok": False, "error": str(exc)[:400]}
     finally:

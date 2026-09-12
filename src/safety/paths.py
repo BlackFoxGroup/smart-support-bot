@@ -50,6 +50,7 @@ DEFAULT_SUPPORT_CHAT_ID = ""
 # Paths relative to INSTALL_ROOT that are included in backups
 BACKUP_INCLUDE = (
     "src",
+    "products",
     "knowledge",
     "requirements.txt",
     "README.md",

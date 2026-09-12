@@ -24,6 +24,7 @@ data/live_catalog/
 data/live_catalog/**
 
 # Product catalogs, guides, and screenshots stay off GitHub
+/products/
 knowledge/product_catalogs/*.json
 knowledge/product_catalogs.examples/
 knowledge/product_guides/*.md

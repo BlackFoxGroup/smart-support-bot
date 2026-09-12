@@ -9,9 +9,11 @@ import re
 from pathlib import Path
 from typing import Any
 
+from src.knowledge.product_catalogs import product_media_dir
 from src.knowledge.source_catalog.classify import classify_filename
 from src.knowledge.source_catalog.pipeline import load_matrix
 from src.knowledge.source_catalog.store import load_media_index, save_media_index
+from src.operation_control import raise_if_stopped
 
 logger = logging.getLogger(__name__)
 
@@ -62,6 +64,7 @@ def _resolve_image(
     candidates = [
         Path(str(item.get("path") or "")),
         project_root / str(item.get("catalog_path") or ""),
+        product_media_dir(project_root, product_id) / name,
         project_root / "media" / "catalogs" / product_id / name,
         live_root(data_dir) / "inbox" / product_id / name,
         live_root(data_dir) / "ai_cache" / product_id / name,
@@ -141,6 +144,7 @@ async def _ai_describe(
         "confidence must be honest. Do not invent feature ids."
     )
     try:
+        raise_if_stopped()
         answer = await ai.chat_with_images(
             prompt,
             [raw],
@@ -148,6 +152,7 @@ async def _ai_describe(
             max_images=1,
             max_tokens=240,
         )
+        raise_if_stopped()
     except Exception as exc:  # noqa: BLE001
         logger.warning("image AI analysis failed: %s", exc)
         return {"_error": "ai_fail", "description": str(exc)[:200]}

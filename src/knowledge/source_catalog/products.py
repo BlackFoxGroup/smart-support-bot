@@ -62,7 +62,6 @@ def ensure_default_registry(data_dir: Path, project_root: Path) -> None:
             "display": "VPS to VPN",
             "source": src if Path(src).is_dir() else "",
             "images": str(img) if img.is_dir() else "",
-            "server_media": "/opt/Smart Support Bot/media/catalogs/vpn-installer/",
         }
         changed = True
     if changed:
@@ -143,7 +142,7 @@ def product_maps(
                 "display": title,
                 "source": src or "Missing",
                 "images": str(img) if img else "Missing",
-                "server_media": str(stored.get("server_media") or f"/media/{pid}/"),
+                "server_media": f"/opt/smart-support/products/{pid}",
                 "registered": True,
             }
         )

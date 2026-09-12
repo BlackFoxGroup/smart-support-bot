@@ -12,7 +12,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from src.knowledge.product_catalogs import ProductCatalog, get_product_catalogs
+from src.knowledge.product_catalogs import (
+    ProductCatalog,
+    get_product_catalogs,
+    product_media_dir,
+    product_media_relative,
+)
 from src.knowledge.source_catalog.pipeline import load_matrix
 from src.knowledge.source_catalog.schema import STATUS_DEPRECATED, STATUS_LIVE
 
@@ -303,7 +308,7 @@ def _pick_overview_media(project_root: Path, product_id: str, limit: int = 3) ->
                 out.append((rel, path))
             if len(out) >= limit:
                 return out
-    folder = project_root / "media" / "catalogs" / product_id
+    folder = product_media_dir(project_root, product_id)
     if folder.is_dir():
         for name in (
             "logo.png",
@@ -1187,8 +1192,8 @@ def enrich_media_entry_from_filename(
         "id": slot,
         "role": "screenshot" if index else "hero",
         "slot": slot,
-        "path": f"media/catalogs/{product_id}/{Path(filename).name}",
-        "local_folder": f"media/catalogs/{product_id}",
+        "path": product_media_relative(product_id, filename),
+        "local_folder": product_media_relative(product_id),
         "note": f"auto-indexed from {Path(filename).name}",
         "title": {"fa": slot, "en": slot, "ru": slot, "zh": slot},
         "description": {

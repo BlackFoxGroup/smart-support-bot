@@ -10,6 +10,14 @@ import zipfile
 from pathlib import Path
 from typing import Any, Awaitable, Callable
 
+from src.knowledge.product_catalogs import (
+    product_json_path,
+    product_media_dir,
+    product_media_relative,
+    resolve_product_json_path,
+)
+from src.operation_control import raise_if_stopped
+
 logger = logging.getLogger(__name__)
 
 TEXT_EXTS = {
@@ -37,11 +45,8 @@ def catalog_inbox_dir(knowledge_root: Path) -> Path:
     return knowledge_root / "catalog_inbox"
 
 
-def product_catalogs_dir(knowledge_root: Path) -> Path:
-    return knowledge_root / "product_catalogs"
-
-
 def media_catalogs_dir(project_root: Path) -> Path:
+    """Legacy compatibility helper; new media uses product_media_dir."""
     return project_root / "media" / "catalogs"
 
 
@@ -84,6 +89,7 @@ def _folder_payload(folder: Path) -> str:
     parts: list[str] = [f"Folder name (product_id hint): {folder.name}"]
     media_names: list[str] = []
     for path in sorted(folder.rglob("*")):
+        raise_if_stopped()
         if not path.is_file():
             continue
         if path.name.startswith("_"):
@@ -221,9 +227,8 @@ def prepare_work_folder(
 
 
 def copy_media_to_server(folder: Path, *, project_root: Path, product_id: str) -> list[str]:
-    """Copy images from folder into media/catalogs/<product_id>/; return relative paths."""
-    out_dir = media_catalogs_dir(project_root) / product_id
-    out_dir.mkdir(parents=True, exist_ok=True)
+    """Copy images into the product's fixed media folder; return relative paths."""
+    out_dir = product_media_dir(project_root, product_id)
     copied: list[str] = []
     for path in sorted(folder.rglob("*")):
         if not path.is_file():
@@ -232,7 +237,7 @@ def copy_media_to_server(folder: Path, *, project_root: Path, product_id: str) -
             continue
         target = out_dir / path.name
         shutil.copy2(path, target)
-        rel = f"media/catalogs/{product_id}/{path.name}"
+        rel = product_media_relative(product_id, path.name)
         copied.append(rel)
     return copied
 
@@ -249,8 +254,6 @@ async def build_one_catalog(
     enrich_notes: list[dict[str, Any]] | None = None,
 ) -> str:
     inbox = catalog_inbox_dir(knowledge_root)
-    out_dir = product_catalogs_dir(knowledge_root)
-    out_dir.mkdir(parents=True, exist_ok=True)
     prompt = _load_build_prompt(inbox)
     payload = _folder_payload(folder)
     if extra_sources.strip():
@@ -265,6 +268,7 @@ async def build_one_catalog(
     # Prefer vision when screenshots exist and ai_chat supports it.
     images = collect_folder_images(folder, limit=5)
     answer = ""
+    raise_if_stopped()
     vision_fn = getattr(ai_chat, "chat_with_images", None)
     # ai_chat may be bound method ai.chat — look for sibling chat_with_images
     owner = getattr(ai_chat, "__self__", None)
@@ -285,6 +289,7 @@ async def build_one_catalog(
             logger.warning("catalog vision failed, falling back to text: %s", exc)
             answer = ""
     if not (answer or "").strip():
+        raise_if_stopped()
         answer = await ai_chat(
             [
                 {"role": "system", "content": prompt},
@@ -296,13 +301,14 @@ async def build_one_catalog(
             ]
         )
     data = _extract_json(answer)
+    raise_if_stopped()
     if not data:
         raise ValueError("AI did not return valid catalog JSON")
 
     existing: dict[str, Any] = {}
     if force_product_id:
-        existing_path = out_dir / f"{force_product_id}.json"
-        if existing_path.is_file():
+        existing_path = resolve_product_json_path(knowledge_root, force_product_id)
+        if existing_path is not None and existing_path.is_file():
             try:
                 loaded = json.loads(existing_path.read_text(encoding="utf-8"))
                 if isinstance(loaded, dict):
@@ -348,7 +354,7 @@ async def build_one_catalog(
                     "role": "hero",
                     "slot": f"{product_id}-hero",
                     "path": "",
-                    "local_folder": f"media/catalogs/{product_id}",
+                    "local_folder": product_media_relative(product_id),
                     "note": "no photos in folder",
                     "topics": [],
                     "feature_ids": [],
@@ -395,7 +401,8 @@ async def build_one_catalog(
         if isinstance(existing.get("title"), dict) and existing.get("title"):
             data["title"] = existing["title"]
 
-    path = out_dir / f"{product_id}.json"
+    path = product_json_path(knowledge_root, product_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
     # Keep a copy inside the inbox folder too
     (folder / f"{product_id}.catalog.json").write_text(
