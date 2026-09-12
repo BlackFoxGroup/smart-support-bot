@@ -278,6 +278,22 @@ th{{color:var(--muted-fg);font-weight:600;background:var(--muted);position:stick
 .brand-panel{{display:flex;align-items:center;gap:16px}}
 .brand-icon{{width:96px;height:96px;object-fit:cover;border-radius:18px;border:1px solid var(--border);flex:0 0 96px}}
 .contact-brand{{margin-bottom:12px}}
+.install-shell{{max-width:980px;margin:0 auto}}
+.install-head{{padding:20px;background:linear-gradient(135deg,var(--card),var(--primary));border-inline-start:4px solid var(--accent)}}
+.install-head p{{max-width:74ch;margin-bottom:0}}
+.install-grid{{display:grid;grid-template-columns:1fr 1fr;gap:12px}}
+.install-section{{margin:0}}
+.install-section h3{{color:var(--fg);font-size:1rem}}
+.install-section details{{margin-top:12px;border-top:1px solid var(--border);padding-top:10px}}
+.install-section summary{{color:var(--muted-fg);font-weight:600}}
+.install-actions{{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}}
+.install-step{{display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid var(--border);border-radius:6px;background:var(--primary)}}
+.install-step strong{{font-size:14px}}
+.install-step span{{color:var(--muted-fg);font-size:13px;min-height:40px}}
+.install-step button{{width:100%;margin-top:auto}}
+.install-step-number{{display:inline-flex;width:26px;height:26px;align-items:center;justify-content:center;border-radius:50%;background:var(--accent);color:var(--on-accent);font-weight:700}}
+.install-status{{min-height:24px;margin:12px 0 0;color:#BBF7D0}}
+@media(max-width:760px){{.install-grid,.install-actions{{grid-template-columns:1fr}}.install-step span{{min-height:0}}}}
 .form-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:12px 0}}
 .field{{display:flex;flex-direction:column;gap:4px}}
 .field label{{color:var(--muted-fg);font-size:14px;font-weight:600}}
@@ -903,10 +919,9 @@ class Handler(BaseHTTPRequestHandler):
             return
         if path == "/contact":
             install_cmd = (
-                "curl -fsSL https://raw.githubusercontent.com/BlackFoxGroup/"
-                "smart-support-bot/main/deploy/install-manager.sh | sudo bash"
+                "irm https://raw.githubusercontent.com/BlackFoxGroup/"
+                "smart-support-bot/main/deploy/install-suite.ps1 | iex"
             )
-            tunnel_cmd = "ssh -L 8766:127.0.0.1:8766 USER@SERVER"
             body = f"""
 <div class="card">
 <img class="brand-icon contact-brand" src="/expert-icon" alt="Black Fox Group">
@@ -923,7 +938,6 @@ class Handler(BaseHTTPRequestHandler):
 </div>
 <div class="card">
 <h2>{_esc(t(lang,'linux_install'))}</h2><p><code>{_esc(install_cmd)}</code></p>
-<h3>{_esc(t(lang,'ssh_tunnel'))}</h3><p><code>{_esc(tunnel_cmd)}</code></p>
 </div>
 """
             self._page(body, t(lang, "nav_contact"))
@@ -938,28 +952,47 @@ class Handler(BaseHTTPRequestHandler):
                 flash += f"<p class='warn'>{_esc(t(lang, err_key))}</p>"
             body = f"""
 {flash}
-<div class="card">
+<div class="install-shell">
+<div class="card install-head">
 <h2>{_esc(t(lang,'nav_install'))}</h2>
 <p class="guide">{_esc(t(lang,'install_help'))}</p>
+</div>
 <form method="post" action="/api/install-bot" id="suite-install-form">
+<input type="hidden" name="local_path" value="{_esc(str(PROJECT_ROOT))}">
+<div class="install-grid">
+<section class="card install-section">
+<h3>{_esc(t(lang,'install_server_title'))}</h3>
+<p class="stat">{_esc(t(lang,'install_server_help'))}</p>
 <div class="form-grid">
-<div class="field span2"><label>{_esc(t(lang,'install_local'))}</label>{_path_pick('local_path','','local_path',lang)}</div>
 <div class="field"><label>{_esc(t(lang,'host'))}</label><input name="host" required></div>
 <div class="field"><label>{_esc(t(lang,'port'))}</label><input name="port" value="22"></div>
 <div class="field"><label>{_esc(t(lang,'username'))}</label><input name="username" value="root" required></div>
 <div class="field"><label>{_esc(t(lang,'password'))}</label><input name="password" type="password"></div>
-<div class="field span2"><label>{_esc(t(lang,'install_ssh_key'))}</label><textarea name="ssh_key" rows="4"></textarea></div>
+</div>
+<details>
+<summary>{_esc(t(lang,'install_key_option'))}</summary>
+<div class="field"><label>{_esc(t(lang,'install_ssh_key'))}</label><textarea name="ssh_key" rows="4"></textarea></div>
+</details>
+</section>
+<section class="card install-section">
+<h3>{_esc(t(lang,'install_package_title'))}</h3>
+<p class="stat">{_esc(t(lang,'install_package_help'))}</p>
+<div class="form-grid">
+<div class="field span2"><label>{_esc(t(lang,'install_local'))}</label><code class="readonly-path">{_esc(str(PROJECT_ROOT))}</code></div>
 <div class="field span2"><label>{_esc(t(lang,'install_remote'))}</label><code class="readonly-path">/opt/smart-support</code></div>
 <div class="field"><label>{_esc(t(lang,'install_token'))}</label><input name="bot_token" type="password"></div>
-<div class="field span2"><label>{_esc(t(lang,'install_extra_env'))}</label><textarea name="extra_env" rows="4" placeholder="ADMIN_IDS=123&#10;TZ=UTC"></textarea></div>
-<div class="field span2"><label>{_esc(t(lang,'install_extra_pip'))}</label><input name="extra_pip" placeholder="aiogram python-dotenv"></div>
 </div>
-<div class="toolbar">
-<button type="submit" formaction="/api/install-bot" data-wait="{_esc(t(lang,'installing_bot'))}">{_esc(t(lang,'install_bot_button'))}</button>
-<button type="submit" formaction="/api/install-expert" data-wait="{_esc(t(lang,'installing_expert'))}">{_esc(t(lang,'install_expert_button'))}</button>
-<button type="submit" formaction="/api/activate-suite" data-wait="{_esc(t(lang,'activating_suite'))}">{_esc(t(lang,'activate_suite_button'))}</button>
+</section>
 </div>
-<p id="install-progress" class="stat" role="status" aria-live="polite"></p>
+<section class="card install-section">
+<h3>{_esc(t(lang,'install_steps_title'))}</h3>
+<div class="install-actions">
+<div class="install-step"><i class="install-step-number">1</i><strong>{_esc(t(lang,'install_bot_button'))}</strong><span>{_esc(t(lang,'install_bot_help'))}</span><button type="submit" formaction="/api/install-bot" data-wait="{_esc(t(lang,'installing_bot'))}">{_esc(t(lang,'install_bot_button'))}</button></div>
+<div class="install-step"><i class="install-step-number">2</i><strong>{_esc(t(lang,'install_expert_button'))}</strong><span>{_esc(t(lang,'install_expert_help'))}</span><button type="submit" formaction="/api/install-expert" data-wait="{_esc(t(lang,'installing_expert'))}">{_esc(t(lang,'install_expert_button'))}</button></div>
+<div class="install-step"><i class="install-step-number">3</i><strong>{_esc(t(lang,'activate_suite_button'))}</strong><span>{_esc(t(lang,'activate_suite_help'))}</span><button type="submit" formaction="/api/activate-suite" data-wait="{_esc(t(lang,'activating_suite'))}">{_esc(t(lang,'activate_suite_button'))}</button></div>
+</div>
+<p id="install-progress" class="install-status" role="status" aria-live="polite"></p>
+</section>
 </form>
 </div>
 <script>

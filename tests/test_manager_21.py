@@ -392,8 +392,23 @@ class Manager21Tests(unittest.TestCase):
         self.assertEqual(positions, sorted(positions))
         self.assertNotIn('name="remote_dir"', source)
         self.assertNotIn('name="start_cmd"', source)
+        self.assertNotIn('name="extra_env"', source)
+        self.assertNotIn('name="extra_pip"', source)
+        self.assertIn('type="hidden" name="local_path"', source)
         self.assertIn('<code class="readonly-path">/opt/smart-support</code>', source)
+        self.assertIn('class="install-actions"', source)
         self.assertIn('aria-live="polite"', source)
+
+    def test_one_command_installer_covers_local_and_remote_setup(self) -> None:
+        root = Path(__file__).parents[1]
+        script = (root / "deploy" / "install-suite.ps1").read_text(encoding="utf-8")
+        readme = (root / "README.md").read_text(encoding="utf-8")
+        self.assertIn('%LOCALAPPDATA%\\SmartSupport', readme)
+        self.assertIn("install_telegram_bot", script)
+        self.assertIn("install_expert", script)
+        self.assertIn("activate_bot_and_expert", script)
+        self.assertIn('Start-Process "http://127.0.0.1:8766"', script)
+        self.assertIn("deploy/install-suite.ps1 | iex", readme)
 
     def test_public_expert_icon_is_served_by_manager(self) -> None:
         root = Path(__file__).parents[1]

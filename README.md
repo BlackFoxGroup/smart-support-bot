@@ -61,27 +61,22 @@ The package contains the raw source for the bot and Manager. It does not contain
 - A Telegram bot token from `@BotFather`
 - An OpenAI-compatible API endpoint and key when AI features are needed
 
-## Easy Manager installation on Linux
+## One-command setup (recommended)
 
-Run this command as a user with `sudo` access:
+Open PowerShell on Windows and run:
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/BlackFoxGroup/smart-support-bot/main/deploy/install-manager.sh | sudo bash
+```powershell
+irm https://raw.githubusercontent.com/BlackFoxGroup/smart-support-bot/main/deploy/install-suite.ps1 | iex
 ```
 
-The installer places the project in `/opt/smart-support` and starts `smart-support-manager.service` on `127.0.0.1:8766`.
+The installer asks for the Linux server login and Telegram token. It then:
 
-Open it through an SSH tunnel:
+1. saves a local Expert copy in `%LOCALAPPDATA%\SmartSupport`;
+2. installs the bot and Expert together in `/opt/smart-support` on the server;
+3. activates and verifies both services;
+4. opens the local Expert in the browser.
 
-```bash
-ssh -L 8766:127.0.0.1:8766 USER@SERVER
-```
-
-Then open:
-
-```text
-http://127.0.0.1:8766
-```
+Python 3.11 or newer must be installed on Windows. No other terminal command is required.
 
 ## Installing the bot and Manager from the ZIP
 
@@ -89,7 +84,7 @@ http://127.0.0.1:8766
 2. Install Python 3.11 or newer on Windows.
 3. Double-click `Start-Smart-Support-Manager-v2.bat`. The first run installs the required Python packages.
 4. Open the Install bot page.
-5. Select the extracted Smart Support folder and enter the server login and Telegram token.
+5. Enter the server login and Telegram token.
 6. Click Install bot, then Install Expert.
 7. Click Activate bot and Expert.
 
@@ -190,27 +185,22 @@ Smart Support Bot and Manager are maintained by Black Fox Group.
 - توکن ربات تلگرام از `@BotFather`
 - آدرس و کلید سرویس سازگار با OpenAI برای قابلیت‌های هوش مصنوعی
 
-## نصب آسان Manager روی لینوکس
+## نصب کامل با یک دستور
 
-این دستور را با کاربری اجرا کنید که به `sudo` دسترسی دارد:
+پنجره PowerShell را در ویندوز باز کنید و این دستور را اجرا کنید:
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/BlackFoxGroup/smart-support-bot/main/deploy/install-manager.sh | sudo bash
+```powershell
+irm https://raw.githubusercontent.com/BlackFoxGroup/smart-support-bot/main/deploy/install-suite.ps1 | iex
 ```
 
-نصب‌کننده پروژه را در مسیر `/opt/smart-support` قرار می‌دهد. سرویس Manager روی `127.0.0.1:8766` اجرا می‌شود.
+نصب‌کننده اطلاعات ورود سرور لینوکس و توکن تلگرام را می‌پرسد. سپس این کارها را خودکار انجام می‌دهد:
 
-برای بازکردن صفحه Manager یک تونل SSH بسازید:
+۱. یک نسخه محلی Expert را در `%LOCALAPPDATA%\SmartSupport` ذخیره می‌کند.
+۲. ربات و Expert را در مسیر `/opt/smart-support` روی سرور نصب می‌کند.
+۳. هر دو سرویس را فعال و بررسی می‌کند.
+۴. Expert محلی را در مرورگر باز می‌کند.
 
-```bash
-ssh -L 8766:127.0.0.1:8766 USER@SERVER
-```
-
-سپس این نشانی را باز کنید:
-
-```text
-http://127.0.0.1:8766
-```
+پایتون نسخه ۳.۱۱ یا جدیدتر باید روی ویندوز نصب باشد. دستور دیگری لازم نیست.
 
 ## نصب ربات و Manager از فایل ZIP
 
@@ -218,7 +208,7 @@ http://127.0.0.1:8766
 ۲. پایتون نسخه ۳.۱۱ یا جدیدتر را روی ویندوز نصب کنید.
 ۳. روی `Start-Smart-Support-Manager-v2.bat` دوبار کلیک کنید. برنامه در اولین اجرا بسته‌های لازم را نصب می‌کند.
 ۴. صفحه نصب ربات را باز کنید.
-۵. پوشه استخراج‌شده Smart Support، اطلاعات ورود سرور و توکن تلگرام را وارد کنید.
+۵. اطلاعات ورود سرور و توکن تلگرام را وارد کنید.
 ۶. ابتدا «نصب ربات» و بعد «نصب اکسپرت» را بزنید.
 ۷. کلید «فعال‌سازی ربات و اکسپرت» را بزنید.
 
