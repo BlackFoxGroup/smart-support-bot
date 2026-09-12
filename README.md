@@ -1,5 +1,40 @@
 # Smart Support Bot and Manager
+@@ -1,6 +1,40 @@
+# Smart Support Bot — Telegram product support
+<p align="center">
+  <img src="docs/assets/logo.jpg" alt="Black Fox VPN Logo" width="96">
+</p>
 
+Async Telegram support bot (**Smart Support Bot**) for **Black Fox VPN Installer** (ops toolkit).
+<h1 align="center">Smart Support Bot</h1>
+
+<p align="center">
+  <strong>Telegram product support for Black Fox VPN Installer</strong><br>
+  Features · Languages · Catalog · Setup · Deploy · Safety
+</p>
+
+<p align="center">
+  <a href="https://foxnext.net">Website</a> •
+  <a href="https://foxnext.net/downloads/Black-Fox-Config-Builder.apk">Black-Fox-Config-Builder.apk</a> •
+  <a href="https://github.com/balckfoxgroup/blackfox-vpn-installer">Black Fox Vpn Installer</a> •
+  <a href="https://github.com/balckfoxgroup/blackfox-config-builder">Black Fox Config Builder</a> •
+  <a href="https://t.me/blackFoxVPNN">Telegram</a>
+</p>
+
+<div dir="rtl">
+
+ربات **Smart Support Bot** به‌صورت رایگان و متن‌باز (**Open Source**) در اختیار عموم قرار گرفته است تا همه بتوانند آزادانه از آن استفاده کنند و در توسعه و بهبود آن مشارکت داشته باشند.
+
+⭐ اگر این پروژه برای شما مفید است، لطفاً با **Star ⭐ در GitHub** از ادامه این مسیر و توسعه پروژه حمایت کنید. حمایت شما انگیزه‌ای برای ادامه و ساخت پروژه‌های بهتر است.
+
+🦊 همچنین خوشحالیم که به خانواده **Black Fox** پیوسته‌اید. 💖
+امیدواریم در کنار هم بتوانیم پروژه‌های کاربردی و متن‌باز بیشتری توسعه دهیم.
+
+🚀 در کنار Smart Support Bot، می‌توانید از سایر پروژه‌های **Black Fox** نیز دیدن کنید و از آن‌ها استفاده کنید.
+
+**از همراهی و حمایت شما سپاسگزاریم. 🙏**
+
+</div>
 Smart Support Bot is a Telegram support bot that answers product questions from an active catalog. Smart Support Manager 2.1 is the companion interface for creating, editing, publishing, and managing those catalogs with an OpenAI-compatible service.
 
 Both programs use the same product directory on the server:
