@@ -1,4 +1,4 @@
-# VPS to VPN — AI Knowledge Base
+# Black Fox VPN Installer — AI Knowledge Base
 
 > **Language pack:** English (`AI_Knowledge_Base_Multilingual/English/`)  
 > **Siblings:** Persian / Russian / Chinese packs in the same multilingual tree.  
@@ -617,7 +617,7 @@ Full: Connection/Single/Bulk/List/Settings/Contact features per hub release note
 
 | Field | Value |
 |-------|-------|
-| Product | VPS to VPN (+ Android companion) |
+| Product | Black Fox Vpn Installer (+ Android companion) |
 | KB primary language | English |
 | Fact cutoff basis | Repo sources cited above (buildinfo, license-access, version.json, auth/tiers, opstate, unlock, ops, settings, ai/prompt, runtime-config) |
 | Explicit gaps | Marked `NEED_MORE_REVIEW` |

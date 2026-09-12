@@ -11,7 +11,7 @@ DATA = json.loads((ROOT / "_faq_en_parsed.json").read_text(encoding="utf-8"))
 
 # Complete question translations — must match EN Q IDs exactly.
 Q = {
-"Q001": {"fa": "نصب‌کننده Black Fox VPN چیست؟", "ru": "Что такое VPS to VPN?", "zh": "VPS to VPN 是什么？"},
+"Q001": {"fa": "نصب‌کننده Black Fox VPN چیست؟", "ru": "Что такое Black Fox VPN Installer?", "zh": "Black Fox VPN Installer 是什么？"},
 "Q002": {"fa": "آیا Black Fox فورک رابط کاربری پنل 3X-UI است؟", "ru": "Black Fox — это форк UI панели 3X-UI?", "zh": "Black Fox 是 3X-UI 面板界面的分支吗？"},
 "Q003": {"fa": "محصول از چه پلتفرم‌هایی پشتیبانی می‌کند؟", "ru": "Какие платформы поддерживает продукт?", "zh": "产品支持哪些平台？"},
 "Q004": {"fa": "Installer رسمی را از کجا دانلود کنم؟", "ru": "Где скачать официальный Installer?", "zh": "官方 Installer 从哪里下载？"},
