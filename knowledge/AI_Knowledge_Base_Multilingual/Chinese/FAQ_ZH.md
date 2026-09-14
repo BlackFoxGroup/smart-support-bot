@@ -6,7 +6,7 @@
 
 
 ### Q001
-**Question:** Black Fox VPN Installer 是什么？
+**Question:** VPS to VPN 是什么？
 **Answer:** Black Fox 是 Windows Installer，通过 SSH 在您的 VPS 上自动部署 WireGuard 与 3X-UI (Sanaei) Panel，用于多地域 VPN 基建，不是消费级 VPN 客户端。
 **Step by step solution:**
 1. 从 foxnext.net 下载 Setup。

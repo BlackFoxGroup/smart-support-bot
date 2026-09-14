@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$PackageUrl = "https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.1.zip"
+$PackageUrl = "https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.2.zip"
 $InstallDir = Join-Path $env:LOCALAPPDATA "SmartSupport"
 $TempDir = Join-Path $env:TEMP ("smart-support-" + [guid]::NewGuid())
 $ZipPath = Join-Path $TempDir "smart-support-suite.zip"
@@ -29,7 +29,7 @@ try {
     Invoke-WebRequest -UseBasicParsing -Uri $PackageUrl -OutFile $ZipPath
     Expand-Archive -Path $ZipPath -DestinationPath $TempDir -Force
 
-    $SourceDir = Join-Path $TempDir "smart-support-suite-v2.1"
+    $SourceDir = Join-Path $TempDir "smart-support-suite-v2.2"
     if (-not (Test-Path (Join-Path $SourceDir "requirements.txt"))) {
         throw "The downloaded package is invalid."
     }

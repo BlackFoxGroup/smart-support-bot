@@ -51,6 +51,10 @@ from src.knowledge.response_bundle import (
     existing_media_paths,
 )
 from src.knowledge.catalog_search import CatalogSiteSearch, looks_unsure, unsure_handoff
+from src.knowledge.feature_lookup_adapter import (
+    feature_lookup_prompt_block,
+    has_implementation_exists,
+)
 from src.knowledge.intents import IntentMatcher, looks_identity
 from src.knowledge.loader import KnowledgeLoader
 from src.knowledge.product_catalogs import (
@@ -516,6 +520,14 @@ def setup_chat_router(
                 7000,
             )
 
+        
+        # Phase 2: Implementation feature.lookup before Catalog false-negative
+        _impl_pid = ask_product or "vps-to-vpn"
+        if _impl_pid in ("vpn-installer", "vps-to-vpn", "") or not ask_product:
+            _impl_block = feature_lookup_prompt_block(text, product_id="vps-to-vpn")
+            if _impl_block:
+                extra_sources = join_context_blocks([_impl_block, extra_sources], 7500)
+
         history_section = history_blob or "(none)"
         product_scope = (
             f"Product catalog scope: {ask_product}\n"
@@ -679,11 +691,29 @@ def setup_chat_router(
         referred = False
         solved = True
         if looks_unsure(final):
-            handoff = unsure_handoff(lang)
-            if SUPPORT_HANDLE.lower() not in final.lower():
-                final = f"{final.rstrip()}\n\n{handoff}"
-            referred = True
-            solved = False
+            if has_implementation_exists(text, product_id="vps-to-vpn"):
+                from src.knowledge.feature_lookup_adapter import feature_lookup as _fl
+
+                hit = _fl(query=text, product_id="vps-to-vpn")
+                notes = (hit.get("notes") or "").strip()
+                if (lang or "").startswith("fa"):
+                    final = (
+                        "بر اساس کد محصول (Implementation)، این قابلیت وجود دارد (EXISTS).\n"
+                        + notes[:1200]
+                    )
+                else:
+                    final = (
+                        "Per product Implementation, this capability EXISTS.\n"
+                        + notes[:1200]
+                    )
+                referred = False
+                solved = True
+            else:
+                handoff = unsure_handoff(lang)
+                if SUPPORT_HANDLE.lower() not in final.lower():
+                    final = f"{final.rstrip()}\n\n{handoff}"
+                referred = True
+                solved = False
         else:
             final = sanitize_reply_links(final, text)
             if SUPPORT_HANDLE.lower() in final.lower():

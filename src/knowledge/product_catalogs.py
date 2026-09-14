@@ -595,6 +595,42 @@ def list_all_product_dicts(knowledge_root: Path) -> list[dict[str, Any]]:
     return out
 
 
+def product_stub_data(
+    product_id: str,
+    *,
+    title: str,
+    emoji: str = "📦",
+    summary: str = "",
+    menu_order: int = 10,
+) -> dict[str, Any]:
+    pid = slugify_product_id(product_id or title)
+    title_map = _lang_map(title or pid)
+    summary_map = _lang_map(summary or title or pid)
+    return {
+        "schema_version": 1,
+        "catalog_id": pid,
+        "product_id": pid,
+        "enabled": True,
+        "menu_order": int(menu_order),
+        "menu_emoji": (emoji or "📦").strip() or "📦",
+        "title": title_map,
+        "short_summary": summary_map,
+        "long_summary": summary_map,
+        "features": [],
+        "does_not": {code: [] for code in SUPPORTED},
+        "keywords": [title or pid],
+        "media": [],
+        "support": {},
+        "ai_training_text": "",
+        "catalog_sources": {
+            "site": {"value": "", "use": False},
+            "channel": {"value": "", "use": False},
+            "group": {"value": "", "use": False},
+        },
+        "operator_materials": [],
+    }
+
+
 def create_product_stub(
     knowledge_root: Path,
     *,
@@ -618,31 +654,9 @@ def create_product_stub(
     if order is None:
         existing = load_product_catalogs(knowledge_root)
         order = (max((p.menu_order for p in existing), default=0) + 10) if existing else 10
-    title_map = _lang_map(title)
-    summary_map = _lang_map(summary or title)
-    data = {
-        "schema_version": 1,
-        "catalog_id": pid,
-        "product_id": pid,
-        "enabled": True,
-        "menu_order": int(order),
-        "menu_emoji": (emoji or "📦").strip() or "📦",
-        "title": title_map,
-        "short_summary": summary_map,
-        "long_summary": summary_map,
-        "features": [],
-        "does_not": {code: [] for code in SUPPORTED},
-        "keywords": [title],
-        "media": [],
-        "support": {},
-        "ai_training_text": "",
-        "catalog_sources": {
-            "site": {"value": "", "use": False},
-            "channel": {"value": "", "use": False},
-            "group": {"value": "", "use": False},
-        },
-        "operator_materials": [],
-    }
+    data = product_stub_data(
+        pid, title=title, emoji=emoji, summary=summary, menu_order=int(order)
+    )
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     ensure_product_asset_dirs(knowledge_root.parent, knowledge_root, pid)
     load_product_catalogs(knowledge_root)
@@ -724,6 +738,14 @@ def delete_product(knowledge_root: Path, product_id: str) -> bool:
         if path.is_file():
             path.unlink()
             removed = True
+    root = product_root(knowledge_root, product_id)
+    if root.is_dir():
+        shutil.rmtree(root, ignore_errors=True)
+        removed = True
+    versions = knowledge_root / "source_catalog" / "versions" / slugify_product_id(product_id)
+    if versions.is_dir():
+        shutil.rmtree(versions, ignore_errors=True)
+        removed = True
     load_product_catalogs(knowledge_root)
     if removed:
         from src.knowledge.refresh import notify_knowledge_changed

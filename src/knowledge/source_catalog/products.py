@@ -144,6 +144,7 @@ def product_maps(
                 "images": str(img) if img else "Missing",
                 "server_media": f"/opt/smart-support/products/{pid}",
                 "registered": True,
+                "enabled": bool(row.get("enabled", True)),
             }
         )
     root = pic_root(project_root)
@@ -162,6 +163,7 @@ def product_maps(
                     "images": str(child),
                     "server_media": "",
                     "registered": False,
+                    "enabled": False,
                     "status": "unregistered",
                 }
             )

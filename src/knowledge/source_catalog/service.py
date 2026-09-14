@@ -10,6 +10,7 @@ from src.knowledge.product_catalogs import (
     get_product,
     list_all_product_dicts,
     load_product_catalogs,
+    slugify_product_id,
     update_product_fields,
 )
 from src.knowledge.source_catalog.classify import classify_filename
@@ -334,6 +335,113 @@ def save_product_paths(data_dir: Path, product_id: str, source: str, images: str
     if display:
         aliases[" ".join(display.lower().replace("-", " ").split())] = product_id
     save_registry(data_dir, {"aliases": aliases, "paths": paths})
+
+
+def product_storage_path(product_id: str) -> str:
+    pid = slugify_product_id(product_id)
+    return f"/opt/smart-support/products/{pid}"
+
+
+def register_product(
+    knowledge_root: Path,
+    data_dir: Path,
+    product_id: str,
+    source: str,
+    images: str,
+    display: str = "",
+) -> dict[str, Any]:
+    """Create or update a product on the live server, then keep a local working copy."""
+    from src.knowledge.source_catalog.sftp_conn import create_product_on_server, session_status
+
+    pid = slugify_product_id(product_id)
+    if not pid:
+        return {"ok": False, "error": "missing id"}
+    if not session_status().get("connected"):
+        return {"ok": False, "error": "not connected", "product_id": pid}
+    remote = create_product_on_server(
+        data_dir,
+        knowledge_root,
+        product_id=pid,
+        title=(display or pid).strip() or pid,
+        summary=(display or pid).strip() or pid,
+    )
+    if not remote.get("ok"):
+        return {
+            "ok": False,
+            "created": False,
+            "product_id": pid,
+            "storage_path": product_storage_path(pid),
+            "error": str(remote.get("error") or "server create failed"),
+        }
+    save_product_paths(data_dir, pid, source, images, display=display)
+    return {
+        "ok": True,
+        "created": bool(remote.get("created")),
+        "product_id": pid,
+        "storage_path": product_storage_path(pid),
+        "error": "",
+    }
+
+
+def toggle_product_visibility(
+    knowledge_root: Path,
+    data_dir: Path,
+    product_id: str,
+) -> dict[str, Any]:
+    from src.knowledge.product_catalogs import load_product_raw, update_product_fields
+    from src.knowledge.source_catalog.sftp_conn import (
+        mark_catalog_cache_current,
+        push_catalog_json_to_bot,
+        session_status,
+    )
+
+    pid = slugify_product_id(product_id)
+    if not pid:
+        return {"ok": False, "error": "missing id"}
+    if not session_status().get("connected"):
+        return {"ok": False, "error": "not connected"}
+    raw = load_product_raw(knowledge_root, pid) or {}
+    enabled = not bool(raw.get("enabled", True))
+    try:
+        update_product_fields(knowledge_root, pid, enabled=enabled)
+    except FileNotFoundError:
+        return {"ok": False, "error": "catalog missing", "product_id": pid}
+    pushed = push_catalog_json_to_bot(data_dir, knowledge_root, pid, restart=True)
+    if pushed.get("ok"):
+        mark_catalog_cache_current()
+    return {
+        "ok": bool(pushed.get("ok")),
+        "enabled": enabled,
+        "product_id": pid,
+        "error": "" if pushed.get("ok") else str(pushed.get("error") or "publish failed"),
+    }
+
+
+def remove_product(
+    knowledge_root: Path,
+    data_dir: Path,
+    product_id: str,
+) -> dict[str, Any]:
+    from src.knowledge.source_catalog.sftp_conn import delete_product_on_server, session_status
+
+    pid = slugify_product_id(product_id)
+    if not pid:
+        return {"ok": False, "error": "missing id"}
+    if not session_status().get("connected"):
+        return {"ok": False, "error": "not connected"}
+    return delete_product_on_server(data_dir, knowledge_root, pid)
+
+
+def sync_products(data_dir: Path, knowledge_root: Path) -> dict[str, Any]:
+    from src.knowledge.source_catalog.sftp_conn import ensure_remote_catalogs, session_status
+
+    if not session_status().get("connected"):
+        return {"ok": False, "error": "not connected", "ids": []}
+    pulled = ensure_remote_catalogs(data_dir, knowledge_root, force=True)
+    if not pulled.get("ok"):
+        return pulled
+    load_product_catalogs(knowledge_root)
+    return pulled
 
 
 def build_ai_catalog(project_root: Path, knowledge_root: Path, data_dir: Path, product_id: str) -> dict[str, Any]:

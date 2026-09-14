@@ -281,6 +281,144 @@ class Manager21Tests(unittest.TestCase):
         ).read_text(encoding="utf-8")
         self.assertNotIn("name='server_media'", app_source)
         self.assertIn("t(lang,'auto_catalog')", app_source)
+        self.assertIn("/api/sync-products", app_source)
+        self.assertIn("t(lang,'sync_products')", app_source)
+        self.assertIn("id='new-storage'", app_source)
+        self.assertIn("connect_first_catalog", app_source)
+        self.assertIn('href=\'/settings\'', app_source)
+        self.assertIn("/api/delete-product", app_source)
+        self.assertIn("/api/toggle-product", app_source)
+        self.assertIn("button.info", app_source)
+        self.assertIn("button.ink", app_source)
+        self.assertIn("path-head", app_source)
+        self.assertIn("delete_product_confirm", app_source)
+        self.assertIn("ensure_remote_catalogs", app_source)
+        self.assertNotIn("pull_remote_catalogs(DATA_DIR, KNOWLEDGE_ROOT)", app_source)
+
+    def test_register_product_requires_server_and_creates_there(self) -> None:
+        from src.knowledge.source_catalog.service import product_storage_path, register_product
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            knowledge = root / "knowledge"
+            knowledge.mkdir()
+            data = root / "data"
+            with patch(
+                "src.knowledge.source_catalog.sftp_conn.session_status",
+                return_value={"connected": False},
+            ):
+                offline = register_product(knowledge, data, "New Camera", "", "", "Camera")
+            self.assertFalse(offline["ok"])
+            self.assertEqual(offline["error"], "not connected")
+            self.assertFalse((root / "products" / "new-camera" / "catalog.json").exists())
+            with (
+                patch(
+                    "src.knowledge.source_catalog.sftp_conn.session_status",
+                    return_value={"connected": True},
+                ),
+                patch(
+                    "src.knowledge.source_catalog.sftp_conn.create_product_on_server",
+                    return_value={"ok": True, "created": True, "product_id": "new-camera"},
+                ),
+            ):
+                out = register_product(knowledge, data, "New Camera", "", "", "Camera")
+            self.assertTrue(out["ok"])
+            self.assertTrue(out["created"])
+            self.assertEqual(out["storage_path"], "/opt/smart-support/products/new-camera")
+            self.assertEqual(product_storage_path("New Camera"), "/opt/smart-support/products/new-camera")
+
+    def test_toggle_and_remove_product_need_server(self) -> None:
+        from src.knowledge.product_catalogs import delete_product, product_stub_data, save_product_raw
+        from src.knowledge.source_catalog.service import remove_product, toggle_product_visibility
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            knowledge = root / "knowledge"
+            knowledge.mkdir()
+            data = root / "data"
+            save_product_raw(knowledge, "demo", product_stub_data("demo", title="Demo"))
+            with patch(
+                "src.knowledge.source_catalog.sftp_conn.session_status",
+                return_value={"connected": False},
+            ):
+                self.assertFalse(toggle_product_visibility(knowledge, data, "demo")["ok"])
+                self.assertFalse(remove_product(knowledge, data, "demo")["ok"])
+            with (
+                patch(
+                    "src.knowledge.source_catalog.sftp_conn.session_status",
+                    return_value={"connected": True},
+                ),
+                patch(
+                    "src.knowledge.source_catalog.sftp_conn.push_catalog_json_to_bot",
+                    return_value={"ok": True},
+                ),
+            ):
+                out = toggle_product_visibility(knowledge, data, "demo")
+            self.assertTrue(out["ok"])
+            self.assertFalse(out["enabled"])
+            with (
+                patch(
+                    "src.knowledge.source_catalog.sftp_conn.session_status",
+                    return_value={"connected": True},
+                ),
+                patch(
+                    "src.knowledge.source_catalog.sftp_conn.delete_product_on_server",
+                    return_value={"ok": True, "product_id": "demo"},
+                ) as mocked,
+            ):
+                gone = remove_product(knowledge, data, "demo")
+            self.assertTrue(gone["ok"])
+            mocked.assert_called_once()
+            self.assertTrue((root / "products" / "demo" / "catalog.json").is_file())
+            self.assertTrue(delete_product(knowledge, "demo"))
+            self.assertFalse((root / "products" / "demo").exists())
+
+    def test_save_product_label_and_maps_include_enabled(self) -> None:
+        from src.manager.i18n import t
+        from src.knowledge.source_catalog.products import product_maps
+        from src.knowledge.product_catalogs import product_stub_data, save_product_raw
+
+        self.assertEqual(t("fa", "edit_row"), "ذخیره محصول")
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            knowledge = root / "knowledge"
+            knowledge.mkdir()
+            save_product_raw(knowledge, "cam", product_stub_data("cam", title="Cam"))
+            maps = product_maps(root, knowledge, root / "data")
+            self.assertTrue(maps[0]["enabled"])
+            self.assertTrue(maps[0]["registered"])
+
+    def test_catalog_cache_skips_repeat_server_load(self) -> None:
+        from src.knowledge.source_catalog.sftp_conn import (
+            clear_catalog_cache,
+            ensure_remote_catalogs,
+        )
+
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            knowledge = root / "knowledge"
+            knowledge.mkdir()
+            data = root / "data"
+            clear_catalog_cache()
+            with (
+                patch(
+                    "src.knowledge.source_catalog.sftp_conn.session_status",
+                    return_value={"connected": True, "host": "example"},
+                ),
+                patch(
+                    "src.knowledge.source_catalog.sftp_conn.pull_remote_catalogs",
+                    return_value={"ok": True, "ids": ["demo"]},
+                ) as pulled,
+            ):
+                first = ensure_remote_catalogs(data, knowledge)
+                second = ensure_remote_catalogs(data, knowledge)
+                forced = ensure_remote_catalogs(data, knowledge, force=True)
+            self.assertTrue(first["ok"])
+            self.assertTrue(second.get("cached"))
+            self.assertEqual(pulled.call_count, 2)
+            self.assertTrue(forced["ok"])
+            self.assertFalse(forced.get("cached"))
+            clear_catalog_cache()
 
     def test_stop_all_cancels_existing_work_but_allows_new_work(self) -> None:
         begin_operation()

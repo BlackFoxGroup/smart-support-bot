@@ -178,6 +178,32 @@ _SFTP_IO_LOCK = threading.RLock()
 _SESS: dict[str, Any] = {"client": None, "sftp": None, "host": ""}
 _LOCAL_SESSION_ENABLED = threading.Event()
 _LOCAL_SESSION_ENABLED.set()
+_CATALOG_CACHE_LOCK = threading.Lock()
+_CATALOG_CACHE: dict[str, Any] = {"loaded": False, "host": ""}
+
+
+def clear_catalog_cache() -> None:
+    with _CATALOG_CACHE_LOCK:
+        _CATALOG_CACHE["loaded"] = False
+        _CATALOG_CACHE["host"] = ""
+
+
+def mark_catalog_cache_current() -> None:
+    status = session_status()
+    if not status.get("connected"):
+        clear_catalog_cache()
+        return
+    with _CATALOG_CACHE_LOCK:
+        _CATALOG_CACHE["loaded"] = True
+        _CATALOG_CACHE["host"] = str(status.get("host") or "")
+
+
+def catalog_cache_ready() -> bool:
+    status = session_status()
+    if not status.get("connected"):
+        return False
+    with _CATALOG_CACHE_LOCK:
+        return bool(_CATALOG_CACHE["loaded"] and _CATALOG_CACHE["host"] == str(status.get("host") or ""))
 
 
 def ssh_ready(data_dir: Path) -> bool:
@@ -253,6 +279,7 @@ def disconnect_session() -> None:
             obj.close()
         except Exception:
             pass
+    clear_catalog_cache()
 
 
 def _live_sftp(data_dir: Path):
@@ -495,6 +522,231 @@ def _pull_remote_catalogs_unlocked(
 
     load_product_catalogs(knowledge_root)
     return {"ok": True, "ids": ids}
+
+
+def _write_local_catalog(knowledge_root: Path, pid: str, payload: str) -> None:
+    from src.knowledge.product_catalogs import load_product_catalogs, product_json_path
+
+    local = product_json_path(knowledge_root, pid)
+    local.parent.mkdir(parents=True, exist_ok=True)
+    (local.parent / "media").mkdir(exist_ok=True)
+    local.write_text(payload, encoding="utf-8")
+    load_product_catalogs(knowledge_root)
+    mark_catalog_cache_current()
+
+
+def ensure_remote_catalogs(
+    data_dir: Path,
+    knowledge_root: Path,
+    *,
+    force: bool = False,
+) -> dict[str, Any]:
+    """Load catalogs from the server once per live session, then reuse the local copy."""
+    status = session_status()
+    if not status.get("connected"):
+        clear_catalog_cache()
+        return {"ok": False, "error": "not connected", "ids": []}
+    if not force and catalog_cache_ready():
+        from src.knowledge.product_catalogs import load_product_catalogs
+
+        loaded = load_product_catalogs(knowledge_root)
+        return {"ok": True, "cached": True, "ids": [item.product_id for item in loaded]}
+    pulled = pull_remote_catalogs(data_dir, knowledge_root)
+    if pulled.get("ok"):
+        mark_catalog_cache_current()
+    return pulled
+
+
+def create_product_on_server(
+    data_dir: Path,
+    knowledge_root: Path,
+    *,
+    product_id: str,
+    title: str,
+    summary: str = "",
+) -> dict[str, Any]:
+    with _SFTP_IO_LOCK:
+        return _create_product_on_server_unlocked(
+            data_dir,
+            knowledge_root,
+            product_id=product_id,
+            title=title,
+            summary=summary,
+        )
+
+
+def _create_product_on_server_unlocked(
+    data_dir: Path,
+    knowledge_root: Path,
+    *,
+    product_id: str,
+    title: str,
+    summary: str = "",
+) -> dict[str, Any]:
+    """Create the product catalog on the live server, then refresh the local copy."""
+    import json
+    import tempfile
+
+    from src.knowledge.product_catalogs import product_stub_data, slugify_product_id
+
+    pid = slugify_product_id(product_id)
+    if not pid:
+        return {"ok": False, "error": "missing id"}
+    if not session_status().get("connected"):
+        return {"ok": False, "error": "not connected"}
+    payload = json.dumps(
+        product_stub_data(pid, title=title or pid, summary=summary or title or pid),
+        ensure_ascii=False,
+        indent=2,
+    ) + "\n"
+    local_root = _local_bot_root()
+    if local_root is not None:
+        destination = local_root / "products" / pid / "catalog.json"
+        created = not destination.is_file()
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        (destination.parent / "media").mkdir(exist_ok=True)
+        if created:
+            destination.write_text(payload, encoding="utf-8")
+            _write_local_catalog(knowledge_root, pid, payload)
+        else:
+            mark_catalog_cache_current()
+        if created:
+            restart = _restart_local_bot()
+            if not restart.get("ok"):
+                return {"ok": False, "error": restart.get("error") or "bot restart failed", "product_id": pid}
+        return {"ok": True, "created": created, "product_id": pid, "local": True}
+    sftp, _settings = _live_sftp(data_dir)
+    with _SESS_LOCK:
+        client = _SESS.get("client")
+    if sftp is None or client is None:
+        return {"ok": False, "error": "not connected"}
+    remote_dir = f"{remote_install_root(data_dir)}/products/{pid}"
+    remote = f"{remote_dir}/catalog.json"
+    created = False
+    try:
+        sftp.stat(remote)
+    except (FileNotFoundError, OSError):
+        created = True
+    temp = remote + ".uploading"
+    try:
+        _mkdirs(sftp, f"{remote_dir}/media")
+        if created:
+            handle = tempfile.NamedTemporaryFile("w", encoding="utf-8", suffix=".json", delete=False)
+            try:
+                handle.write(payload)
+                handle.close()
+                sftp.put(handle.name, temp)
+            finally:
+                Path(handle.name).unlink(missing_ok=True)
+            try:
+                sftp.posix_rename(temp, remote)
+            except (AttributeError, OSError):
+                try:
+                    sftp.remove(remote)
+                except OSError:
+                    pass
+                sftp.rename(temp, remote)
+        if created:
+            _stdin, stdout, stderr = client.exec_command(
+                "systemctl restart smart-support-bot.service && "
+                "systemctl is-active smart-support-bot.service",
+                timeout=30,
+            )
+            code = stdout.channel.recv_exit_status()
+            state = stdout.read().decode("utf-8", "replace").strip()
+            error = stderr.read().decode("utf-8", "replace").strip()
+            if code != 0 or state != "active":
+                return {"ok": False, "error": error or state or "bot restart failed", "product_id": pid}
+        if created:
+            _write_local_catalog(knowledge_root, pid, payload)
+        else:
+            mark_catalog_cache_current()
+        return {"ok": True, "created": created, "product_id": pid}
+    except Exception as exc:  # noqa: BLE001
+        return {"ok": False, "error": _classify_error(exc), "product_id": pid}
+
+
+def delete_product_on_server(
+    data_dir: Path,
+    knowledge_root: Path,
+    product_id: str,
+) -> dict[str, Any]:
+    with _SFTP_IO_LOCK:
+        return _delete_product_on_server_unlocked(data_dir, knowledge_root, product_id)
+
+
+def _purge_local_product(knowledge_root: Path, data_dir: Path, pid: str) -> None:
+    from src.knowledge.product_catalogs import delete_product
+    from src.knowledge.source_catalog.products import load_registry, save_registry
+
+    delete_product(knowledge_root, pid)
+    reg = load_registry(data_dir)
+    paths = dict(reg.get("paths") or {})
+    if pid in paths:
+        paths.pop(pid, None)
+        save_registry(data_dir, {**reg, "paths": paths})
+
+
+def _delete_product_on_server_unlocked(
+    data_dir: Path,
+    knowledge_root: Path,
+    product_id: str,
+) -> dict[str, Any]:
+    import shlex
+    import shutil
+
+    from src.knowledge.product_catalogs import slugify_product_id
+
+    pid = slugify_product_id(product_id)
+    if not pid:
+        return {"ok": False, "error": "missing id"}
+    if not session_status().get("connected"):
+        return {"ok": False, "error": "not connected"}
+    local_root = _local_bot_root()
+    if local_root is not None:
+        for folder in (
+            local_root / "products" / pid,
+            local_root / "knowledge" / "source_catalog" / "versions" / pid,
+        ):
+            if folder.is_dir():
+                shutil.rmtree(folder, ignore_errors=True)
+        restart = _restart_local_bot()
+        _purge_local_product(knowledge_root, data_dir, pid)
+        mark_catalog_cache_current()
+        if not restart.get("ok"):
+            return {"ok": False, "error": restart.get("error") or "bot restart failed", "product_id": pid}
+        return {"ok": True, "product_id": pid, "local": True}
+    sftp, _settings = _live_sftp(data_dir)
+    with _SESS_LOCK:
+        client = _SESS.get("client")
+    if sftp is None or client is None:
+        return {"ok": False, "error": "not connected"}
+    root = remote_install_root(data_dir)
+    remote_dir = f"{root}/products/{pid}"
+    versions = f"{root}/knowledge/source_catalog/versions/{pid}"
+    cmd = f"rm -rf -- {shlex.quote(remote_dir)} {shlex.quote(versions)}"
+    try:
+        _stdin, stdout, stderr = client.exec_command(cmd, timeout=30)
+        code = stdout.channel.recv_exit_status()
+        error = stderr.read().decode("utf-8", "replace").strip()
+        if code != 0:
+            return {"ok": False, "error": error or "remote delete failed", "product_id": pid}
+        _stdin, stdout, stderr = client.exec_command(
+            "systemctl restart smart-support-bot.service && "
+            "systemctl is-active smart-support-bot.service",
+            timeout=30,
+        )
+        code = stdout.channel.recv_exit_status()
+        state = stdout.read().decode("utf-8", "replace").strip()
+        error = stderr.read().decode("utf-8", "replace").strip()
+        if code != 0 or state != "active":
+            _purge_local_product(knowledge_root, data_dir, pid)
+            return {"ok": False, "error": error or state or "bot restart failed", "product_id": pid}
+        _purge_local_product(knowledge_root, data_dir, pid)
+        mark_catalog_cache_current()
+        return {"ok": True, "product_id": pid}
+    except Exception as exc:  # noqa: BLE001
+        return {"ok": False, "error": _classify_error(exc), "product_id": pid}
 
 
 def push_catalog_json_to_bot(

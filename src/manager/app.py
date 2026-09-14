@@ -42,7 +42,7 @@ from src.knowledge.source_catalog.sftp_conn import (
     load_sftp_settings,
     publish_catalog_to_bot,
     push_catalog_json_to_bot,
-    pull_remote_catalogs,
+    ensure_remote_catalogs,
     save_sftp_settings,
     session_status,
     sync_remote_ai,
@@ -344,6 +344,10 @@ button,input[type=submit],a.btn{{background:var(--accent);color:var(--on-accent)
 .guide.keys li{{margin:4px 0}}
 button.ghost,a.ghost{{background:var(--secondary);color:var(--on-primary)}}
 button.danger,a.danger{{background:var(--danger);color:#fff}}
+button.info,a.info{{background:#0EA5E9;color:#0F172A}}
+button.ink,a.ink{{background:#111;color:#fff}}
+.path-head .guide{{max-width:none;width:100%;box-sizing:border-box;margin:0}}
+.prodcard .toolbar{{flex-wrap:wrap}}
 button:hover,a.btn:hover{{filter:brightness(1.06)}}
 .toolbar{{display:flex;flex-wrap:nowrap;gap:8px;align-items:center;margin:12px 0}}
 .media-bar{{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;box-sizing:border-box;margin:16px 0;padding-inline:24px}}
@@ -606,6 +610,8 @@ class Handler(BaseHTTPRequestHandler):
         self.send_response(code)
         self.send_header("Content-Type", ctype)
         self.send_header("Content-Length", str(len(data)))
+        if ctype.startswith("text/html"):
+            self.send_header("Cache-Control", "no-store")
         self.end_headers()
         self.wfile.write(data)
 
@@ -619,6 +625,26 @@ class Handler(BaseHTTPRequestHandler):
 
     def _page(self, body: str, title: str | None = None) -> None:
         self._send(_html(body, lang=self._lang() or "en", title=title))
+
+    def _server_workspace(self, lang: str, title: str) -> bool:
+        if session_status().get("connected"):
+            pulled = ensure_remote_catalogs(DATA_DIR, KNOWLEDGE_ROOT)
+            if pulled.get("ok"):
+                return True
+            self._page(
+                f"<div class='card'><h2>{_esc(title)}</h2>"
+                f"<p class='warn'>{_esc(t(lang,'err_sync_products'))}</p>"
+                f"<a class='btn' href='/settings'>{_esc(t(lang,'go_settings'))}</a></div>",
+                title,
+            )
+            return False
+        self._page(
+            f"<div class='card'><h2>{_esc(title)}</h2>"
+            f"<p class='warn'>{_esc(t(lang,'connect_first_catalog'))}</p>"
+            f"<a class='btn' href='/settings'>{_esc(t(lang,'go_settings'))}</a></div>",
+            title,
+        )
+        return False
 
     def do_GET(self) -> None:  # noqa: N802
         u = urlparse(self.path)
@@ -652,6 +678,11 @@ class Handler(BaseHTTPRequestHandler):
             )
             return
         if path.startswith("/run/"):
+            if not session_status().get("connected"):
+                self._redir(
+                    f"/products?id={quote(pid)}&err=err_offline" if pid else "/products?err=err_offline"
+                )
+                return
             action = path.split("/")[2]
             try:
                 ok, err = execute_action(action, pid)
@@ -679,6 +710,16 @@ class Handler(BaseHTTPRequestHandler):
             self._send(icon.read_bytes(), 200, "image/jpeg")
             return
         dash = service.dashboard(PROJECT_ROOT, KNOWLEDGE_ROOT, DATA_DIR)
+        workspace_titles = {
+            "/products": t(lang, "nav_products"),
+            "/catalog": t(lang, "nav_catalog"),
+            "/catalog-photos": t(lang, "nav_cat_photos"),
+            "/media": t(lang, "nav_media"),
+        }
+        if path in workspace_titles:
+            if not self._server_workspace(lang, workspace_titles[path]):
+                return
+            dash = service.dashboard(PROJECT_ROOT, KNOWLEDGE_ROOT, DATA_DIR)
         if path == "/":
             cards = []
             for p in dash["products"]:
@@ -717,43 +758,75 @@ class Handler(BaseHTTPRequestHandler):
                 flash += f"<p class='ok'>{_esc(t(lang, msg_key) if msg_key.startswith('ok_') else msg_key)}</p>"
             if err_key:
                 flash += f"<p class='warn'>{_esc(t(lang, err_key) if err_key.startswith('err_') else err_key)}</p>"
+            sync_bar = (
+                f"<form method='post' action='/api/sync-products' class='busy-form toolbar'>"
+                f"<button class='info' type='submit' data-wait='{_esc(t(lang,'syncing_products'))}'>"
+                f"{_esc(t(lang,'sync_products'))}</button></form>"
+            )
             map_cards = []
             for m in dash.get("maps") or []:
                 src = "" if m.get("source") == "Missing" else (m.get("source") or "")
                 imgs = "" if m.get("images") == "Missing" else (m.get("images") or "")
                 st = t(lang, "registered") if m.get("registered") else t(lang, "unregistered")
+                pid_esc = _esc(m.get("product_id"))
+                live = bool(m.get("enabled", True))
+                extra = ""
+                if m.get("registered"):
+                    extra = (
+                        f"<p class='stat'>{_esc(t(lang,'product_on' if live else 'product_off'))}</p>"
+                        f"<div class='toolbar'>"
+                        f"<form method='post' action='/api/toggle-product' class='busy-form'>"
+                        f"<input type='hidden' name='id' value='{pid_esc}'>"
+                        f"<button class='ink' type='submit'>{_esc(t(lang,'toggle_product'))}</button></form>"
+                        f"<form method='post' action='/api/delete-product' class='busy-form' "
+                        f"onsubmit='return confirm({json.dumps(t(lang,'delete_product_confirm'))})'>"
+                        f"<input type='hidden' name='id' value='{pid_esc}'>"
+                        f"<button class='danger' type='submit'>{_esc(t(lang,'delete'))}</button></form>"
+                        f"</div>"
+                    )
                 map_cards.append(
                     f"<div class='card prodcard'><h2>{_esc(m.get('display') or m.get('product_id'))}</h2>"
                     f"<p class='stat'>{_esc(st)}</p>"
                     f"<form method='post' action='/api/paths'>"
-                    f"<input type='hidden' name='id' value='{_esc(m.get('product_id'))}'>"
+                    f"<input type='hidden' name='id' value='{pid_esc}'>"
                     "<div class='form-grid'>"
-                    f"<div class='field'><label>{t(lang,'col_id')}</label><input value='{_esc(m.get('product_id'))}' disabled></div>"
-                    f"<div class='field'><label for='d-{_esc(m.get('product_id'))}'>{t(lang,'display')}</label>"
-                    f"<input id='d-{_esc(m.get('product_id'))}' name='display' value='{_esc(m.get('display'))}'></div>"
-                    f"<div class='field span2'><label for='s-{_esc(m.get('product_id'))}'>{t(lang,'col_source')}</label>"
+                    f"<div class='field'><label>{t(lang,'col_id')}</label><input value='{pid_esc}' disabled></div>"
+                    f"<div class='field'><label for='d-{pid_esc}'>{t(lang,'display')}</label>"
+                    f"<input id='d-{pid_esc}' name='display' value='{_esc(m.get('display'))}'></div>"
+                    f"<div class='field span2'><label for='s-{pid_esc}'>{t(lang,'col_source')}</label>"
                     f"{_path_pick('source', src, 's-'+str(m.get('product_id')), lang)}</div>"
-                    f"<div class='field span2'><label for='i-{_esc(m.get('product_id'))}'>{t(lang,'col_images')}</label>"
+                    f"<div class='field span2'><label for='i-{pid_esc}'>{t(lang,'col_images')}</label>"
                     f"{_path_pick('images', imgs, 'i-'+str(m.get('product_id')), lang)}</div>"
                     f"<div class='field span2'><label>{t(lang,'storage_path')}</label>"
                     f"<code class='readonly-path'>{_esc(m.get('server_media'))}</code></div>"
                     f"</div><div class='toolbar'><button>{t(lang,'edit_row')}</button>"
-                    f"<a class='btn ghost' href='/products?id={_esc(m.get('product_id'))}'>{_esc(t(lang,'auto_catalog'))}</a></div></form></div>"
+                    f"<a class='btn ghost' href='/products?id={pid_esc}'>{_esc(t(lang,'auto_catalog'))}</a></div></form>"
+                    f"{extra}</div>"
                 )
             save_card = (
                 f"<div class='card'><h2>{t(lang,'save_map')}</h2>"
+                f"<p class='stat'>{_esc(t(lang,'save_map_help'))}</p>"
                 f"<form method='post' action='/api/paths'>"
                 "<div class='form-grid'>"
-                f"<div class='field'><label for='newid'>{t(lang,'col_id')}</label><input id='newid' name='id'></div>"
+                f"<div class='field'><label for='newid'>{t(lang,'col_id')}</label><input id='newid' name='id' required></div>"
                 f"<div class='field'><label for='newdisp'>{t(lang,'display')}</label><input id='newdisp' name='display'></div>"
                 f"<div class='field span2'><label for='newsrc'>{t(lang,'col_source')}</label>{_path_pick('source','','newsrc',lang)}</div>"
                 f"<div class='field span2'><label for='newimg'>{t(lang,'col_images')}</label>{_path_pick('images','','newimg',lang)}</div>"
-                f"</div><button>{t(lang,'save_map')}</button></form></div>"
+                f"<div class='field span2'><label>{t(lang,'storage_path')}</label>"
+                f"<code id='new-storage' class='readonly-path'>/opt/smart-support/products/…</code></div>"
+                f"</div><button>{t(lang,'save_map')}</button></form>"
+                "<script>"
+                "(()=>{const id=document.getElementById('newid');const out=document.getElementById('new-storage');"
+                "if(!id||!out)return;const slug=v=>((v||'').trim().toLowerCase().replace(/[^\\w\\u0600-\\u06ff]+/g,'-')"
+                ".replace(/-+/g,'-').replace(/^-|-$/g,'').replace(/[^a-z0-9-]+/g,'')||'');"
+                "const draw=()=>{out.textContent='/opt/smart-support/products/'+(slug(id.value)||'…');};"
+                "id.addEventListener('input',draw);draw();})();"
+                "</script></div>"
             )
             self._page(
                 flash
-                + f"<div class='card'><h2>{_esc(t(lang,'path_map'))}</h2>"
-                f"<p class='guide'>{_esc(t(lang,'source_help'))}</p></div>"
+                + f"<div class='card path-head'><h2>{_esc(t(lang,'path_map'))}</h2>"
+                f"<p class='guide'>{_esc(t(lang,'source_help'))}</p>{sync_bar}</div>"
                 + f"<div class='pair-grid'>{''.join(map_cards)}{save_card}</div>",
                 t(lang, "nav_products"),
             )
@@ -1504,6 +1577,18 @@ b.disabled=false;b.removeAttribute('aria-busy');toast(txt.textContent,failed===0
             "/api/to-catalog",
             "/api/analyze-send",
             "/api/ingest",
+            "/api/paths",
+            "/api/sync-products",
+            "/api/delete-product",
+            "/api/toggle-product",
+            "/api/scan",
+            "/api/map",
+            "/api/map-decide",
+            "/api/delete",
+            "/api/delete-force",
+            "/api/keep",
+            "/api/process-queue",
+            "/api/ingest-loose",
         }
         if u in catalog_mutations and not session_status().get("connected"):
             if (self.headers.get("X-Stay") or "") == "1":
@@ -1515,13 +1600,16 @@ b.disabled=false;b.removeAttribute('aria-busy');toast(txt.textContent,failed===0
                     "application/json",
                 )
                 return
+            if u in {
+                "/api/paths",
+                "/api/sync-products",
+                "/api/delete-product",
+                "/api/toggle-product",
+            }:
+                self._redir("/products?err=err_offline")
+                return
             self._redir(f"/catalog?id={quote(pid)}&err=err_offline")
             return
-        if u in catalog_mutations and u not in {"/api/to-catalog", "/api/analyze-send"}:
-            pulled = pull_remote_catalogs(DATA_DIR, KNOWLEDGE_ROOT)
-            if not pulled.get("ok"):
-                self._redir(f"/catalog?id={quote(pid)}&err=err_catalog_publish")
-                return
         try:
             if u == "/api/toggle":
                 page = service.product_page(PROJECT_ROOT, KNOWLEDGE_ROOT, DATA_DIR, pid)
@@ -2003,7 +2091,7 @@ b.disabled=false;b.removeAttribute('aria-busy');toast(txt.textContent,failed===0
             elif u == "/api/connect":
                 result = connect_session(DATA_DIR)
                 if result.get("ok"):
-                    pulled = pull_remote_catalogs(DATA_DIR, KNOWLEDGE_ROOT)
+                    pulled = ensure_remote_catalogs(DATA_DIR, KNOWLEDGE_ROOT, force=True)
                     append_history(
                         DATA_DIR,
                         "_manager",
@@ -2046,21 +2134,64 @@ b.disabled=false;b.removeAttribute('aria-busy');toast(txt.textContent,failed===0
             elif u == "/api/disconnect":
                 disconnect_session()
                 loc = "/settings?msg=ok_disconnect"
+            elif u == "/api/sync-products":
+                out = service.sync_products(DATA_DIR, KNOWLEDGE_ROOT)
+                append_history(
+                    DATA_DIR,
+                    "_manager",
+                    {
+                        "action": "sync_products",
+                        "result": "ok" if out.get("ok") else "FAILED",
+                        "source_section": "products",
+                    },
+                )
+                loc = "/products?msg=ok_sync_products" if out.get("ok") else "/products?err=err_sync_products"
+            elif u == "/api/delete-product":
+                out = service.remove_product(KNOWLEDGE_ROOT, DATA_DIR, pid)
+                append_history(
+                    DATA_DIR,
+                    pid,
+                    {
+                        "action": "delete_product",
+                        "result": "ok" if out.get("ok") else "FAILED",
+                        "source_section": "products",
+                    },
+                )
+                loc = "/products?msg=ok_product_deleted" if out.get("ok") else "/products?err=err_product_delete"
+            elif u == "/api/toggle-product":
+                out = service.toggle_product_visibility(KNOWLEDGE_ROOT, DATA_DIR, pid)
+                append_history(
+                    DATA_DIR,
+                    pid,
+                    {
+                        "action": "toggle_product",
+                        "result": "ok" if out.get("ok") else "FAILED",
+                        "source_section": "products",
+                    },
+                )
+                loc = "/products?msg=ok_product_toggled" if out.get("ok") else "/products?err=err_product_toggle"
             elif u == "/api/paths":
-                service.save_product_paths(
+                out = service.register_product(
+                    KNOWLEDGE_ROOT,
                     DATA_DIR,
                     pid,
                     (form.get("source") or [""])[0],
                     (form.get("images") or [""])[0],
-                    (form.get("server_media") or [""])[0],
                     (form.get("display") or [""])[0],
                 )
                 append_history(
                     DATA_DIR,
-                    pid,
-                    {"action": "save_product_paths", "result": "ok", "source_section": "products"},
+                    out.get("product_id") or pid,
+                    {
+                        "action": "register_product",
+                        "result": "ok" if out.get("ok") else "FAILED",
+                        "source_section": "products",
+                    },
                 )
-                loc = "/products?msg=saved_ok"
+                if out.get("ok"):
+                    loc = "/products?msg=ok_product_add" if out.get("created") else "/products?msg=saved_ok"
+                else:
+                    loc = "/products?err=err_product_add"
             elif u == "/api/map-decide":
                 feats = [x.strip() for x in ((form.get("features") or [""])[0]).split(",") if x.strip()]
                 apply_mapping_decision(
