@@ -60,7 +60,9 @@ The package is **raw source + empty `products/` template + `ai_profile` support*
 Product Ask AI works from each product’s `catalog.json` + `ai_profile.json` alone.
 
 
-## Product AI profile (`ai_profile.json`)
+## Product AI profile (ai_profile.json)
+
+Persian section title below: «پروفایل هوش مصنوعی محصول».
 
 Each product folder includes a small `ai_profile.json` next to `catalog.json`. It tells Ask AI how to answer for **that product only**: stay in product scope, prefer catalog howtos, attach linked catalog photos when available, answer in the question’s language, and use optional aliases for paraphrased questions.
 
@@ -198,11 +200,19 @@ Smart Support Bot and Manager are maintained by Black Fox Group.
 این بسته **سورس خام + قالب خالی `products/` + پشتیبانی `ai_profile`** است و **کاتالوگ محصولات بلک‌فاکس (یا هر فروشندهٔ دیگر) داخل آن نیست**. پایگاه‌های آمادهٔ دانش هوش مصنوعی بلک‌فاکس (`AI_Knowledge_Base_Multilingual` و `AI_BOT_DATABASE`) و فایل‌های رسانه‌ای/اسکرین‌شات محصولات داخل بسته نیستند (رسانه از طریق Expert/Manager اضافه می‌شود). هیچ رمز، توکن، کلید API، نشانی سرور، نام کاربری، اطلاعات کاربران یا فایل نشست تلگرام داخل آن قرار ندارد. Ask AI محصول فقط با `catalog.json` و `ai_profile.json` همان محصول کار می‌کند.
 
 
-## پروفایل هوش مصنوعی محصول (`ai_profile.json`)
+## پروفایل هوش مصنوعی محصول (ai_profile.json)
 
-کنار هر `catalog.json` یک فایل سبک `ai_profile.json` هم هست. این فایل فقط برای **همان محصول** به Ask AI می‌گوید: داخل محدودهٔ محصول بماند، از howto کاتالوگ استفاده کند، در صورت وجود عکس مرتبط بفرستد، به زبان سؤال جواب دهد، و در صورت نیاز از alias برای سؤال‌های پارافریز استفاده کند.
+معادل انگلیسی این بخش: Product AI profile.
 
-Expert/Manager هنگام افزودن، ذخیره یا فعال‌سازی کاتالوگ این فایل را خودکار می‌سازد. برای پاسخ پشتیبانی محصول به پایگاه‌های مشترک دانش هوش مصنوعی بلک‌فاکس نیاز نیست.
+کنار هر `catalog.json` یک فایل سبک به نام `ai_profile.json` قرار می‌گیرد. این فایل فقط برای **همان محصول** به بخش «سؤال از AI» می‌گوید:
+
+- داخل محدودهٔ همان محصول بماند
+- از متن‌های آموزشی (howto) کاتالوگ استفاده کند
+- اگر عکس مرتبط در کاتالوگ باشد، آن را بفرستد
+- به زبان خود سؤال جواب دهد
+- در صورت نیاز از نام‌های جایگزین (alias) برای سؤال‌های پارافریز استفاده کند
+
+برنامهٔ Expert / Manager هنگام افزودن، ذخیره یا فعال‌سازی کاتالوگ این فایل را خودکار می‌سازد. برای پاسخ پشتیبانی محصول، به پایگاه‌های مشترک دانش هوش مصنوعی بلک‌فاکس نیاز نیست.
 
 ## پیش‌نیازها
 

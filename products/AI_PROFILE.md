@@ -1,28 +1,15 @@
-# Per-product AI profile
+# Product AI profile / پروفایل هوش مصنوعی محصول
 
-Each product folder may include `ai_profile.json` next to `catalog.json`.
+## English
 
-Canonical path: `products/<product_id>/ai_profile.json`
+File: `products/<product-id>/ai_profile.json`
 
-Ask AI (product-scoped) loads this file for reply rules and paraphrase aliases.
-It does **not** require `knowledge/AI_BOT_DATABASE` or `knowledge/AI_Knowledge_Base_Multilingual`.
+Small per-product settings for Ask AI (scope, howto, media, language, aliases).
+Expert/Manager creates it automatically when you add, save, or activate a catalog.
 
-Minimal schema:
+## فارسی
 
-```json
-{
-  "schema_version": 1,
-  "product_id": "vpn-installer",
-  "reply_rules": {
-    "stay_in_product": true,
-    "use_howto": true,
-    "attach_catalog_media": true,
-    "language_from_question": true
-  },
-  "aliases": { "fa": [], "en": [] },
-  "notes": "optional short support notes for AI"
-}
-```
+فایل: `products/<product-id>/ai_profile.json`
 
-Manager auto-creates a default profile when a catalog is created/saved/activated if the file is missing.
-Media screenshots are optional and added via Expert/Manager (not required in the public source zip).
+تنظیمات سبک مخصوص همان محصول برای «سؤال از AI» (محدودهٔ محصول، howto، عکس، زبان جواب، alias).
+Expert / Manager هنگام افزودن، ذخیره یا فعال‌سازی کاتالوگ این فایل را خودکار می‌سازد.
