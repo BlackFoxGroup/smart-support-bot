@@ -898,6 +898,53 @@ def retrieve_catalog_context(
     if dominant_cluster:
         for slot in _CLUSTER_PRIMARY_SLOTS.get(dominant_cluster, ()):
             wanted_slots.add(slot)
+    # Language-independent catalog feature match wins over RAG token/embedding ties
+    # (e.g. EN "install" tied with backup alphabetically → wrong Backup screenshot).
+    if pid_filter:
+        from src.knowledge.product_catalogs import match_feature_for_query as _match_feat_media
+
+        _fh = _match_feat_media(query, lang=lang, product_id=pid_filter)
+        if _fh is not None:
+            _cat_m, _feat_m, _ = _fh
+            _fid = str(_feat_m.get("id") or "").strip()
+            _slot = str(_feat_m.get("media_slot") or "").strip()
+            _related = [
+                str(x).strip()
+                for x in (_feat_m.get("related_media_slots") or [])
+                if str(x).strip()
+            ]
+            if _fid:
+                wanted_feats = {_fid}
+                wanted_slots = set()
+                if _slot:
+                    wanted_slots.add(_slot)
+                for s in _related:
+                    wanted_slots.add(s)
+                matched = next(
+                    (
+                        u
+                        for u in (features + list(evidence))
+                        if _fid in (u.feature_ids or [])
+                    ),
+                    None,
+                )
+                if matched is None:
+                    matched = CatalogUnit(
+                        kind="feature",
+                        product_id=pid_filter,
+                        unit_id=f"feature:{pid_filter}:{_fid}",
+                        title=_fid,
+                        body="",
+                        search_blob=_fid,
+                        feature_ids=[_fid],
+                        media_slots=list(wanted_slots),
+                        score=99.0,
+                    )
+                else:
+                    matched.media_slots = list(wanted_slots) or list(
+                        matched.media_slots or []
+                    )
+                dominant_feats = [matched]
     # Topology only when explicitly asked
     qn = _norm(search_query)
     if "topology" not in qn and "توپولوژی" not in qn and "view mesh" not in qn:

@@ -1,0 +1,362 @@
+{
+  "schema_version": 2,
+  "catalog_id": "telegram-bot-expert-installer",
+  "product_id": "telegram-bot-expert-installer",
+  "enabled": true,
+  "menu_emoji": "🧰",
+  "menu_order": 20,
+  "updated_at": "2026-09-15T00:10:26Z",
+  "title": {
+    "fa": "Telegram Bot Expert Installer",
+    "en": "Telegram Bot Expert Installer",
+    "ru": "Telegram Bot Expert Installer",
+    "zh": "Telegram Bot Expert Installer"
+  },
+  "short_summary": {
+    "fa": "با Expert Installer ربات تلگرام را نصب، چک، بکاپ و مدیریت می‌کنی؛ بدون درگیری با سرور لینوکس خام.",
+    "en": "Expert Installer helps you install, check, back up and manage the Telegram bot without raw Linux work.",
+    "ru": "Expert Installer helps you install, check, back up and manage the Telegram bot without raw Linux work.",
+    "zh": "Expert Installer helps you install, check, back up and manage the Telegram bot without raw Linux work."
+  },
+  "long_summary": {
+    "fa": "با Telegram Bot Expert Installer ربات را نصب، چک، بکاپ و مدیریت می‌کنی. هر کلید کاتالوگ توضیح می‌دهد آن بخش چیست و چطور از همان صفحه استفاده کنی؛ عکس واقعی همان صفحه هم برای Ask AI وصل است.",
+    "en": "Telegram Bot Expert Installer helps you install, check, back up and manage the bot. Each catalog key explains what that section is and how to use it on that screen; real screenshots are linked for Ask AI.",
+    "ru": "Telegram Bot Expert Installer covers dashboard, install, health check, backup, logs and uninstall. Each section has a real screenshot so Ask AI can send the matching photo when users ask.",
+    "zh": "Telegram Bot Expert Installer covers dashboard, install, health check, backup, logs and uninstall. Each section has a real screenshot so Ask AI can send the matching photo when users ask."
+  },
+  "keywords": {
+    "fa": [
+      "اکسپرت",
+      "نصب ربات",
+      "expert installer",
+      "تلگرام",
+      "بکاپ ربات",
+      "لاگ ربات"
+    ],
+    "en": [
+      "expert installer",
+      "telegram bot",
+      "install bot",
+      "backup",
+      "logs",
+      "health check"
+    ]
+  },
+  "does_not": {
+    "fa": "جای فروش لایسنس VPS to VPN یا ساخت کانفیگ Config Builder نیست.",
+    "en": "It is not the VPS to VPN license store or Config Builder.",
+    "ru": "It is not the VPS to VPN license store or Config Builder.",
+    "zh": "It is not the VPS to VPN license store or Config Builder."
+  },
+  "support": {
+    "fa": "برای پرسش های بیشتر از گزینه «سوال از AI» استفاده کنید.",
+    "en": "For more questions, use Ask AI.",
+    "ru": "Use Ask AI scoped to this product.",
+    "zh": "Use Ask AI scoped to this product."
+  },
+  "features": [
+    {
+      "id": "languages",
+      "emoji": "🌐",
+      "title": {
+        "fa": "زبان‌های پشتیبانی‌شده",
+        "en": "Supported languages",
+        "ru": "Supported languages",
+        "zh": "Supported languages"
+      },
+      "media_slot": "",
+      "howto": {
+        "fa": "هدف طراحی: بدانی Expert Installer با چهار زبان فارسی، انگلیسی، روسی و چینی کار می‌کند.\nعملکرد: از منوی زبان یا تنظیمات زبان یکی را انتخاب کن؛ متن‌های داشبورد و بخش‌ها همان لحظه عوض می‌شوند. اگر زبان اشتباه ماند یک‌بار برنامه را ببند و دوباره باز کن.",
+        "en": "Design goal: Know Expert Installer supports Persian, English, Russian, and Chinese.\nBehavior: Pick a language from the language menu or settings; dashboard and section text switch right away. If it sticks, close and reopen the app once.",
+        "ru": "Design goal: Know Expert Installer supports Persian, English, Russian, and Chinese.\nBehavior: Pick a language from the language menu or settings; dashboard and section text switch right away. If it sticks, close and reopen the app once.",
+        "zh": "Design goal: Know Expert Installer supports Persian, English, Russian, and Chinese.\nBehavior: Pick a language from the language menu or settings; dashboard and section text switch right away. If it sticks, close and reopen the app once."
+      },
+      "summary": {
+        "fa": "زبان‌های رابط: فارسی، انگلیسی، روسی، چینی — از تنظیمات زبان عوض کن.",
+        "en": "UI languages: FA / EN / RU / ZH — change in language settings.",
+        "ru": "UI languages: FA / EN / RU / ZH — change in language settings.",
+        "zh": "UI languages: FA / EN / RU / ZH — change in language settings."
+      }
+    },
+    {
+      "id": "dashboard",
+      "title": {
+        "fa": "داشبورد",
+        "en": "Dashboard",
+        "ru": "Dashboard",
+        "zh": "Dashboard"
+      },
+      "media_slot": "dashboard",
+      "howto": {
+        "fa": "هدف طراحی: از یک صفحه، وضعیت ربات و میانبر کارهای اصلی را ببینی.\nعملکرد: Expert Installer را باز کن تا داشبورد بیاید. از همین‌جا به نصب، بررسی سلامت، بکاپ، لاگ و حذف نصب برو. قبل از کار جدید، یک نگاه به وضعیت کلی ربات بینداز.",
+        "en": "Design goal: See bot status and shortcuts to main tasks on one screen.\nBehavior: Open Expert Installer to land on the dashboard. From here open install, health check, backup, logs, or uninstall. Glance at overall status before starting a new change.",
+        "ru": "Design goal: See bot status and shortcuts to main tasks on one screen.\nBehavior: Open Expert Installer to land on the dashboard. From here open install, health check, backup, logs, or uninstall. Glance at overall status before starting a new change.",
+        "zh": "Design goal: See bot status and shortcuts to main tasks on one screen.\nBehavior: Open Expert Installer to land on the dashboard. From here open install, health check, backup, logs, or uninstall. Glance at overall status before starting a new change."
+      },
+      "summary": {
+        "fa": "صفحه اصلی Expert: وضعیت ربات و ورود به نصب، سلامت، بکاپ، لاگ و حذف.",
+        "en": "Expert home: bot status and entry to install, health, backup, logs, uninstall.",
+        "ru": "Expert home: bot status and entry to install, health, backup, logs, uninstall.",
+        "zh": "Expert home: bot status and entry to install, health, backup, logs, uninstall."
+      },
+      "emoji": "📊"
+    },
+    {
+      "id": "install_bot",
+      "title": {
+        "fa": "نصب ربات",
+        "en": "Install bot",
+        "ru": "Install bot",
+        "zh": "Install bot"
+      },
+      "media_slot": "install-bot",
+      "howto": {
+        "fa": "هدف طراحی: ربات تلگرام را بدون کار دستی روی لینوکس خام بالا بیاوری.\nعملکرد: کلید نصب ربات را بزن، مسیر/تنظیمات خواسته‌شده را پر کن و مراحل را تا پایان دنبال کن. بعد از اتمام، از بررسی سلامت مطمئن شو سرویس بالا است؛ اگر گیر کرد لاگ همان مرحله را بخوان.",
+        "en": "Design goal: Bring up the Telegram bot without raw Linux handwork.\nBehavior: Tap Install bot, fill the requested path/settings, and finish every step. Then use Health check to confirm the service is up; if it stalls, read the log for that step.",
+        "ru": "Design goal: Bring up the Telegram bot without raw Linux handwork.\nBehavior: Tap Install bot, fill the requested path/settings, and finish every step. Then use Health check to confirm the service is up; if it stalls, read the log for that step.",
+        "zh": "Design goal: Bring up the Telegram bot without raw Linux handwork.\nBehavior: Tap Install bot, fill the requested path/settings, and finish every step. Then use Health check to confirm the service is up; if it stalls, read the log for that step."
+      },
+      "summary": {
+        "fa": "نصب و راه‌اندازی ربات تلگرام با ویزارد Expert، بدون لینوکس خام.",
+        "en": "Install and start the Telegram bot via Expert wizard, without raw Linux.",
+        "ru": "Install and start the Telegram bot via Expert wizard, without raw Linux.",
+        "zh": "Install and start the Telegram bot via Expert wizard, without raw Linux."
+      },
+      "emoji": "📥",
+      "related_media_slots": [
+        "health-check"
+      ]
+    },
+    {
+      "id": "health_check",
+      "title": {
+        "fa": "بررسی سلامت",
+        "en": "Health check",
+        "ru": "Health check",
+        "zh": "Health check"
+      },
+      "media_slot": "health-check",
+      "howto": {
+        "fa": "هدف طراحی: بفهمی سرویس ربات سالم است یا کجا خطا دارد.\nعملکرد: بررسی سلامت را اجرا کن و نتیجه OK/هشدار/خطا را بخوان. اگر خطا بود همان پیام را نگه دار، بعد به لاگ‌ها سر بزن یا نصب را دوباره چک کن؛ برای سوال دقیق‌تر «سوال از AI» را بزن.",
+        "en": "Design goal: Tell whether the bot service is healthy or where it fails.\nBehavior: Run Health check and read OK / warning / error. Keep the error text, then open Logs or recheck Install; for a guided answer, tap Ask AI.",
+        "ru": "Design goal: Tell whether the bot service is healthy or where it fails.\nBehavior: Run Health check and read OK / warning / error. Keep the error text, then open Logs or recheck Install; for a guided answer, tap Ask AI.",
+        "zh": "Design goal: Tell whether the bot service is healthy or where it fails.\nBehavior: Run Health check and read OK / warning / error. Keep the error text, then open Logs or recheck Install; for a guided answer, tap Ask AI."
+      },
+      "summary": {
+        "fa": "چک سلامت سرویس ربات؛ نتیجه را ببین و در صورت خطا به لاگ برو.",
+        "en": "Check bot service health; on error, open Logs next.",
+        "ru": "Check bot service health; on error, open Logs next.",
+        "zh": "Check bot service health; on error, open Logs next."
+      },
+      "emoji": "💚"
+    },
+    {
+      "id": "backup",
+      "title": {
+        "fa": "بکاپ",
+        "en": "Backup",
+        "ru": "Backup",
+        "zh": "Backup"
+      },
+      "media_slot": "backup",
+      "howto": {
+        "fa": "هدف طراحی: قبل از تغییر بزرگ، از تنظیمات و داده ربات نسخه داشته باشی.\nعملکرد: بکاپ را بزن و فایل/مسیر ذخیره‌شده را یادداشت کن. قبل از آپدیت، حذف نصب یا دستکاری تنظیمات حتماً یک بکاپ تازه بگیر؛ برای برگرداندن، همان بکاپ را از همین بخش بازیابی کن.",
+        "en": "Design goal: Keep a copy of bot settings/data before big changes.\nBehavior: Run Backup and note where the file was saved. Take a fresh backup before update, uninstall, or config edits; restore that backup from this same section when needed.",
+        "ru": "Design goal: Keep a copy of bot settings/data before big changes.\nBehavior: Run Backup and note where the file was saved. Take a fresh backup before update, uninstall, or config edits; restore that backup from this same section when needed.",
+        "zh": "Design goal: Keep a copy of bot settings/data before big changes.\nBehavior: Run Backup and note where the file was saved. Take a fresh backup before update, uninstall, or config edits; restore that backup from this same section when needed."
+      },
+      "summary": {
+        "fa": "پشتیبان‌گیری و بازیابی تنظیمات/داده ربات قبل از تغییر بزرگ.",
+        "en": "Back up and restore bot settings/data before big changes.",
+        "ru": "Back up and restore bot settings/data before big changes.",
+        "zh": "Back up and restore bot settings/data before big changes."
+      },
+      "emoji": "💾"
+    },
+    {
+      "id": "logs",
+      "title": {
+        "fa": "لاگ‌ها",
+        "en": "Logs",
+        "ru": "Logs",
+        "zh": "Logs"
+      },
+      "media_slot": "logs",
+      "howto": {
+        "fa": "هدف طراحی: علت خطا را از لاگ واقعی ببینی، نه با حدس.\nعملکرد: لاگ‌ها را باز کن و آخرین خطوط مربوط به زمان خطا را بخوان. اگر برای پشتیبانی می‌فرستی، همان بازه زمانی را کپی کن؛ برای فهمیدن معنی خطا، متن را در «سوال از AI» بپرس.",
+        "en": "Design goal: Find the real cause from logs, not guesses.\nBehavior: Open Logs and read the latest lines around the failure time. If you send them to support, copy that time window; to understand an error line, paste it into Ask AI.",
+        "ru": "Design goal: Find the real cause from logs, not guesses.\nBehavior: Open Logs and read the latest lines around the failure time. If you send them to support, copy that time window; to understand an error line, paste it into Ask AI.",
+        "zh": "Design goal: Find the real cause from logs, not guesses.\nBehavior: Open Logs and read the latest lines around the failure time. If you send them to support, copy that time window; to understand an error line, paste it into Ask AI."
+      },
+      "summary": {
+        "fa": "مشاهده لاگ واقعی برای پیدا کردن علت خطا.",
+        "en": "Read real logs to find the cause of errors.",
+        "ru": "Read real logs to find the cause of errors.",
+        "zh": "Read real logs to find the cause of errors."
+      },
+      "emoji": "📜"
+    },
+    {
+      "id": "uninstall",
+      "title": {
+        "fa": "حذف نصب",
+        "en": "Uninstall",
+        "ru": "Uninstall",
+        "zh": "Uninstall"
+      },
+      "media_slot": "uninstall",
+      "howto": {
+        "fa": "هدف طراحی: ربات را تمیز از سیستم برداری تا سرویس و فایل‌های نصب نمانند.\nعملکرد: اول از بخش بکاپ یک نسخه بگیر، بعد حذف نصب را شروع کن و مراحل را تا تأیید نهایی برو. پس از حذف، یک‌بار بررسی سلامت/وضعیت سرویس را چک کن که چیزی باقی نمانده باشد.",
+        "en": "Design goal: Remove the bot cleanly so service and install files are gone.\nBehavior: Take a Backup first, then start Uninstall and finish every confirm step. Afterward, check Health/status once to be sure nothing is left running.",
+        "ru": "Design goal: Remove the bot cleanly so service and install files are gone.\nBehavior: Take a Backup first, then start Uninstall and finish every confirm step. Afterward, check Health/status once to be sure nothing is left running.",
+        "zh": "Design goal: Remove the bot cleanly so service and install files are gone.\nBehavior: Take a Backup first, then start Uninstall and finish every confirm step. Afterward, check Health/status once to be sure nothing is left running."
+      },
+      "summary": {
+        "fa": "حذف تمیز ربات از سیستم؛ قبلش بکاپ بگیر.",
+        "en": "Cleanly remove the bot; take a backup first.",
+        "ru": "Cleanly remove the bot; take a backup first.",
+        "zh": "Cleanly remove the bot; take a backup first."
+      },
+      "emoji": "🗑️"
+    },
+    {
+      "id": "contact",
+      "title": {
+        "fa": "تماس Expert Installer",
+        "en": "Expert Installer contact",
+        "ru": "Expert Installer contact",
+        "zh": "Expert Installer contact"
+      },
+      "media_slot": "contact",
+      "howto": {
+        "fa": "هدف طراحی: راه ارتباط با تیم پشتیبانی Expert را دم دست داشته باشی.\nعملکرد: از این صفحه کانال‌های تماس را باز کن. برای پرسش‌های بیشتر درباره همین محصول از گزینه «سوال از AI» استفاده کنید.",
+        "en": "Design goal: Keep Expert support contact paths handy.\nBehavior: Open the contact channels from this screen. For more questions about this product, use Ask AI.",
+        "ru": "Design goal: Keep Expert support contact paths handy.\nBehavior: Open the contact channels from this screen. For more questions about this product, use Ask AI.",
+        "zh": "Design goal: Keep Expert support contact paths handy.\nBehavior: Open the contact channels from this screen. For more questions about this product, use Ask AI."
+      },
+      "summary": {
+        "fa": "راه‌های تماس پشتیبانی Expert؛ سوال بیشتر با «سوال از AI».",
+        "en": "Expert support contacts; more questions via Ask AI.",
+        "ru": "Expert support contacts; more questions via Ask AI.",
+        "zh": "Expert support contacts; more questions via Ask AI."
+      },
+      "emoji": "📞"
+    }
+  ],
+  "media": [
+    {
+      "role": "hero",
+      "slot": "dashboard",
+      "path": "products/telegram-bot-expert-installer/media/01-dashboard.png",
+      "local_folder": "products/telegram-bot-expert-installer/media",
+      "note": "اسکرین داشبورد Expert Installer",
+      "ai_guide": "اسکرین داشبورد Expert Installer — وقتی کاربر درباره این بخش پرسید همین عکس را بفرست.",
+      "feature_ids": [
+        "dashboard"
+      ],
+      "topics": [
+        "dashboard",
+        "telegram bot expert installer",
+        "expert installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "install-bot",
+      "path": "products/telegram-bot-expert-installer/media/02-install-bot.png",
+      "local_folder": "products/telegram-bot-expert-installer/media",
+      "note": "نصب ربات از Expert Installer",
+      "ai_guide": "نصب ربات از Expert Installer — وقتی کاربر درباره این بخش پرسید همین عکس را بفرست.",
+      "feature_ids": [
+        "install_bot"
+      ],
+      "topics": [
+        "install bot",
+        "telegram bot expert installer",
+        "expert installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "health-check",
+      "path": "products/telegram-bot-expert-installer/media/03-health-check.png",
+      "local_folder": "products/telegram-bot-expert-installer/media",
+      "note": "بررسی سلامت ربات",
+      "ai_guide": "بررسی سلامت ربات — وقتی کاربر درباره این بخش پرسید همین عکس را بفرست.",
+      "feature_ids": [
+        "health_check"
+      ],
+      "topics": [
+        "health check",
+        "telegram bot expert installer",
+        "expert installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "backup",
+      "path": "products/telegram-bot-expert-installer/media/04-backup.png",
+      "local_folder": "products/telegram-bot-expert-installer/media",
+      "note": "بکاپ ربات",
+      "ai_guide": "بکاپ ربات — وقتی کاربر درباره این بخش پرسید همین عکس را بفرست.",
+      "feature_ids": [
+        "backup"
+      ],
+      "topics": [
+        "backup",
+        "telegram bot expert installer",
+        "expert installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "logs",
+      "path": "products/telegram-bot-expert-installer/media/05-logs.png",
+      "local_folder": "products/telegram-bot-expert-installer/media",
+      "note": "لاگ‌های ربات",
+      "ai_guide": "لاگ‌های ربات — وقتی کاربر درباره این بخش پرسید همین عکس را بفرست.",
+      "feature_ids": [
+        "logs"
+      ],
+      "topics": [
+        "logs",
+        "telegram bot expert installer",
+        "expert installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "uninstall",
+      "path": "products/telegram-bot-expert-installer/media/06-uninstall.png",
+      "local_folder": "products/telegram-bot-expert-installer/media",
+      "note": "حذف نصب ربات",
+      "ai_guide": "حذف نصب ربات — وقتی کاربر درباره این بخش پرسید همین عکس را بفرست.",
+      "feature_ids": [
+        "uninstall"
+      ],
+      "topics": [
+        "uninstall",
+        "telegram bot expert installer",
+        "expert installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "contact",
+      "path": "products/telegram-bot-expert-installer/media/07-contact.png",
+      "local_folder": "products/telegram-bot-expert-installer/media",
+      "note": "صفحه تماس و پشتیبانی",
+      "ai_guide": "صفحه تماس و پشتیبانی — وقتی کاربر درباره این بخش پرسید همین عکس را بفرست.",
+      "feature_ids": [
+        "contact"
+      ],
+      "topics": [
+        "contact",
+        "telegram bot expert installer",
+        "expert installer"
+      ]
+    }
+  ],
+  "catalog_enabled": true,
+  "ai_training_text": "Catalog teaching for Telegram Bot Expert Installer ONLY.\nWhen the user asks how to use a section, answer as a tutor: what it is, what it is for, ordered steps, one tip.\nUse the howto blocks below. Do not invent steps not listed here.\n\n## languages — زبان‌های پشتیبانی‌شده / Supported languages\nهدف طراحی: بدانی Expert Installer با چهار زبان فارسی، انگلیسی، روسی و چینی کار می‌کند.\nعملکرد: از منوی زبان یا تنظیمات زبان یکی را انتخاب کن؛ متن‌های داشبورد و بخش‌ها همان لحظه عوض می‌شوند. اگر زبان اشتباه ماند یک‌بار برنامه را ببند و دوباره باز کن.\nDesign goal: Know Expert Installer supports Persian, English, Russian, and Chinese.\nBehavior: Pick a language from the language menu or settings; dashboard and section text switch right away. If it sticks, close and reopen the app once.\n\n## dashboard — داشبورد / Dashboard\nهدف طراحی: از یک صفحه، وضعیت ربات و میانبر کارهای اصلی را ببینی.\nعملکرد: Expert Installer را باز کن تا داشبورد بیاید. از همین‌جا به نصب، بررسی سلامت، بکاپ، لاگ و حذف نصب برو. قبل از کار جدید، یک نگاه به وضعیت کلی ربات بینداز.\nDesign goal: See bot status and shortcuts to main tasks on one screen.\nBehavior: Open Expert Installer to land on the dashboard. From here open install, health check, backup, logs, or uninstall. Glance at overall status before starting a new change.\n\n## install_bot — نصب ربات / Install bot\nهدف طراحی: ربات تلگرام را بدون کار دستی روی لینوکس خام بالا بیاوری.\nعملکرد: کلید نصب ربات را بزن، مسیر/تنظیمات خواسته‌شده را پر کن و مراحل را تا پایان دنبال کن. بعد از اتمام، از بررسی سلامت مطمئن شو سرویس بالا است؛ اگر گیر کرد لاگ همان مرحله را بخوان.\nDesign goal: Bring up the Telegram bot without raw Linux handwork.\nBehavior: Tap Install bot, fill the requested path/settings, and finish every step. Then use Health check to confirm the service is up; if it stalls, read the log for that step.\n\n## health_check — بررسی سلامت / Health check\nهدف طراحی: بفهمی سرویس ربات سالم است یا کجا خطا دارد.\nعملکرد: بررسی سلامت را اجرا کن و نتیجه OK/هشدار/خطا را بخوان. اگر خطا بود همان پیام را نگه دار، بعد به لاگ‌ها سر بزن یا نصب را دوباره چک کن؛ برای سوال دقیق‌تر «سوال از AI» را بزن.\nDesign goal: Tell whether the bot service is healthy or where it fails.\nBehavior: Run Health check and read OK / warning / error. Keep the error text, then open Logs or recheck Install; for a guided answer, tap Ask AI.\n\n## backup — بکاپ / Backup\nهدف طراحی: قبل از تغییر بزرگ، از تنظیمات و داده ربات نسخه داشته باشی.\nعملکرد: بکاپ را بزن و فایل/مسیر ذخیره‌شده را یادداشت کن. قبل از آپدیت، حذف نصب یا دستکاری تنظیمات حتماً یک بکاپ تازه بگیر؛ برای برگرداندن، همان بکاپ را از همین بخش بازیابی کن.\nDesign goal: Keep a copy of bot settings/data before big changes.\nBehavior: Run Backup and note where the file was saved. Take a fresh backup before update, uninstall, or config edits; restore that backup from this same section when needed.\n\n## logs — لاگ‌ها / Logs\nهدف طراحی: علت خطا را از لاگ واقعی ببینی، نه با حدس.\nعملکرد: لاگ‌ها را باز کن و آخرین خطوط مربوط به زمان خطا را بخوان. اگر برای پشتیبانی می‌فرستی، همان بازه زمانی را کپی کن؛ برای فهمیدن معنی خطا، متن را در «سوال از AI» بپرس.\nDesign goal: Find the real cause from logs, not guesses.\nBehavior: Open Logs and read the latest lines around the failure time. If you send them to support, copy that time window; to understand an error line, paste it into Ask AI.\n\n## uninstall — حذف نصب / Uninstall\nهدف طراحی: ربات را تمیز از سیستم برداری تا سرویس و فایل‌های نصب نمانند.\nعملکرد: اول از بخش بکاپ یک نسخه بگیر، بعد حذف نصب را شروع کن و مراحل را تا تأیید نهایی برو. پس از حذف، یک‌بار بررسی سلامت/وضعیت سرویس را چک کن که چیزی باقی نمانده باشد.\nDesign goal: Remove the bot cleanly so service and install files are gone.\nBehavior: Take a Backup first, then start Uninstall and finish every confirm step. Afterward, check Health/status once to be sure nothing is left running.\n\n## contact — تماس Expert Installer / Expert Installer contact\nهدف طراحی: راه ارتباط با تیم پشتیبانی Expert را دم دست داشته باشی.\nعملکرد: از این صفحه کانال‌های تماس را باز کن. برای پرسش‌های بیشتر درباره همین محصول از گزینه «سوال از AI» استفاده کنید.\nDesign goal: Keep Expert support contact paths handy.\nBehavior: Open the contact channels from this screen. For more questions about this product, use Ask AI.\n"
+}

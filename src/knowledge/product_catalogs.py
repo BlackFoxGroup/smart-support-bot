@@ -295,29 +295,74 @@ def _normalize_query(text: str) -> str:
     return re.sub(r"\s+", " ", (text or "").strip().lower().replace("‌", ""))
 
 
+# Paraphrase aliases for Expert Installer feature matching (intent → feature id).
+_EXPERT_FEATURE_ALIASES: dict[str, tuple[str, ...]] = {
+    "languages": (
+        "زبان", "زبانها", "فارسی", "انگلیسی", "روسی", "چینی", "language", "locale",
+    ),
+    "dashboard": (
+        "داشبورد", "صفحه اصلی", "خانه expert", "منوی expert", "dashboard", "home screen",
+    ),
+    "install_bot": (
+        "نصب", "نصب ربات", "راه اندازی", "راه‌اندازی", "بالا آوردن", "اینستال",
+        "install", "setup bot", "deploy bot",
+        "установить", "установка", "установить бота", "как установить",
+        "安装", "怎么安装",
+    ),
+    "health_check": (
+        "سلامت", "سالم", "چک سلامت", "وضعیت سرویس", "کار نمیکنه", "کار نمی‌کنه",
+        "خراب", "health", "status check", "not working",
+    ),
+    "backup": (
+        "بکاپ", "پشتیبان", "پشتیبان گیری", "کپی تنظیمات", "backup", "restore", "بازیابی",
+    ),
+    "logs": (
+        "لاگ", "لاگها", "لاگ‌ها", "گزارش خطا", "خطاهای ربات", "log", "logs", "error log",
+    ),
+    "uninstall": (
+        "حذف", "حذف نصب", "پاک کردن", "آناینستال", "uninstall", "remove bot",
+    ),
+    "contact": (
+        "تماس", "پشتیبانی", "ارتباط", "contact", "support contact",
+    ),
+}
+
+
 def match_feature_for_query(
-    query: str, *, lang: str = "fa"
+    query: str,
+    *,
+    lang: str = "fa",
+    product_id: str | None = None,
 ) -> tuple[ProductCatalog, dict[str, Any], float] | None:
-    """Best matching catalog feature for an Ask AI question."""
+    """Best matching catalog feature for an Ask AI question.
+
+    Optional product_id scopes matching to one catalog (e.g. Expert Installer).
+    Uses title/howto/summary tokens plus product-specific paraphrase aliases.
+    """
     catalogs = get_product_catalogs()
     if not catalogs:
         return None
+    want = (product_id or "").strip()
+    if want:
+        catalogs = [c for c in catalogs if c.product_id == want]
+        if not catalogs:
+            return None
     q = _normalize_query(query)
-    if len(q) < 3:
+    if len(q) < 2:
         return None
-    tokens = [t for t in re.findall(r"[\w\u0600-\u06ff]+", q) if len(t) >= 3]
+    tokens = [t for t in re.findall(r"[\w\u0600-\u06ff]+", q) if len(t) >= 2]
     best: tuple[ProductCatalog, dict[str, Any], float] | None = None
     for cat in catalogs:
         for feat in cat.features or []:
             if not isinstance(feat, dict):
                 continue
-            fid = str(feat.get("id") or "").strip().lower().replace("_", " ").replace("-", " ")
+            fid_raw = str(feat.get("id") or "").strip()
+            fid = fid_raw.lower().replace("_", " ").replace("-", " ")
             titles = " ".join(str(v) for v in (feat.get("title") or {}).values()).lower()
             howto = " ".join(str(v) for v in (feat.get("howto") or {}).values()).lower()
             summary = " ".join(str(v) for v in (feat.get("summary") or {}).values()).lower()
             blob = f"{fid} {titles} {howto} {summary} {cat.product_id}"
             score = 0.0
-            # Strong exact-ish hits for Full Deploy / Connect SSH style asks
             compact_fid = fid.replace(" ", "")
             compact_q = q.replace(" ", "").replace("-", "").replace("_", "")
             if compact_fid and compact_fid in compact_q:
@@ -329,12 +374,28 @@ def match_feature_for_query(
                     score += 1.5
                 if token in fid.replace(" ", ""):
                     score += 2.0
-            # Persian teaching verbs boost when feature already matched a bit
-            if score >= 4 and any(w in q for w in ("آموزش", "اموزش", "چطور", "چگونه", "استفاده", "how", "tutorial")):
+            # Expert paraphrase aliases (how users actually ask)
+            if cat.product_id == "telegram-bot-expert-installer":
+                for alias in _EXPERT_FEATURE_ALIASES.get(fid_raw, ()):
+                    a = _normalize_query(alias)
+                    if a and a in q:
+                        score += 7.0
+                    elif a and any(tok in a or a in tok for tok in tokens if len(tok) >= 3):
+                        score += 3.0
+            if score >= 3 and any(
+                w in q
+                for w in (
+                    "آموزش", "اموزش", "چطور", "چگونه", "استفاده", "نحوه",
+                    "how", "tutorial", "help", "کمک", "راهنما",
+                    "как", "установить", "怎么",
+                )
+            ):
                 score += 3.0
             if best is None or score > best[2]:
                 best = (cat, feat, score)
-    if best is None or best[2] < 6.0:
+    # Lower bar when scoped to one product (paraphrases are shorter)
+    min_score = 4.0 if want else 6.0
+    if best is None or best[2] < min_score:
         return None
     return best
 
@@ -391,22 +452,29 @@ def resolve_media_paths_for_query(
             note = str(media.get("note") or "").lower()
             blob = f"{slot} {note} {rel} {cat.product_id}".lower()
             score = 0.0
-            if slot and slot in wanted_slots:
-                # Prefer listed related slots in order
+            # When a catalog feature is matched, ONLY its media_slot / related slots —
+            # never let token overlap (e.g. "install" ⊆ "uninstall") pull wrong screenshots.
+            if feature:
+                if not wanted_slots or not slot or slot not in wanted_slots:
+                    continue
                 score += 20.0 - wanted_slots.index(slot) * 0.5
-            for token in tokens:
-                if token in blob.replace("-", " ").replace("_", " "):
-                    score += 1.2
-                compact = token.replace("-", "").replace("_", "")
-                if compact and compact in slot.replace("-", "").replace("_", ""):
-                    score += 3.0
-            if "fulldeploy" in q.replace(" ", "").replace("-", "").replace("_", ""):
-                if "full-deploy" in slot or "full_deploy" in slot or "fulldeploy" in rel.replace("-", ""):
-                    score += 8.0
-                if slot == "panel-login":
-                    score += 3.0
-                if "operations" in slot:
-                    score += 2.0
+            else:
+                if slot and slot in wanted_slots:
+                    # Prefer listed related slots in order
+                    score += 20.0 - wanted_slots.index(slot) * 0.5
+                for token in tokens:
+                    if token in blob.replace("-", " ").replace("_", " "):
+                        score += 1.2
+                    compact = token.replace("-", "").replace("_", "")
+                    if compact and compact in slot.replace("-", "").replace("_", ""):
+                        score += 3.0
+                if "fulldeploy" in q.replace(" ", "").replace("-", "").replace("_", ""):
+                    if "full-deploy" in slot or "full_deploy" in slot or "fulldeploy" in rel.replace("-", ""):
+                        score += 8.0
+                    if slot == "panel-login":
+                        score += 3.0
+                    if "operations" in slot:
+                        score += 2.0
             if score <= 0:
                 continue
             path = (project_root / rel).resolve()

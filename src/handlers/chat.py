@@ -55,12 +55,15 @@ from src.knowledge.feature_lookup_adapter import (
     feature_lookup_prompt_block,
     has_implementation_exists,
 )
-from src.knowledge.intents import IntentMatcher, looks_identity
+from src.knowledge.intents import IntentMatcher, detect_reply_lang, looks_creator, looks_identity, looks_usage_howto
 from src.knowledge.loader import KnowledgeLoader
 from src.knowledge.product_catalogs import (
     ai_products_snippet,
+    feature_howto_text,
     get_product,
     list_all_product_dicts,
+    match_feature_for_query,
+    resolve_media_paths_for_query,
 )
 from src.storage.answer_memory import AnswerMemoryStore
 from src.storage.metrics import MetricsStore
@@ -182,6 +185,9 @@ def setup_chat_router(
             return
 
         lang = await users.get_lang(user.id, user.language_code)
+        # Answer in the language of THIS question (not only profile preference).
+        text_for_lang = (message.text or "").strip()
+        lang = detect_reply_lang(text_for_lang, lang)
         if access is not None:
             menu_kb = keyboards.main_menu_keyboard(
                 lang,
@@ -213,13 +219,57 @@ def setup_chat_router(
 
         if looks_identity(text):
             body = texts.bot_intro(lang)
+            ask_product = await users.get_ask_ai_product(user.id)
+            if ask_product:
+                product = get_product(ask_product)
+                title = product.label(lang) if product else ask_product
+                if (lang or "").startswith("fa"):
+                    body = (
+                        f"{body}\n\n"
+                        f"الان داخل کاتالوگ «{title}» هستی؛ "
+                        "سوال‌های این محصول را اینجا بپرس تا جواب همان بخش را بدهم."
+                    )
+                else:
+                    body = (
+                        f"{body}\n\n"
+                        f"You are in the «{title}» catalog — ask about this product here."
+                    )
             await users.append_chat(user.id, "user", text)
             await users.append_chat(user.id, "assistant", body)
             await metrics.record_answered(referred_support=False, ai_solved=True)
             await message.answer(
                 body,
                 reply_markup=keyboards.ask_ai_keyboard(
-                    lang, product_id=await users.get_ask_ai_product(user.id)
+                    lang, product_id=ask_product
+                ),
+            )
+            return
+
+        if looks_creator(text):
+            from src.branding import load_creator_contact
+            creator = load_creator_contact(settings.knowledge_root)
+            body = creator.format_card(lang)
+            ask_product = await users.get_ask_ai_product(user.id)
+            if ask_product:
+                product = get_product(ask_product)
+                title = product.label(lang) if product else ask_product
+                if (lang or "").startswith("fa"):
+                    body = (
+                        f"{body}\n\n"
+                        f"اگر سوالت دربارهٔ محصول «{title}» است، همان را بپرس تا راهنمای همان بخش را بدهم."
+                    )
+                else:
+                    body = (
+                        f"{body}\n\n"
+                        f"If your question is about «{title}», ask it here for that product's guide."
+                    )
+            await users.append_chat(user.id, "user", text)
+            await users.append_chat(user.id, "assistant", body)
+            await metrics.record_answered(referred_support=False, ai_solved=True)
+            await message.answer(
+                body,
+                reply_markup=keyboards.ask_ai_keyboard(
+                    lang, product_id=ask_product
                 ),
             )
             return
@@ -367,6 +417,65 @@ def setup_chat_router(
                 min_score=12.0,
             )
 
+        # Matched catalog feature media is language-independent and must win over
+        # weaker RAG media picks (e.g. EN install wrongly attaching Backup).
+        if ask_product:
+            feat_hit = match_feature_for_query(
+                text, lang=lang, product_id=ask_product
+            )
+            if feat_hit is not None:
+                matched_cat, matched_feat, _matched_score = feat_hit
+                feat_paths = resolve_media_paths_for_query(
+                    text,
+                    project_root=settings.project_root,
+                    lang=lang,
+                    limit=2,
+                    feature=matched_feat,
+                    product=matched_cat,
+                )
+                want_media = bool(feat_paths) and (
+                    getattr(retrieval, "attach_media", False)
+                    or wants_send_media(text)
+                    or looks_usage_howto(text)
+                )
+                if not want_media and feat_paths:
+                    from src.knowledge.catalog_rag import (
+                        is_educational_question,
+                        wants_catalog_media,
+                    )
+
+                    want_media = wants_catalog_media(text) or is_educational_question(
+                        text
+                    )
+                if want_media and feat_paths:
+                    media_paths = feat_paths
+                    retrieval.attach_media = True
+                    fid = str(matched_feat.get("id") or "").strip()
+                    refs: list[MediaRef] = []
+                    root = settings.project_root.resolve()
+                    for path in feat_paths:
+                        try:
+                            rel = str(path.resolve().relative_to(root)).replace("\\", "/")
+                        except ValueError:
+                            rel = str(path)
+                        refs.append(
+                            MediaRef(
+                                path=rel,
+                                product_id=ask_product,
+                                unit_id=f"feature-media:{fid}:{path.name}",
+                                feature_ids=[fid] if fid else [],
+                                score=20.0,
+                            )
+                        )
+                    bundle.media_refs = refs
+                    if fid:
+                        feat_ref = f"feature:{ask_product}:{fid}"
+                        bundle.knowledge_refs = list(
+                            dict.fromkeys(
+                                [feat_ref] + list(bundle.knowledge_refs or [])
+                            )
+                        )
+
         if (
             ask_product
             and getattr(retrieval, "needs_clarification", False)
@@ -481,15 +590,45 @@ def setup_chat_router(
         )
 
         def _user_facing_fallback() -> str:
+            # Prefer a single feature howto in the question language (no bilingual dump).
+            if ask_product:
+                hit = match_feature_for_query(text, lang=lang, product_id=ask_product)
+                if hit is not None:
+                    _c, feat, _s = hit
+                    howto = feature_howto_text(feat, lang)
+                    title = (
+                        (feat.get("title") or {}).get(lang)
+                        or (feat.get("title") or {}).get("en")
+                        or str(feat.get("id") or "")
+                    )
+                    if howto and not looks_like_prompt_dump(howto):
+                        if (lang or "").startswith("fa"):
+                            return f"{title}\n\n{howto}"
+                        return f"{title}\n\n{howto}"
             teach = strip_internal_prompt_lines(catalog_teach)
+            # Drop English Design goal / Behavior lines when answering Persian (and vice versa).
+            if (lang or "").startswith("fa"):
+                teach = "\n".join(
+                    ln
+                    for ln in teach.splitlines()
+                    if not ln.strip().lower().startswith(("design goal:", "behavior:"))
+                    and not ln.strip().startswith("## ")
+                )
+            elif (lang or "").startswith("en"):
+                teach = "\n".join(
+                    ln
+                    for ln in teach.splitlines()
+                    if not ln.strip().startswith(("هدف طراحی:", "عملکرد:"))
+                    and not ln.strip().startswith("## ")
+                )
             excerpt = excerpt_teaching_for_query(teach, text, limit=900)
-            if excerpt:
+            if excerpt and not looks_like_prompt_dump(excerpt):
                 if (lang or "").startswith("fa"):
                     return "بر اساس راهنمای همین محصول:\n\n" + excerpt
                 return "From this product catalog:\n\n" + excerpt
             for unit in retrieval.units or []:
                 body = excerpt_teaching_for_query(unit.body or "", text, limit=700)
-                if body:
+                if body and not looks_like_prompt_dump(body):
                     return body
             return ""
 
@@ -540,8 +679,71 @@ def setup_chat_router(
             if ask_product
             else ""
         )
+        # Expert Installer ONLY: understand paraphrased questions and tutor from howto.
+        expert_usage_block = ""
+        if ask_product == "telegram-bot-expert-installer":
+            matched_howto = ""
+            matched_title = ""
+            hit = match_feature_for_query(
+                text, lang=lang, product_id="telegram-bot-expert-installer"
+            )
+            if hit is not None:
+                _cat_hit, feat_hit, _score = hit
+                matched_howto = feature_howto_text(feat_hit, lang)
+                matched_title = (
+                    (feat_hit.get("title") or {}).get(lang)
+                    or (feat_hit.get("title") or {}).get("en")
+                    or str(feat_hit.get("id") or "")
+                )
+            want_tutor = looks_usage_howto(text) or bool(matched_howto)
+            if not matched_howto and want_tutor:
+                prod = get_product("telegram-bot-expert-installer")
+                if prod is not None:
+                    chunks = []
+                    for feat in prod.features or []:
+                        if not isinstance(feat, dict):
+                            continue
+                        body = feature_howto_text(feat, lang)
+                        if body:
+                            title = (feat.get("title") or {}).get(lang) or feat.get("id") or ""
+                            chunks.append(f"{title}\n{body}")
+                    matched_howto = "\n\n".join(chunks[:8])
+            if (lang or "").startswith("fa"):
+                expert_usage_block = (
+                    "### Expert Installer intent + usage (ONLY this product)\n"
+                    "کاربر ممکن است سوال را با هر عبارتی بپرسد. اول مفهوم سوال را بفهم، "
+                    "بعد نزدیک‌ترین بخش کاتالوگ Expert را انتخاب کن و همان را جواب بده.\n"
+                    "اگر سوال دربارهٔ نحوهٔ کار / گیر کردن / از کجا بزنم است، مثل مربی جواب بده:\n"
+                    "۱) این بخش چیست\n"
+                    "۲) برای چه است\n"
+                    "۳) مراحل مرتب\n"
+                    "۴) یک نکته از کاتالوگ\n"
+                    "قدم اختراع نکن. فقط Expert.\n"
+                    + (
+                        f"بخش تشخیص‌داده‌شده: {matched_title}\n"
+                        if matched_title
+                        else "اگر مطمئن نیستی کدام بخش است، از روی مفهوم سوال نزدیک‌ترین howto را انتخاب کن.\n"
+                    )
+                    + f"منبع howto:\n{matched_howto or '(از evidence کاتالوگ)'}\n\n"
+                )
+            else:
+                expert_usage_block = (
+                    "### Expert Installer intent + usage (ONLY this product)\n"
+                    "Users phrase questions many ways. Infer the meaning first, "
+                    "map to the closest Expert catalog section, then answer that section.\n"
+                    "If it is about how to use / stuck / which button, reply as a tutor:\n"
+                    "1) what it is  2) what it is for  3) ordered steps  4) one catalog tip.\n"
+                    "Do not invent steps. Expert catalog only.\n"
+                    + (
+                        f"Detected section: {matched_title}\n"
+                        if matched_title
+                        else "If unsure which section, pick the closest howto by meaning.\n"
+                    )
+                    + f"Howto source:\n{matched_howto or '(use catalog evidence)'}\n\n"
+                )
         user_prompt = (
             f"{product_scope}"
+            f"{expert_usage_block}"
             f"Prior turns in this Ask AI session:\n{history_section}\n\n"
             f"User question:\n{text}\n\n"
             f"Expanded topic hints (internal):\n{retrieval.query_expanded}\n\n"
@@ -549,6 +751,10 @@ def setup_chat_router(
             f"Knowledge / product-map markdown snippets:\n{kb_snip or '(none)'}\n\n"
             f"Catalog / site sources:\n{extra_sources or '(none)'}\n\n"
             "Write a helpful Telegram support reply as a real tutor/support agent.\n"
+            f"CRITICAL language rule: reply ONLY in language code={lang}. "
+            "Match the question language exactly. Do not mix FA/EN/RU/ZH in one reply. "
+            "Do not paste Design goal/Behavior/هدف طراحی labels from another language.\n"
+            "Do not paste catalog training headers or ## section ids.\n"
             "Source order: (1) Operator AI memory, (2) catalog evidence, "
             "(3) other markdown — never invent steps.\n"
             "When the question is educational, explain: what it is, what it is for, "

@@ -1,0 +1,1678 @@
+{
+  "schema_version": 2,
+  "catalog_id": "vpn-installer",
+  "product_id": "vpn-installer",
+  "enabled": true,
+  "catalog_enabled": true,
+  "menu_emoji": "🛡️",
+  "menu_order": 10,
+  "updated_at": "2026-09-15T01:12:13Z",
+  "title": {
+    "fa": "VPS to VPN — Black Fox Group",
+    "en": "VPS to VPN — Black Fox Group",
+    "ru": "VPS to VPN — Black Fox Group",
+    "zh": "VPS to VPN — Black Fox Group"
+  },
+  "short_summary": {
+    "fa": "VPS to VPN سرور را به مسیر VPN و پنل وصل می‌کند؛ مد Basic / Pro / AI Pro، سرور مرکزی، مش، دامنه و CDN.",
+    "en": "VPS to VPN wires servers into VPN paths and panels — Basic / Pro / AI Pro, central setup, mesh, domain and CDN.",
+    "ru": "VPS to VPN wires servers into VPN paths and panels — Basic / Pro / AI Pro, central setup, mesh, domain and CDN.",
+    "zh": "VPS to VPN wires servers into VPN paths and panels — Basic / Pro / AI Pro, central setup, mesh, domain and CDN."
+  },
+  "long_summary": {
+    "fa": "با VPS to VPN مد کاری را انتخاب می‌کنی، لایسنس را ثبت می‌کنی، سرور مرکزی و Exit/Node/Tunnel را می‌چینی، پنل و دامنه و CDN را تنظیم می‌کنی. هر بخش مهم یک اسکرین واقعی در کاتالوگ دارد تا Ask AI همان عکس را با جواب بفرستد.",
+    "en": "Pick a mode, register a license, set central/Exit/Node/Tunnel servers, then panel, domain and CDN. Important sections have real screenshots so Ask AI can send the matching photo with answers.",
+    "ru": "Pick a mode, register a license, set central/Exit/Node/Tunnel servers, then panel, domain and CDN. Important sections have real screenshots so Ask AI can send the matching photo with answers.",
+    "zh": "Pick a mode, register a license, set central/Exit/Node/Tunnel servers, then panel, domain and CDN. Important sections have real screenshots so Ask AI can send the matching photo with answers."
+  },
+  "keywords": {
+    "fa": [
+      "vps to vpn",
+      "وی‌پی‌اس",
+      "پنل",
+      "مش",
+      "دامنه",
+      "cdn",
+      "basic",
+      "pro",
+      "ai pro",
+      "مد پایه",
+      "پایه",
+      "basic mode",
+      "Basic Mode",
+      "بیسیک"
+    ],
+    "en": [
+      "vps to vpn",
+      "panel",
+      "mesh",
+      "domain",
+      "cdn",
+      "basic",
+      "pro",
+      "ai pro",
+      "exit",
+      "node",
+      "basic mode",
+      "modes"
+    ]
+  },
+  "does_not": {
+    "fa": "جای ساخت کانفیگ Config Builder یا نصب Expert Installer به‌تنهایی نیست.",
+    "en": "Not Config Builder config creation or Expert Installer alone.",
+    "ru": "Not Config Builder config creation or Expert Installer alone.",
+    "zh": "Not Config Builder config creation or Expert Installer alone."
+  },
+  "support": {
+    "fa": "سوال از AI را روی محصول VPS to VPN بزن.",
+    "en": "Use Ask AI on the VPS to VPN product.",
+    "ru": "Use Ask AI on the VPS to VPN product.",
+    "zh": "Use Ask AI on the VPS to VPN product."
+  },
+  "platforms": [
+    "windows",
+    "android"
+  ],
+  "features": [
+    {
+      "id": "languages",
+      "emoji": "🌐",
+      "title": {
+        "fa": "زبان‌های پشتیبانی‌شده",
+        "en": "Supported languages",
+        "ru": "Supported languages",
+        "zh": "Supported languages"
+      },
+      "media_slot": "",
+      "howto": {
+        "fa": "هدف طراحی: بدانی VPS to VPN با چه زبان‌هایی کار می‌کند (عربی، آلمانی، انگلیسی، اسپانیایی، فارسی، فرانسوی، هندی، اندونزیایی، روسی، ترکی، اوکراینی، ازبکی، چینی).\nرفتار: زبان رابط را از تنظیمات زبان عوض کن؛ متن‌ها برای این زبان‌ها آماده است: عربی، آلمانی، انگلیسی، اسپانیایی، فارسی، فرانسوی، هندی، اندونزیایی، روسی، ترکی، اوکراینی، ازبکی، چینی.",
+        "en": "Design goal: Know which UI languages VPS to VPN supports (Arabic, German, English, Spanish, Persian, French, Hindi, Indonesian, Russian, Turkish, Ukrainian, Uzbek, Chinese).\nBehavior: Switch language from the language settings; UI text exists for: Arabic, German, English, Spanish, Persian, French, Hindi, Indonesian, Russian, Turkish, Ukrainian, Uzbek, Chinese.",
+        "ru": "Design goal: Know which UI languages VPS to VPN supports (Arabic, German, English, Spanish, Persian, French, Hindi, Indonesian, Russian, Turkish, Ukrainian, Uzbek, Chinese).\nBehavior: Switch language from the language settings; UI text exists for: Arabic, German, English, Spanish, Persian, French, Hindi, Indonesian, Russian, Turkish, Ukrainian, Uzbek, Chinese.",
+        "zh": "Design goal: Know which UI languages VPS to VPN supports (Arabic, German, English, Spanish, Persian, French, Hindi, Indonesian, Russian, Turkish, Ukrainian, Uzbek, Chinese).\nBehavior: Switch language from the language settings; UI text exists for: Arabic, German, English, Spanish, Persian, French, Hindi, Indonesian, Russian, Turkish, Ukrainian, Uzbek, Chinese."
+      },
+      "summary": {
+        "fa": "زبان‌ها: عربی، آلمانی، انگلیسی، اسپانیایی، فارسی، فرانسوی، هندی، اندونزیایی، روسی، ترکی، اوکراینی، ازبکی، چینی",
+        "en": "Languages: Arabic, German, English, Spanish, Persian, French, Hindi, Indonesian, Russian, Turkish, Ukrainian, Uzbek, Chinese",
+        "ru": "Languages: Arabic, German, English, Spanish, Persian, French, Hindi, Indonesian, Russian, Turkish, Ukrainian, Uzbek, Chinese",
+        "zh": "Languages: Arabic, German, English, Spanish, Persian, French, Hindi, Indonesian, Russian, Turkish, Ukrainian, Uzbek, Chinese"
+      }
+    },
+    {
+      "id": "overview",
+      "title": {
+        "fa": "معرفی VPS to VPN",
+        "en": "VPS to VPN overview",
+        "ru": "VPS to VPN overview",
+        "zh": "VPS to VPN overview"
+      },
+      "media_slot": "app-icon",
+      "howto": {
+        "fa": "هدف طراحی: بدانی VPS to VPN چه کاری برای سرور و پنل انجام می‌دهد.\nعملکرد: با این برنامه سرور را به مسیر VPN و پنل وصل می‌کنی و مد Basic / Pro / AI Pro را انتخاب می‌کنی.",
+        "en": "Design goal: Understand what VPS to VPN does for servers and panels.\nBehavior: Use it to wire servers into VPN paths and panels, and pick Basic / Pro / AI Pro.",
+        "ru": "Design goal: Understand what VPS to VPN does for servers and panels.\nBehavior: Use it to wire servers into VPN paths and panels, and pick Basic / Pro / AI Pro.",
+        "zh": "Design goal: Understand what VPS to VPN does for servers and panels.\nBehavior: Use it to wire servers into VPN paths and panels, and pick Basic / Pro / AI Pro."
+      },
+      "summary": {
+        "fa": "معرفی محصول VPS to VPN.",
+        "en": "VPS to VPN product overview.",
+        "ru": "VPS to VPN product overview.",
+        "zh": "VPS to VPN product overview."
+      },
+      "emoji": "🛡️"
+    },
+    {
+      "id": "modes",
+      "title": {
+        "fa": "مدهای Basic / Pro / AI Pro",
+        "en": "Basic / Pro / AI Pro modes",
+        "ru": "Basic / Pro / AI Pro modes",
+        "zh": "Basic / Pro / AI Pro modes"
+      },
+      "media_slot": "basic-mode",
+      "related_media_slots": [
+        "pro-mode",
+        "ai-pro-mode",
+        "basic-mode-android",
+        "ai-pro-mode-android"
+      ],
+      "howto": {
+        "fa": "هدف طراحی: مد مناسب کار را انتخاب کنی؛ امکانات هر مد فرق دارد.\nعملکرد: Basic برای شروع ساده است؛ Pro و AI Pro لایسنس جدا دارند و امکانات بیشتری مثل دامنه رایگان می‌دهند.",
+        "en": "Design goal: Pick the mode that matches the job; features differ.\nBehavior: Basic is the simple start; Pro and AI Pro need licenses and unlock more, including free-domain quotas.",
+        "ru": "Design goal: Pick the mode that matches the job; features differ.\nBehavior: Basic is the simple start; Pro and AI Pro need licenses and unlock more, including free-domain quotas.",
+        "zh": "Design goal: Pick the mode that matches the job; features differ.\nBehavior: Basic is the simple start; Pro and AI Pro need licenses and unlock more, including free-domain quotas."
+      },
+      "summary": {
+        "fa": "سه مد کاری برنامه.",
+        "en": "Three operating modes.",
+        "ru": "Three operating modes.",
+        "zh": "Three operating modes."
+      },
+      "emoji": "🎛️"
+    },
+    {
+      "id": "basic_mode",
+      "title": {
+        "fa": "مد پایه (Basic Mode)",
+        "en": "Basic Mode",
+        "ru": "Basic Mode",
+        "zh": "Basic Mode"
+      },
+      "media_slot": "basic-mode",
+      "howto": {
+        "fa": "هدف طراحی: مد Basic یکی از سه حالت Basic، Pro و AI Pro در VPS to VPN by Black Fox Group است و برای شروع ساده طراحی شده؛ ساده‌ترین حالت برای داشتن یک پنل VPN شخصی است.\nعملکرد: نصب پنل در این مد رایگان است و برای تست و آشنایی با برنامه است. در زمان اتصال سرور خروجی و پیکربندی باید لایسنس مد کاری مورد نظرت را تهیه کنی.",
+        "en": "Design goal: Basic is one of three modes (Basic, Pro, AI Pro) in VPS to VPN by Black Fox Group, made for a simple start — the simplest way to run a personal VPN panel.\nBehavior: Panel install in this mode is free for testing and learning the app. When you connect an exit server and configure it, buy the license for the work mode you need.",
+        "ru": "Design goal: Basic is one of three modes (Basic, Pro, AI Pro) in VPS to VPN by Black Fox Group, made for a simple start — the simplest way to run a personal VPN panel.\nBehavior: Panel install in this mode is free for testing and learning the app. When you connect an exit server and configure it, buy the license for the work mode you need.",
+        "zh": "Design goal: Basic is one of three modes (Basic, Pro, AI Pro) in VPS to VPN by Black Fox Group, made for a simple start — the simplest way to run a personal VPN panel.\nBehavior: Panel install in this mode is free for testing and learning the app. When you connect an exit server and configure it, buy the license for the work mode you need."
+      },
+      "summary": {
+        "fa": "مد Basic: شروع ساده؛ نصب پنل رایگان برای تست؛ برای Exit و پیکربندی لایسنس لازم است.",
+        "en": "Basic mode: simple start; free panel install for testing; license needed for exit/config.",
+        "ru": "Basic mode: simple start; free panel install for testing; license needed for exit/config.",
+        "zh": "Basic mode: simple start; free panel install for testing; license needed for exit/config."
+      },
+      "emoji": "🟢"
+    },
+    {
+      "id": "pro_mode",
+      "title": {
+        "fa": "Pro Mode",
+        "en": "Pro Mode",
+        "ru": "Pro Mode",
+        "zh": "Pro Mode"
+      },
+      "media_slot": "pro-mode",
+      "howto": {
+        "fa": "هدف طراحی: برای کار جدی‌تر با لایسنس Pro امکانات بیشتری بگیری.\nعملکرد: بعد از فعال‌سازی لایسنس، Pro Mode را از منو باز کن.",
+        "en": "Design goal: Use Pro license features for heavier setups.\nBehavior: After license activation, open Pro Mode from the menu.",
+        "ru": "Design goal: Use Pro license features for heavier setups.\nBehavior: After license activation, open Pro Mode from the menu.",
+        "zh": "Design goal: Use Pro license features for heavier setups.\nBehavior: After license activation, open Pro Mode from the menu."
+      },
+      "summary": {
+        "fa": "مد Pro.",
+        "en": "Pro mode.",
+        "ru": "Pro mode.",
+        "zh": "Pro mode."
+      },
+      "emoji": "🔵"
+    },
+    {
+      "id": "ai_pro_mode",
+      "title": {
+        "fa": "AI Pro Mode",
+        "en": "AI Pro Mode",
+        "ru": "AI Pro Mode",
+        "zh": "AI Pro Mode"
+      },
+      "media_slot": "ai-pro-mode",
+      "howto": {
+        "fa": "هدف طراحی: از کمک AI داخل اپ برای کارهای پیشرفته استفاده کنی.\nعملکرد: AI Pro را باز کن؛ چت و تسک‌های کمکی همان‌جا هستند.",
+        "en": "Design goal: Use in-app AI help for advanced work.\nBehavior: Open AI Pro; helper chat and tasks live there.",
+        "ru": "Design goal: Use in-app AI help for advanced work.\nBehavior: Open AI Pro; helper chat and tasks live there.",
+        "zh": "Design goal: Use in-app AI help for advanced work.\nBehavior: Open AI Pro; helper chat and tasks live there."
+      },
+      "summary": {
+        "fa": "مد AI Pro.",
+        "en": "AI Pro mode.",
+        "ru": "AI Pro mode.",
+        "zh": "AI Pro mode."
+      },
+      "emoji": "🟣"
+    },
+    {
+      "id": "registration",
+      "title": {
+        "fa": "ثبت لایسنس",
+        "en": "Registration",
+        "ru": "Registration",
+        "zh": "Registration"
+      },
+      "media_slot": "registration",
+      "howto": {
+        "fa": "هدف طراحی: لایسنس Pro یا AI Pro را روی دستگاه فعال کنی.\nعملکرد: کد foxnext.net و Device ID را در Registration بزن.",
+        "en": "Design goal: Activate a Pro or AI Pro license on the device.\nBehavior: Enter the foxnext.net code and Device ID in Registration.",
+        "ru": "Design goal: Activate a Pro or AI Pro license on the device.\nBehavior: Enter the foxnext.net code and Device ID in Registration.",
+        "zh": "Design goal: Activate a Pro or AI Pro license on the device.\nBehavior: Enter the foxnext.net code and Device ID in Registration."
+      },
+      "summary": {
+        "fa": "فعال‌سازی لایسنس.",
+        "en": "License activation.",
+        "ru": "License activation.",
+        "zh": "License activation."
+      },
+      "emoji": "🔑"
+    },
+    {
+      "id": "central_setup",
+      "title": {
+        "fa": "سرور مرکزی",
+        "en": "Central setup",
+        "ru": "Central setup",
+        "zh": "Central setup"
+      },
+      "media_slot": "central-setup",
+      "howto": {
+        "fa": "هدف طراحی: سرور مرکزی را درست پایه بگذاری.\nعملکرد: از Central setup مشخصات سرور را وارد و تأیید کن.",
+        "en": "Design goal: Set up the central server correctly.\nBehavior: Enter and confirm server details in Central setup.",
+        "ru": "Design goal: Set up the central server correctly.\nBehavior: Enter and confirm server details in Central setup.",
+        "zh": "Design goal: Set up the central server correctly.\nBehavior: Enter and confirm server details in Central setup."
+      },
+      "summary": {
+        "fa": "راه‌اندازی سرور مرکزی.",
+        "en": "Central server setup.",
+        "ru": "Central server setup.",
+        "zh": "Central server setup."
+      },
+      "emoji": "🖥️"
+    },
+    {
+      "id": "full_deploy",
+      "title": {
+        "fa": "دیپلوی کامل",
+        "en": "Full deploy",
+        "ru": "Full deploy",
+        "zh": "Full deploy"
+      },
+      "media_slot": "full-deploy",
+      "howto": {
+        "fa": "هدف طراحی: نصب کامل را یک‌جا جلو ببری.\nعملکرد: Full deploy را بزن و تا پایان مرحله‌ها صبر کن.",
+        "en": "Design goal: Run a full install in one flow.\nBehavior: Start Full deploy and wait through the steps.",
+        "ru": "Design goal: Run a full install in one flow.\nBehavior: Start Full deploy and wait through the steps.",
+        "zh": "Design goal: Run a full install in one flow.\nBehavior: Start Full deploy and wait through the steps."
+      },
+      "summary": {
+        "fa": "اجرای دیپلوی کامل.",
+        "en": "Run full deploy.",
+        "ru": "Run full deploy.",
+        "zh": "Run full deploy."
+      },
+      "emoji": "🚀"
+    },
+    {
+      "id": "exit_servers",
+      "title": {
+        "fa": "Exit Server",
+        "en": "Exit servers",
+        "ru": "Exit servers",
+        "zh": "Exit servers"
+      },
+      "media_slot": "add-exit",
+      "howto": {
+        "fa": "هدف طراحی: سرور خروجی ترافیک را اضافه کنی.\nعملکرد: از Add Exit مشخصات سرور را بده و ذخیره کن.",
+        "en": "Design goal: Add an exit server for traffic.\nBehavior: Enter exit server details and save.",
+        "ru": "Design goal: Add an exit server for traffic.\nBehavior: Enter exit server details and save.",
+        "zh": "Design goal: Add an exit server for traffic.\nBehavior: Enter exit server details and save."
+      },
+      "summary": {
+        "fa": "افزودن Exit Server.",
+        "en": "Add exit servers.",
+        "ru": "Add exit servers.",
+        "zh": "Add exit servers."
+      },
+      "emoji": "🚪"
+    },
+    {
+      "id": "node_servers",
+      "title": {
+        "fa": "Node Server",
+        "en": "Node servers",
+        "ru": "Node servers",
+        "zh": "Node servers"
+      },
+      "media_slot": "add-node",
+      "howto": {
+        "fa": "هدف طراحی: نود میانی را به مسیر اضافه کنی.\nعملکرد: Add Node را باز کن و سرور را ثبت کن.",
+        "en": "Design goal: Add a middle node to the path.\nBehavior: Open Add Node and register the server.",
+        "ru": "Design goal: Add a middle node to the path.\nBehavior: Open Add Node and register the server.",
+        "zh": "Design goal: Add a middle node to the path.\nBehavior: Open Add Node and register the server."
+      },
+      "summary": {
+        "fa": "افزودن Node.",
+        "en": "Add node servers.",
+        "ru": "Add node servers.",
+        "zh": "Add node servers."
+      },
+      "emoji": "🧩"
+    },
+    {
+      "id": "tunnel_servers",
+      "title": {
+        "fa": "Tunnel Server",
+        "en": "Tunnel servers",
+        "ru": "Tunnel servers",
+        "zh": "Tunnel servers"
+      },
+      "media_slot": "add-tunnel",
+      "howto": {
+        "fa": "هدف طراحی: تونل بین سرورها را بسازی.\nعملکرد: از Add Tunnel سرور تونل را اضافه کن.",
+        "en": "Design goal: Build tunnels between servers.\nBehavior: Add the tunnel server from Add Tunnel.",
+        "ru": "Design goal: Build tunnels between servers.\nBehavior: Add the tunnel server from Add Tunnel.",
+        "zh": "Design goal: Build tunnels between servers.\nBehavior: Add the tunnel server from Add Tunnel."
+      },
+      "summary": {
+        "fa": "افزودن Tunnel.",
+        "en": "Add tunnel servers.",
+        "ru": "Add tunnel servers.",
+        "zh": "Add tunnel servers."
+      },
+      "emoji": "🚇"
+    },
+    {
+      "id": "mesh",
+      "title": {
+        "fa": "مش سرورها",
+        "en": "Mesh servers",
+        "ru": "Mesh servers",
+        "zh": "Mesh servers"
+      },
+      "media_slot": "mesh-servers",
+      "howto": {
+        "fa": "هدف طراحی: وضعیت مش و ارتباط سرورها را ببینی.\nعملکرد: صفحه Mesh را باز کن و لینک‌ها را بررسی کن.",
+        "en": "Design goal: See mesh status and server links.\nBehavior: Open Mesh and review the links.",
+        "ru": "Design goal: See mesh status and server links.\nBehavior: Open Mesh and review the links.",
+        "zh": "Design goal: See mesh status and server links.\nBehavior: Open Mesh and review the links."
+      },
+      "summary": {
+        "fa": "نمای مش سرورها.",
+        "en": "Server mesh view.",
+        "ru": "Server mesh view.",
+        "zh": "Server mesh view."
+      },
+      "emoji": "🕸️"
+    },
+    {
+      "id": "connection_manager",
+      "title": {
+        "fa": "مدیریت اتصال",
+        "en": "Connection manager",
+        "ru": "Connection manager",
+        "zh": "Connection manager"
+      },
+      "media_slot": "connection-manager",
+      "howto": {
+        "fa": "هدف طراحی: اتصال بین سرورها را یک‌جا مدیریت کنی.\nعملکرد: از Connection manager وضعیت و عملیات اتصال را ببین.",
+        "en": "Design goal: Manage server connections in one place.\nBehavior: Use Connection manager for status and connection actions.",
+        "ru": "Design goal: Manage server connections in one place.\nBehavior: Use Connection manager for status and connection actions.",
+        "zh": "Design goal: Manage server connections in one place.\nBehavior: Use Connection manager for status and connection actions."
+      },
+      "summary": {
+        "fa": "مدیر اتصال سرورها.",
+        "en": "Server connection manager.",
+        "ru": "Server connection manager.",
+        "zh": "Server connection manager."
+      },
+      "emoji": "🔗"
+    },
+    {
+      "id": "move_central",
+      "title": {
+        "fa": "جابجایی مرکزی",
+        "en": "Move central",
+        "ru": "Move central",
+        "zh": "Move central"
+      },
+      "media_slot": "move-central",
+      "howto": {
+        "fa": "هدف طراحی: سرور مرکزی را به جای جدید منتقل کنی.\nعملکرد: مراحل Move central را کامل کن تا مسیر قطع نماند.",
+        "en": "Design goal: Move the central server to a new place.\nBehavior: Finish Move central so the path stays consistent.",
+        "ru": "Design goal: Move the central server to a new place.\nBehavior: Finish Move central so the path stays consistent.",
+        "zh": "Design goal: Move the central server to a new place.\nBehavior: Finish Move central so the path stays consistent."
+      },
+      "summary": {
+        "fa": "جابجایی سرور مرکزی.",
+        "en": "Move central server.",
+        "ru": "Move central server.",
+        "zh": "Move central server."
+      },
+      "emoji": "📦"
+    },
+    {
+      "id": "move_server",
+      "title": {
+        "fa": "انتقال سرور",
+        "en": "Move to new server",
+        "ru": "Move to new server",
+        "zh": "Move to new server"
+      },
+      "media_slot": "move-server",
+      "howto": {
+        "fa": "هدف طراحی: سرویس را روی سرور جدید ببری.\nعملکرد: گزینه انتقال را بزن و مقصد را تأیید کن.",
+        "en": "Design goal: Move the service onto a new server.\nBehavior: Start the move action and confirm the destination.",
+        "ru": "Design goal: Move the service onto a new server.\nBehavior: Start the move action and confirm the destination.",
+        "zh": "Design goal: Move the service onto a new server.\nBehavior: Start the move action and confirm the destination."
+      },
+      "summary": {
+        "fa": "انتقال به سرور جدید.",
+        "en": "Move to a new server.",
+        "ru": "Move to a new server.",
+        "zh": "Move to a new server."
+      },
+      "emoji": "➡️"
+    },
+    {
+      "id": "delete_servers",
+      "title": {
+        "fa": "حذف Exit/Node",
+        "en": "Delete exit/node",
+        "ru": "Delete exit/node",
+        "zh": "Delete exit/node"
+      },
+      "media_slot": "delete-exit-node",
+      "howto": {
+        "fa": "هدف طراحی: سرورهای اضافی را از مسیر برداری.\nعملکرد: Exit یا Node را انتخاب و حذف را تأیید کن.",
+        "en": "Design goal: Remove extra servers from the path.\nBehavior: Select Exit or Node and confirm delete.",
+        "ru": "Design goal: Remove extra servers from the path.\nBehavior: Select Exit or Node and confirm delete.",
+        "zh": "Design goal: Remove extra servers from the path.\nBehavior: Select Exit or Node and confirm delete."
+      },
+      "summary": {
+        "fa": "حذف Exit و Node.",
+        "en": "Delete exit and node servers.",
+        "ru": "Delete exit and node servers.",
+        "zh": "Delete exit and node servers."
+      },
+      "emoji": "❌"
+    },
+    {
+      "id": "reset_servers",
+      "title": {
+        "fa": "ریست سرورها",
+        "en": "Reset all servers",
+        "ru": "Reset all servers",
+        "zh": "Reset all servers"
+      },
+      "media_slot": "reset-servers",
+      "howto": {
+        "fa": "هدف طراحی: همه سرورها را به حالت اولیه برگردانی وقتی مسیر خراب شده.\nعملکرد: Reset all را فقط وقتی مطمئنی بزن؛ برگشت سخت است.",
+        "en": "Design goal: Reset all servers when the path is broken.\nBehavior: Use Reset all only when sure; it is hard to undo.",
+        "ru": "Design goal: Reset all servers when the path is broken.\nBehavior: Use Reset all only when sure; it is hard to undo.",
+        "zh": "Design goal: Reset all servers when the path is broken.\nBehavior: Use Reset all only when sure; it is hard to undo."
+      },
+      "summary": {
+        "fa": "ریست همه سرورها.",
+        "en": "Reset all servers.",
+        "ru": "Reset all servers.",
+        "zh": "Reset all servers."
+      },
+      "emoji": "♻️"
+    },
+    {
+      "id": "check_system",
+      "title": {
+        "fa": "بررسی سیستم",
+        "en": "Check system",
+        "ru": "Check system",
+        "zh": "Check system"
+      },
+      "media_slot": "check-system",
+      "howto": {
+        "fa": "هدف طراحی: قبل از نصب بفهمی سیستم آماده است یا نه.\nعملکرد: Check system را بزن و هشدارها را بخوان.",
+        "en": "Design goal: See if the system is ready before install.\nBehavior: Run Check system and read the warnings.",
+        "ru": "Design goal: See if the system is ready before install.\nBehavior: Run Check system and read the warnings.",
+        "zh": "Design goal: See if the system is ready before install.\nBehavior: Run Check system and read the warnings."
+      },
+      "summary": {
+        "fa": "چک آمادگی سیستم.",
+        "en": "System readiness check.",
+        "ru": "System readiness check.",
+        "zh": "System readiness check."
+      },
+      "emoji": "🩺"
+    },
+    {
+      "id": "panel_inbound",
+      "title": {
+        "fa": "Inbound پنل",
+        "en": "Panel inbound",
+        "ru": "Panel inbound",
+        "zh": "Panel inbound"
+      },
+      "media_slot": "panel-inbound-proto",
+      "related_media_slots": [
+        "panel-inbound-port"
+      ],
+      "howto": {
+        "fa": "هدف طراحی: ورودی پنل را درست تنظیم کنی.\nعملکرد: پروتکل و پورت inbound را از همین بخش بچین.",
+        "en": "Design goal: Configure panel inbound correctly.\nBehavior: Set inbound protocol and port in this section.",
+        "ru": "Design goal: Configure panel inbound correctly.\nBehavior: Set inbound protocol and port in this section.",
+        "zh": "Design goal: Configure panel inbound correctly.\nBehavior: Set inbound protocol and port in this section."
+      },
+      "summary": {
+        "fa": "تنظیم inbound پنل.",
+        "en": "Configure panel inbound.",
+        "ru": "Configure panel inbound.",
+        "zh": "Configure panel inbound."
+      },
+      "emoji": "📥"
+    },
+    {
+      "id": "panel_outbound",
+      "title": {
+        "fa": "Outbound پنل",
+        "en": "Panel outbound",
+        "ru": "Panel outbound",
+        "zh": "Panel outbound"
+      },
+      "media_slot": "panel-outbound",
+      "howto": {
+        "fa": "هدف طراحی: خروجی پنل به سمت سرورها درست باشد.\nعملکرد: Outbound servers را در پنل تنظیم کن.",
+        "en": "Design goal: Point panel outbound at the right servers.\nBehavior: Configure outbound servers in the panel.",
+        "ru": "Design goal: Point panel outbound at the right servers.\nBehavior: Configure outbound servers in the panel.",
+        "zh": "Design goal: Point panel outbound at the right servers.\nBehavior: Configure outbound servers in the panel."
+      },
+      "summary": {
+        "fa": "تنظیم outbound پنل.",
+        "en": "Configure panel outbound.",
+        "ru": "Configure panel outbound.",
+        "zh": "Configure panel outbound."
+      },
+      "emoji": "📤"
+    },
+    {
+      "id": "panel_manager",
+      "title": {
+        "fa": "مدیریت پنل",
+        "en": "Panel manager",
+        "ru": "Panel manager",
+        "zh": "Panel manager"
+      },
+      "media_slot": "panel-manager",
+      "howto": {
+        "fa": "هدف طراحی: عملیات روزمره پنل را از یکجا انجام بدهی.\nعملکرد: Panel manager را باز کن و کار لازم را بزن.",
+        "en": "Design goal: Do day-to-day panel actions in one place.\nBehavior: Open Panel manager and run the needed action.",
+        "ru": "Design goal: Do day-to-day panel actions in one place.\nBehavior: Open Panel manager and run the needed action.",
+        "zh": "Design goal: Do day-to-day panel actions in one place.\nBehavior: Open Panel manager and run the needed action."
+      },
+      "summary": {
+        "fa": "مدیریت پنل.",
+        "en": "Panel manager.",
+        "ru": "Panel manager.",
+        "zh": "Panel manager."
+      },
+      "emoji": "🛠️"
+    },
+    {
+      "id": "restore_panel",
+      "title": {
+        "fa": "بازیابی پنل",
+        "en": "Restore panel",
+        "ru": "Restore panel",
+        "zh": "Restore panel"
+      },
+      "media_slot": "restore-panel",
+      "howto": {
+        "fa": "هدف طراحی: پنل را از بکاپ برگردانی.\nعملکرد: فایل یا منبع بکاپ را بده و Restore را تأیید کن.",
+        "en": "Design goal: Restore the panel from a backup.\nBehavior: Provide the backup source and confirm Restore.",
+        "ru": "Design goal: Restore the panel from a backup.\nBehavior: Provide the backup source and confirm Restore.",
+        "zh": "Design goal: Restore the panel from a backup.\nBehavior: Provide the backup source and confirm Restore."
+      },
+      "summary": {
+        "fa": "ریستور پنل.",
+        "en": "Restore panel.",
+        "ru": "Restore panel.",
+        "zh": "Restore panel."
+      },
+      "emoji": "⏪"
+    },
+    {
+      "id": "factory_reset",
+      "title": {
+        "fa": "ریست کارخانه‌ای پنل",
+        "en": "Factory reset panel",
+        "ru": "Factory reset panel",
+        "zh": "Factory reset panel"
+      },
+      "media_slot": "factory-reset-panel",
+      "howto": {
+        "fa": "هدف طراحی: پنل را کامل صفر کنی وقتی چاره دیگری نمانده.\nعملکرد: Factory reset را فقط با آگاهی از پاک شدن تنظیمات بزن.",
+        "en": "Design goal: Fully zero the panel when nothing else works.\nBehavior: Use Factory reset only knowing settings will be wiped.",
+        "ru": "Design goal: Fully zero the panel when nothing else works.\nBehavior: Use Factory reset only knowing settings will be wiped.",
+        "zh": "Design goal: Fully zero the panel when nothing else works.\nBehavior: Use Factory reset only knowing settings will be wiped."
+      },
+      "summary": {
+        "fa": "ریست کارخانه‌ای.",
+        "en": "Factory reset.",
+        "ru": "Factory reset.",
+        "zh": "Factory reset."
+      },
+      "emoji": "⚠️"
+    },
+    {
+      "id": "domain_dns",
+      "title": {
+        "fa": "دامنه و DNS",
+        "en": "Domain and DNS",
+        "ru": "Domain and DNS",
+        "zh": "Domain and DNS"
+      },
+      "media_slot": "domain-dns",
+      "howto": {
+        "fa": "هدف طراحی: دامنه را به مسیر سرور وصل کنی.\nعملکرد: رکوردهای DNS را طبق راهنمای همین صفحه تنظیم کن.",
+        "en": "Design goal: Point the domain at your server path.\nBehavior: Set DNS records as shown on this screen.",
+        "ru": "Design goal: Point the domain at your server path.\nBehavior: Set DNS records as shown on this screen.",
+        "zh": "Design goal: Point the domain at your server path.\nBehavior: Set DNS records as shown on this screen."
+      },
+      "summary": {
+        "fa": "تنظیم دامنه و DNS.",
+        "en": "Domain and DNS setup.",
+        "ru": "Domain and DNS setup.",
+        "zh": "Domain and DNS setup."
+      },
+      "emoji": "🌐"
+    },
+    {
+      "id": "free_domain",
+      "title": {
+        "fa": "دامنه رایگان",
+        "en": "Free domain",
+        "ru": "Free domain",
+        "zh": "Free domain"
+      },
+      "media_slot": "free-domain",
+      "howto": {
+        "fa": "هدف طراحی: از سهمیه دامنه رایگان مد Pro/AI Pro استفاده کنی.\nعملکرد: Free Domain را باز کن و ساب‌دامین را طبق سهمیه بگیر.",
+        "en": "Design goal: Use the Pro/AI Pro free-domain quota.\nBehavior: Open Free Domain and claim a subdomain within quota.",
+        "ru": "Design goal: Use the Pro/AI Pro free-domain quota.\nBehavior: Open Free Domain and claim a subdomain within quota.",
+        "zh": "Design goal: Use the Pro/AI Pro free-domain quota.\nBehavior: Open Free Domain and claim a subdomain within quota."
+      },
+      "summary": {
+        "fa": "دریافت دامنه رایگان.",
+        "en": "Get a free domain.",
+        "ru": "Get a free domain.",
+        "zh": "Get a free domain."
+      },
+      "emoji": "🎁"
+    },
+    {
+      "id": "cdn",
+      "title": {
+        "fa": "CDN",
+        "en": "CDN",
+        "ru": "CDN",
+        "zh": "CDN"
+      },
+      "media_slot": "cdn-cloudflare",
+      "related_media_slots": [
+        "cdn-arvan",
+        "cdn-other"
+      ],
+      "howto": {
+        "fa": "هدف طراحی: ترافیک را از CDN عبور بدهی.\nعملکرد: بین Cloudflare، ابرآروان یا گزینه دیگر یکی را بچین.",
+        "en": "Design goal: Route traffic through a CDN.\nBehavior: Pick Cloudflare, Arvan, or another CDN option.",
+        "ru": "Design goal: Route traffic through a CDN.\nBehavior: Pick Cloudflare, Arvan, or another CDN option.",
+        "zh": "Design goal: Route traffic through a CDN.\nBehavior: Pick Cloudflare, Arvan, or another CDN option."
+      },
+      "summary": {
+        "fa": "تنظیم CDN.",
+        "en": "CDN setup.",
+        "ru": "CDN setup.",
+        "zh": "CDN setup."
+      },
+      "emoji": "☁️"
+    },
+    {
+      "id": "ip_access",
+      "title": {
+        "fa": "دسترسی IP",
+        "en": "IP access",
+        "ru": "IP access",
+        "zh": "IP access"
+      },
+      "media_slot": "ip-access",
+      "howto": {
+        "fa": "هدف طراحی: دسترسی را به IPهای مشخص محدود کنی.\nعملکرد: IP Access را روشن کن و لیست را تنظیم کن.",
+        "en": "Design goal: Limit access to chosen IPs.\nBehavior: Turn on IP Access and set the list.",
+        "ru": "Design goal: Limit access to chosen IPs.\nBehavior: Turn on IP Access and set the list.",
+        "zh": "Design goal: Limit access to chosen IPs.\nBehavior: Turn on IP Access and set the list."
+      },
+      "summary": {
+        "fa": "محدودسازی IP.",
+        "en": "IP access control.",
+        "ru": "IP access control.",
+        "zh": "IP access control."
+      },
+      "emoji": "🔒"
+    },
+    {
+      "id": "proxy",
+      "title": {
+        "fa": "پروکسی",
+        "en": "Proxy",
+        "ru": "Proxy",
+        "zh": "Proxy"
+      },
+      "media_slot": "proxy",
+      "howto": {
+        "fa": "هدف طراحی: در صورت نیاز از پروکسی استفاده کنی.\nعملکرد: تنظیمات Proxy را در همین صفحه وارد کن.",
+        "en": "Design goal: Use a proxy when needed.\nBehavior: Enter Proxy settings on this screen.",
+        "ru": "Design goal: Use a proxy when needed.\nBehavior: Enter Proxy settings on this screen.",
+        "zh": "Design goal: Use a proxy when needed.\nBehavior: Enter Proxy settings on this screen."
+      },
+      "summary": {
+        "fa": "تنظیم پروکسی.",
+        "en": "Proxy settings.",
+        "ru": "Proxy settings.",
+        "zh": "Proxy settings."
+      },
+      "emoji": "🕵️"
+    },
+    {
+      "id": "telegram_bot",
+      "title": {
+        "fa": "ربات تلگرام",
+        "en": "Telegram bot",
+        "ru": "Telegram bot",
+        "zh": "Telegram bot"
+      },
+      "media_slot": "telegram-bot",
+      "howto": {
+        "fa": "هدف طراحی: ربات تلگرام را به مسیر وصل کنی.\nعملکرد: از افزودن ربات تلگرام توکن و مراحل را کامل کن.",
+        "en": "Design goal: Attach a Telegram bot to the flow.\nBehavior: Complete token and steps in Add Telegram bot.",
+        "ru": "Design goal: Attach a Telegram bot to the flow.\nBehavior: Complete token and steps in Add Telegram bot.",
+        "zh": "Design goal: Attach a Telegram bot to the flow.\nBehavior: Complete token and steps in Add Telegram bot."
+      },
+      "summary": {
+        "fa": "افزودن ربات تلگرام.",
+        "en": "Add Telegram bot.",
+        "ru": "Add Telegram bot.",
+        "zh": "Add Telegram bot."
+      },
+      "emoji": "🤖"
+    },
+    {
+      "id": "mirza_bot",
+      "title": {
+        "fa": "میرزا بات",
+        "en": "Mirza bot",
+        "ru": "Mirza bot",
+        "zh": "Mirza bot"
+      },
+      "media_slot": "mirza-bot",
+      "howto": {
+        "fa": "هدف طراحی: میرزا بات را در مسیر داشته باشی.\nعملکرد: گزینه Mirza را باز کن و اتصال را انجام بده.",
+        "en": "Design goal: Include Mirza bot in the path.\nBehavior: Open Mirza and complete the connection.",
+        "ru": "Design goal: Include Mirza bot in the path.\nBehavior: Open Mirza and complete the connection.",
+        "zh": "Design goal: Include Mirza bot in the path.\nBehavior: Open Mirza and complete the connection."
+      },
+      "summary": {
+        "fa": "اتصال میرزا بات.",
+        "en": "Connect Mirza bot.",
+        "ru": "Connect Mirza bot.",
+        "zh": "Connect Mirza bot."
+      },
+      "emoji": "🦾"
+    },
+    {
+      "id": "smart_support",
+      "title": {
+        "fa": "Smart Support داخل اپ",
+        "en": "Smart Support in app",
+        "ru": "Smart Support in app",
+        "zh": "Smart Support in app"
+      },
+      "media_slot": "smart-support",
+      "howto": {
+        "fa": "هدف طراحی: از پشتیبانی هوشمند داخل VPS to VPN کمک بگیری.\nعملکرد: Smart Support Bot را از منوی اپ باز کن.",
+        "en": "Design goal: Get in-app smart support help.\nBehavior: Open Smart Support Bot from the app menu.",
+        "ru": "Design goal: Get in-app smart support help.\nBehavior: Open Smart Support Bot from the app menu.",
+        "zh": "Design goal: Get in-app smart support help.\nBehavior: Open Smart Support Bot from the app menu."
+      },
+      "summary": {
+        "fa": "ورود به Smart Support از اپ.",
+        "en": "Open Smart Support from the app.",
+        "ru": "Open Smart Support from the app.",
+        "zh": "Open Smart Support from the app."
+      },
+      "emoji": "💬"
+    },
+    {
+      "id": "settings",
+      "title": {
+        "fa": "تنظیمات VPS to VPN",
+        "en": "VPS to VPN settings",
+        "ru": "VPS to VPN settings",
+        "zh": "VPS to VPN settings"
+      },
+      "media_slot": "settings",
+      "howto": {
+        "fa": "هدف طراحی: ترجیح‌های برنامه را تنظیم کنی.\nعملکرد: Settings را باز کن و گزینه‌ها را ذخیره کن.",
+        "en": "Design goal: Adjust app preferences.\nBehavior: Open Settings and save your options.",
+        "ru": "Design goal: Adjust app preferences.\nBehavior: Open Settings and save your options.",
+        "zh": "Design goal: Adjust app preferences.\nBehavior: Open Settings and save your options."
+      },
+      "summary": {
+        "fa": "تنظیمات اپ.",
+        "en": "App settings.",
+        "ru": "App settings.",
+        "zh": "App settings."
+      },
+      "emoji": "⚙️"
+    },
+    {
+      "id": "view",
+      "title": {
+        "fa": "نمای وضعیت",
+        "en": "Status view",
+        "ru": "Status view",
+        "zh": "Status view"
+      },
+      "media_slot": "view",
+      "howto": {
+        "fa": "هدف طراحی: وضعیت فعلی را سریع ببینی.\nعملکرد: View را باز کن و خلاصه وضعیت را بخوان.",
+        "en": "Design goal: See current status quickly.\nBehavior: Open View and read the status summary.",
+        "ru": "Design goal: See current status quickly.\nBehavior: Open View and read the status summary.",
+        "zh": "Design goal: See current status quickly.\nBehavior: Open View and read the status summary."
+      },
+      "summary": {
+        "fa": "مشاهده وضعیت.",
+        "en": "View status.",
+        "ru": "View status.",
+        "zh": "View status."
+      },
+      "emoji": "👀"
+    },
+    {
+      "id": "contact",
+      "title": {
+        "fa": "تماس VPS to VPN",
+        "en": "VPS to VPN contact",
+        "ru": "VPS to VPN contact",
+        "zh": "VPS to VPN contact"
+      },
+      "media_slot": "contact",
+      "howto": {
+        "fa": "هدف طراحی: به پشتیبانی Black Fox برسی.\nعملکرد: از صفحه Contact راه ارتباط را باز کن.",
+        "en": "Design goal: Reach Black Fox support.\nBehavior: Open Contact and use the support path.",
+        "ru": "Design goal: Reach Black Fox support.\nBehavior: Open Contact and use the support path.",
+        "zh": "Design goal: Reach Black Fox support.\nBehavior: Open Contact and use the support path."
+      },
+      "summary": {
+        "fa": "تماس پشتیبانی.",
+        "en": "Support contact.",
+        "ru": "Support contact.",
+        "zh": "Support contact."
+      },
+      "emoji": "📞"
+    },
+    {
+      "id": "delete_history",
+      "title": {
+        "fa": "حذف تاریخچه محلی",
+        "en": "Delete local history",
+        "ru": "Delete local history",
+        "zh": "Delete local history"
+      },
+      "media_slot": "delete-history",
+      "howto": {
+        "fa": "هدف طراحی: تاریخچه محلی دستگاه را پاک کنی.\nعملکرد: Delete local history را بزن و تأیید کن.",
+        "en": "Design goal: Clear local device history.\nBehavior: Tap Delete local history and confirm.",
+        "ru": "Design goal: Clear local device history.\nBehavior: Tap Delete local history and confirm.",
+        "zh": "Design goal: Clear local device history.\nBehavior: Tap Delete local history and confirm."
+      },
+      "summary": {
+        "fa": "پاک کردن تاریخچه محلی.",
+        "en": "Delete local history.",
+        "ru": "Delete local history.",
+        "zh": "Delete local history."
+      },
+      "emoji": "🧹"
+    }
+  ],
+  "media": [
+    {
+      "role": "logo",
+      "slot": "product-logo",
+      "path": "products/vpn-installer/media/01-product-logo.jpg",
+      "local_folder": "products/vpn-installer/media",
+      "note": "لوگوی VPS to VPN",
+      "ai_guide": "لوگوی VPS to VPN. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "overview"
+      ],
+      "topics": [
+        "product logo",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "logo",
+      "slot": "brand-logo",
+      "path": "products/vpn-installer/media/02-brand-logo.jpg",
+      "local_folder": "products/vpn-installer/media",
+      "note": "لوگوی Black Fox Group",
+      "ai_guide": "لوگوی Black Fox Group. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "overview"
+      ],
+      "topics": [
+        "brand logo",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "logo",
+      "slot": "app-icon",
+      "path": "products/vpn-installer/media/03-app-icon.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "آیکون برنامه VPS to VPN",
+      "ai_guide": "آیکون برنامه VPS to VPN. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "overview"
+      ],
+      "topics": [
+        "app icon",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "basic-mode",
+      "path": "products/vpn-installer/media/04-basic-mode.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "مد Basic ویندوز",
+      "ai_guide": "مد Basic ویندوز. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "modes",
+        "basic_mode"
+      ],
+      "topics": [
+        "basic mode",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "basic-mode-android",
+      "path": "products/vpn-installer/media/05-basic-mode-android.jpg",
+      "local_folder": "products/vpn-installer/media",
+      "note": "مد Basic اندروید",
+      "ai_guide": "مد Basic اندروید. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "modes",
+        "basic_mode"
+      ],
+      "topics": [
+        "basic mode android",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "pro-mode",
+      "path": "products/vpn-installer/media/06-pro-mode.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "مد Pro ویندوز",
+      "ai_guide": "مد Pro ویندوز. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "modes",
+        "pro_mode"
+      ],
+      "topics": [
+        "pro mode",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "ai-pro-mode",
+      "path": "products/vpn-installer/media/07-ai-pro-mode.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "مد AI Pro ویندوز",
+      "ai_guide": "مد AI Pro ویندوز. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "modes",
+        "ai_pro_mode"
+      ],
+      "topics": [
+        "ai pro mode",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "ai-pro-mode-android",
+      "path": "products/vpn-installer/media/08-ai-pro-mode-android.jpg",
+      "local_folder": "products/vpn-installer/media",
+      "note": "مد AI Pro اندروید",
+      "ai_guide": "مد AI Pro اندروید. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "modes",
+        "ai_pro_mode"
+      ],
+      "topics": [
+        "ai pro mode android",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "registration",
+      "path": "products/vpn-installer/media/09-registration.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "ثبت لایسنس ویندوز",
+      "ai_guide": "ثبت لایسنس ویندوز. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "registration"
+      ],
+      "topics": [
+        "registration",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "registration-android",
+      "path": "products/vpn-installer/media/10-registration-android.jpg",
+      "local_folder": "products/vpn-installer/media",
+      "note": "ثبت لایسنس اندروید",
+      "ai_guide": "ثبت لایسنس اندروید. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "registration"
+      ],
+      "topics": [
+        "registration android",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "central-setup",
+      "path": "products/vpn-installer/media/11-central-setup.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "راه‌اندازی سرور مرکزی",
+      "ai_guide": "راه‌اندازی سرور مرکزی. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "central_setup"
+      ],
+      "topics": [
+        "central setup",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "full-deploy",
+      "path": "products/vpn-installer/media/12-full-deploy.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "دیپلوی کامل",
+      "ai_guide": "دیپلوی کامل. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "full_deploy"
+      ],
+      "topics": [
+        "full deploy",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "add-exit",
+      "path": "products/vpn-installer/media/13-add-exit.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "افزودن Exit Server",
+      "ai_guide": "افزودن Exit Server. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "exit_servers"
+      ],
+      "topics": [
+        "add exit",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "add-node",
+      "path": "products/vpn-installer/media/14-add-node.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "افزودن Node Server",
+      "ai_guide": "افزودن Node Server. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "node_servers"
+      ],
+      "topics": [
+        "add node",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "add-tunnel",
+      "path": "products/vpn-installer/media/15-add-tunnel.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "افزودن Tunnel Server",
+      "ai_guide": "افزودن Tunnel Server. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "tunnel_servers"
+      ],
+      "topics": [
+        "add tunnel",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "mesh-servers",
+      "path": "products/vpn-installer/media/16-mesh-servers.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "مش سرورها",
+      "ai_guide": "مش سرورها. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "mesh"
+      ],
+      "topics": [
+        "mesh servers",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "connection-manager",
+      "path": "products/vpn-installer/media/17-connection-manager.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "مدیریت اتصال سرورها",
+      "ai_guide": "مدیریت اتصال سرورها. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "connection_manager"
+      ],
+      "topics": [
+        "connection manager",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "move-central",
+      "path": "products/vpn-installer/media/18-move-central.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "جابجایی سرور مرکزی",
+      "ai_guide": "جابجایی سرور مرکزی. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "move_central"
+      ],
+      "topics": [
+        "move central",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "move-server",
+      "path": "products/vpn-installer/media/19-move-server.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "انتقال به سرور جدید",
+      "ai_guide": "انتقال به سرور جدید. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "move_server"
+      ],
+      "topics": [
+        "move server",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "delete-exit-node",
+      "path": "products/vpn-installer/media/20-delete-exit-node.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "حذف Exit و Node",
+      "ai_guide": "حذف Exit و Node. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "delete_servers"
+      ],
+      "topics": [
+        "delete exit node",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "reset-servers",
+      "path": "products/vpn-installer/media/21-reset-servers.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "ریست همه سرورها",
+      "ai_guide": "ریست همه سرورها. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "reset_servers"
+      ],
+      "topics": [
+        "reset servers",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "check-system",
+      "path": "products/vpn-installer/media/22-check-system.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "بررسی سیستم ویندوز",
+      "ai_guide": "بررسی سیستم ویندوز. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "check_system"
+      ],
+      "topics": [
+        "check system",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "check-system-android",
+      "path": "products/vpn-installer/media/23-check-system-android.jpg",
+      "local_folder": "products/vpn-installer/media",
+      "note": "بررسی سیستم اندروید",
+      "ai_guide": "بررسی سیستم اندروید. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "check_system"
+      ],
+      "topics": [
+        "check system android",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "panel-inbound-proto",
+      "path": "products/vpn-installer/media/24-panel-inbound-proto.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "پروتکل inbound پنل",
+      "ai_guide": "پروتکل inbound پنل. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "panel_inbound"
+      ],
+      "topics": [
+        "panel inbound proto",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "panel-inbound-port",
+      "path": "products/vpn-installer/media/25-panel-inbound-port.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "پورت inbound پنل",
+      "ai_guide": "پورت inbound پنل. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "panel_inbound"
+      ],
+      "topics": [
+        "panel inbound port",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "panel-outbound",
+      "path": "products/vpn-installer/media/26-panel-outbound.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "outbound سرورها در پنل",
+      "ai_guide": "outbound سرورها در پنل. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "panel_outbound"
+      ],
+      "topics": [
+        "panel outbound",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "panel-manager",
+      "path": "products/vpn-installer/media/27-panel-manager.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "مدیریت پنل",
+      "ai_guide": "مدیریت پنل. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "panel_manager"
+      ],
+      "topics": [
+        "panel manager",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "restore-panel",
+      "path": "products/vpn-installer/media/28-restore-panel.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "بازیابی پنل",
+      "ai_guide": "بازیابی پنل. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "restore_panel"
+      ],
+      "topics": [
+        "restore panel",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "factory-reset-panel",
+      "path": "products/vpn-installer/media/29-factory-reset-panel.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "ریست کارخانه‌ای پنل",
+      "ai_guide": "ریست کارخانه‌ای پنل. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "factory_reset"
+      ],
+      "topics": [
+        "factory reset panel",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "domain-dns",
+      "path": "products/vpn-installer/media/30-domain-dns.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "دامنه و DNS",
+      "ai_guide": "دامنه و DNS. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "domain_dns"
+      ],
+      "topics": [
+        "domain dns",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "free-domain",
+      "path": "products/vpn-installer/media/31-free-domain.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "دامنه رایگان",
+      "ai_guide": "دامنه رایگان. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "free_domain"
+      ],
+      "topics": [
+        "free domain",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "cdn-arvan",
+      "path": "products/vpn-installer/media/32-cdn-arvan.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "CDN ابرآروان",
+      "ai_guide": "CDN ابرآروان. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "cdn"
+      ],
+      "topics": [
+        "cdn arvan",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "cdn-cloudflare",
+      "path": "products/vpn-installer/media/33-cdn-cloudflare.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "CDN کلودفلر",
+      "ai_guide": "CDN کلودفلر. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "cdn"
+      ],
+      "topics": [
+        "cdn cloudflare",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "cdn-other",
+      "path": "products/vpn-installer/media/34-cdn-other.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "CDN دیگر",
+      "ai_guide": "CDN دیگر. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "cdn"
+      ],
+      "topics": [
+        "cdn other",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "ip-access",
+      "path": "products/vpn-installer/media/35-ip-access.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "محدودیت IP",
+      "ai_guide": "محدودیت IP. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "ip_access"
+      ],
+      "topics": [
+        "ip access",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "ip-access-on",
+      "path": "products/vpn-installer/media/36-ip-access-on.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "IP Access روشن",
+      "ai_guide": "IP Access روشن. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "ip_access"
+      ],
+      "topics": [
+        "ip access on",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "proxy",
+      "path": "products/vpn-installer/media/37-proxy.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "پروکسی",
+      "ai_guide": "پروکسی. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "proxy"
+      ],
+      "topics": [
+        "proxy",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "telegram-bot",
+      "path": "products/vpn-installer/media/38-telegram-bot.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "افزودن ربات تلگرام",
+      "ai_guide": "افزودن ربات تلگرام. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "telegram_bot"
+      ],
+      "topics": [
+        "telegram bot",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "mirza-bot",
+      "path": "products/vpn-installer/media/39-mirza-bot.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "میرزا بات",
+      "ai_guide": "میرزا بات. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "mirza_bot"
+      ],
+      "topics": [
+        "mirza bot",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "smart-support",
+      "path": "products/vpn-installer/media/40-smart-support.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "Smart Support Bot داخل اپ",
+      "ai_guide": "Smart Support Bot داخل اپ. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "smart_support"
+      ],
+      "topics": [
+        "smart support",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "settings",
+      "path": "products/vpn-installer/media/41-settings.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "تنظیمات ویندوز",
+      "ai_guide": "تنظیمات ویندوز. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "settings"
+      ],
+      "topics": [
+        "settings",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "settings-android",
+      "path": "products/vpn-installer/media/42-settings-android.jpg",
+      "local_folder": "products/vpn-installer/media",
+      "note": "تنظیمات اندروید",
+      "ai_guide": "تنظیمات اندروید. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "settings"
+      ],
+      "topics": [
+        "settings android",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "view",
+      "path": "products/vpn-installer/media/43-view.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "نمای وضعیت ویندوز",
+      "ai_guide": "نمای وضعیت ویندوز. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "view"
+      ],
+      "topics": [
+        "view",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "view-android",
+      "path": "products/vpn-installer/media/44-view-android.jpg",
+      "local_folder": "products/vpn-installer/media",
+      "note": "نمای وضعیت اندروید",
+      "ai_guide": "نمای وضعیت اندروید. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "view"
+      ],
+      "topics": [
+        "view android",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "contact",
+      "path": "products/vpn-installer/media/45-contact.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "تماس ویندوز",
+      "ai_guide": "تماس ویندوز. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "contact"
+      ],
+      "topics": [
+        "contact",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "contact-android",
+      "path": "products/vpn-installer/media/46-contact-android.jpg",
+      "local_folder": "products/vpn-installer/media",
+      "note": "تماس اندروید",
+      "ai_guide": "تماس اندروید. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "contact"
+      ],
+      "topics": [
+        "contact android",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "delete-history",
+      "path": "products/vpn-installer/media/47-delete-history.png",
+      "local_folder": "products/vpn-installer/media",
+      "note": "حذف تاریخچه محلی",
+      "ai_guide": "حذف تاریخچه محلی. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.",
+      "feature_ids": [
+        "delete_history"
+      ],
+      "topics": [
+        "delete history",
+        "vps to vpn",
+        "vpn installer"
+      ]
+    }
+  ]
+}

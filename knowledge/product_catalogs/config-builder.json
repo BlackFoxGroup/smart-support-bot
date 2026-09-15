@@ -1,0 +1,376 @@
+{
+  "schema_version": 2,
+  "catalog_id": "config-builder",
+  "product_id": "config-builder",
+  "enabled": true,
+  "catalog_enabled": true,
+  "menu_emoji": "🛠️",
+  "menu_order": 30,
+  "updated_at": "2026-09-15T00:25:14Z",
+  "title": {
+    "fa": "Config Builder",
+    "en": "Config Builder",
+    "ru": "Config Builder",
+    "zh": "Config Builder"
+  },
+  "short_summary": {
+    "fa": "Config Builder برای ساخت کانفیگ کلاینت روی پنل‌های 3X-UI است؛ تکی، گروهی، لینک و QR.",
+    "en": "Config Builder creates client configs on 3X-UI panels — single, bulk, link and QR.",
+    "ru": "Config Builder creates client configs on 3X-UI panels — single, bulk, link and QR.",
+    "zh": "Config Builder creates client configs on 3X-UI panels — single, bulk, link and QR."
+  },
+  "long_summary": {
+    "fa": "با Config Builder به پنل وصل می‌شوی، کانفیگ تکی یا گروهی می‌سازی، زبان و تنظیمات را عوض می‌کنی. عکس‌های هر بخش در کاتالوگ است تا وقتی کاربر «عکس» یا همان بخش را بخواهد، ربات تصویر درست را بفرستد.",
+    "en": "Connect to the panel, build single or bulk configs, change language and settings. Each section has a catalog screenshot so Ask AI can send the right photo.",
+    "ru": "Connect to the panel, build single or bulk configs, change language and settings. Each section has a catalog screenshot so Ask AI can send the right photo.",
+    "zh": "Connect to the panel, build single or bulk configs, change language and settings. Each section has a catalog screenshot so Ask AI can send the right photo."
+  },
+  "keywords": {
+    "fa": [
+      "کانفیگ",
+      "config builder",
+      "3x-ui",
+      "ساخت کانفیگ",
+      "کیوآر",
+      "گروهی",
+      "لیست",
+      "صفحه لیست",
+      "حذف کانفیگ"
+    ],
+    "en": [
+      "config builder",
+      "3x-ui",
+      "qr",
+      "bulk",
+      "panel",
+      "client config",
+      "list",
+      "config list",
+      "delete config"
+    ]
+  },
+  "does_not": {
+    "fa": "جای نصب VPS to VPN یا Expert Installer نیست؛ فقط ساخت کانفیگ کلاینت است.",
+    "en": "Not VPS to VPN install or Expert Installer — client config building only.",
+    "ru": "Not VPS to VPN install or Expert Installer — client config building only.",
+    "zh": "Not VPS to VPN install or Expert Installer — client config building only."
+  },
+  "support": {
+    "fa": "سوال از AI را روی محصول Config Builder بزن.",
+    "en": "Use Ask AI on the Config Builder product.",
+    "ru": "Use Ask AI on the Config Builder product.",
+    "zh": "Use Ask AI on the Config Builder product."
+  },
+  "platforms": [
+    "windows",
+    "android"
+  ],
+  "features": [
+    {
+      "id": "languages",
+      "emoji": "🌐",
+      "title": {
+        "fa": "زبان‌های پشتیبانی‌شده",
+        "en": "Supported languages",
+        "ru": "Supported languages",
+        "zh": "Supported languages"
+      },
+      "media_slot": "language",
+      "howto": {
+        "fa": "هدف طراحی: بدانی Config Builder با چه زبان‌هایی کار می‌کند (فارسی، انگلیسی).\nرفتار: از تغییر زبان / تنظیمات زبان یکی از این‌ها را انتخاب کن: فارسی، انگلیسی.",
+        "en": "Design goal: Know which languages Config Builder supports (Persian, English).\nBehavior: Pick one of these in language settings: Persian, English.",
+        "ru": "Design goal: Know which languages Config Builder supports (Persian, English).\nBehavior: Pick one of these in language settings: Persian, English.",
+        "zh": "Design goal: Know which languages Config Builder supports (Persian, English).\nBehavior: Pick one of these in language settings: Persian, English."
+      },
+      "summary": {
+        "fa": "زبان‌ها: فارسی، انگلیسی",
+        "en": "Languages: Persian, English",
+        "ru": "Languages: Persian, English",
+        "zh": "Languages: Persian, English"
+      }
+    },
+    {
+      "id": "connection",
+      "title": {
+        "fa": "اتصال به پنل",
+        "en": "Panel connection",
+        "ru": "Panel connection",
+        "zh": "Panel connection"
+      },
+      "media_slot": "connection",
+      "howto": {
+        "fa": "هدف طراحی: Config Builder به پنل 3X-UI وصل شود تا کانفیگ واقعی بسازد.\nعملکرد: آدرس پنل، کاربر و رمز را بزن؛ اگر API Key بدهی ساخت سریع‌تر می‌شود. Sub URL را از یک کانفیگ قبلی کپی کن تا دامنه درست تشخیص داده شود.",
+        "en": "Design goal: Connect Config Builder to a 3X-UI panel for real configs.\nBehavior: Enter panel URL, user and password; an API key speeds creation. Paste a prior Sub URL so the domain is detected correctly.",
+        "ru": "Design goal: Connect Config Builder to a 3X-UI panel for real configs.\nBehavior: Enter panel URL, user and password; an API key speeds creation. Paste a prior Sub URL so the domain is detected correctly.",
+        "zh": "Design goal: Connect Config Builder to a 3X-UI panel for real configs.\nBehavior: Enter panel URL, user and password; an API key speeds creation. Paste a prior Sub URL so the domain is detected correctly."
+      },
+      "summary": {
+        "fa": "ورود به پنل برای ساخت کانفیگ.",
+        "en": "Sign in to the panel to build configs.",
+        "ru": "Sign in to the panel to build configs.",
+        "zh": "Sign in to the panel to build configs."
+      },
+      "emoji": "🔌"
+    },
+    {
+      "id": "single_create",
+      "title": {
+        "fa": "ساخت تکی",
+        "en": "Single create",
+        "ru": "Single create",
+        "zh": "Single create"
+      },
+      "media_slot": "single",
+      "howto": {
+        "fa": "هدف طراحی: یک کانفیگ تمیز برای یک کاربر بسازی.\nعملکرد: گزینه‌ها را تنظیم کن و لینک یا QR را همان‌جا بگیر.",
+        "en": "Design goal: Build one clean config for one user.\nBehavior: Set the options and get the link or QR on the same screen.",
+        "ru": "Design goal: Build one clean config for one user.\nBehavior: Set the options and get the link or QR on the same screen.",
+        "zh": "Design goal: Build one clean config for one user.\nBehavior: Set the options and get the link or QR on the same screen."
+      },
+      "summary": {
+        "fa": "ساخت یک کانفیگ تکی.",
+        "en": "Create a single config.",
+        "ru": "Create a single config.",
+        "zh": "Create a single config."
+      },
+      "emoji": "1️⃣"
+    },
+    {
+      "id": "bulk_create",
+      "title": {
+        "fa": "ساخت گروهی",
+        "en": "Bulk create",
+        "ru": "Bulk create",
+        "zh": "Bulk create"
+      },
+      "media_slot": "bulk",
+      "howto": {
+        "fa": "هدف طراحی: چند کانفیگ را یک‌جا برای چند کاربر بسازی.\nعملکرد: تعداد و الگو را بده تا لیست لینک‌ها آماده شود.",
+        "en": "Design goal: Create several configs in one pass.\nBehavior: Set count and pattern so the link list is ready.",
+        "ru": "Design goal: Create several configs in one pass.\nBehavior: Set count and pattern so the link list is ready.",
+        "zh": "Design goal: Create several configs in one pass.\nBehavior: Set count and pattern so the link list is ready."
+      },
+      "summary": {
+        "fa": "ساخت چند کانفیگ با هم.",
+        "en": "Create multiple configs together.",
+        "ru": "Create multiple configs together.",
+        "zh": "Create multiple configs together."
+      },
+      "emoji": "📦"
+    },
+    {
+      "id": "list_page",
+      "emoji": "📋",
+      "title": {
+        "fa": "معرفی صفحه لیست",
+        "en": "List page overview",
+        "ru": "List page overview",
+        "zh": "List page overview"
+      },
+      "media_slot": "",
+      "howto": {
+        "fa": "هدف طراحی: سابقه کانفیگ‌هایی که با Config Builder روی همین دستگاه ساخته‌ای را ببینی و مدیریت کنی.\nعملکرد: تب List را باز کن. از منوی سه‌نقطه (یا انتخاب چندتایی) لینک را کپی کن، از پنل حذف کن (نیاز به اتصال فعال)، یا فقط از لیست محلی پاک کن. در نسخه فعلی ویرایش کانفیگ داخل اپ نیست.",
+        "en": "Design goal: Review and manage configs created with Config Builder on this device.\nBehavior: Open the List tab. From the three-dot menu (or multi-select) copy a link, delete from the panel (needs an active connection), or remove from the local list only. There is no in-app edit-config flow in the current release.",
+        "ru": "Design goal: Review and manage configs created with Config Builder on this device.\nBehavior: Open the List tab. From the three-dot menu (or multi-select) copy a link, delete from the panel (needs an active connection), or remove from the local list only. There is no in-app edit-config flow in the current release.",
+        "zh": "Design goal: Review and manage configs created with Config Builder on this device.\nBehavior: Open the List tab. From the three-dot menu (or multi-select) copy a link, delete from the panel (needs an active connection), or remove from the local list only. There is no in-app edit-config flow in the current release."
+      },
+      "summary": {
+        "fa": "تب List: سابقه محلی، کپی لینک، حذف از پنل یا از لیست.",
+        "en": "List tab: local history, copy link, delete from panel or list.",
+        "ru": "List tab: local history, copy link, delete from panel or list.",
+        "zh": "List tab: local history, copy link, delete from panel or list."
+      }
+    },
+    {
+      "id": "language",
+      "title": {
+        "fa": "زبان",
+        "en": "Language",
+        "ru": "Language",
+        "zh": "Language"
+      },
+      "media_slot": "language",
+      "howto": {
+        "fa": "هدف طراحی: زبان رابط را با کاربر هماهنگ کنی.\nعملکرد: زبان را عوض کن؛ بقیه منوها همان ساختار را دارند.",
+        "en": "Design goal: Match the UI language to the user.\nBehavior: Switch language; the rest of the menus keep the same structure.",
+        "ru": "Design goal: Match the UI language to the user.\nBehavior: Switch language; the rest of the menus keep the same structure.",
+        "zh": "Design goal: Match the UI language to the user.\nBehavior: Switch language; the rest of the menus keep the same structure."
+      },
+      "summary": {
+        "fa": "تغییر زبان برنامه.",
+        "en": "Change app language.",
+        "ru": "Change app language.",
+        "zh": "Change app language."
+      },
+      "emoji": "🌐"
+    },
+    {
+      "id": "settings",
+      "title": {
+        "fa": "تنظیمات Config Builder",
+        "en": "Config Builder settings",
+        "ru": "Config Builder settings",
+        "zh": "Config Builder settings"
+      },
+      "media_slot": "settings",
+      "howto": {
+        "fa": "هدف طراحی: رفتار پیش‌فرض ساخت کانفیگ را یک‌بار درست بچینی.\nعملکرد: مقادیر پیش‌فرض و ترجیح‌های ساخت را از این صفحه ذخیره کن.",
+        "en": "Design goal: Set default config-building behavior once.\nBehavior: Save defaults and build preferences on this screen.",
+        "ru": "Design goal: Set default config-building behavior once.\nBehavior: Save defaults and build preferences on this screen.",
+        "zh": "Design goal: Set default config-building behavior once.\nBehavior: Save defaults and build preferences on this screen."
+      },
+      "summary": {
+        "fa": "تنظیمات پیش‌فرض Config Builder.",
+        "en": "Config Builder defaults.",
+        "ru": "Config Builder defaults.",
+        "zh": "Config Builder defaults."
+      },
+      "emoji": "⚙️"
+    },
+    {
+      "id": "contact",
+      "title": {
+        "fa": "تماس Config Builder",
+        "en": "Config Builder contact",
+        "ru": "Config Builder contact",
+        "zh": "Config Builder contact"
+      },
+      "media_slot": "contact",
+      "howto": {
+        "fa": "هدف طراحی: اگر جایی گیر کردی سریع به پشتیبانی برسی.\nعملکرد: از این صفحه راه‌های تماس را باز کن.",
+        "en": "Design goal: Reach support quickly when stuck.\nBehavior: Open contact options from this page.",
+        "ru": "Design goal: Reach support quickly when stuck.\nBehavior: Open contact options from this page.",
+        "zh": "Design goal: Reach support quickly when stuck.\nBehavior: Open contact options from this page."
+      },
+      "summary": {
+        "fa": "پشتیبانی Config Builder.",
+        "en": "Config Builder support contacts.",
+        "ru": "Config Builder support contacts.",
+        "zh": "Config Builder support contacts."
+      },
+      "emoji": "📞"
+    }
+  ],
+  "media": [
+    {
+      "role": "logo",
+      "slot": "product-logo",
+      "path": "products/config-builder/media/00-product-logo.png",
+      "local_folder": "products/config-builder/media",
+      "note": "لوگوی Config Builder",
+      "ai_guide": "لوگوی Config Builder. وقتی لوگو یا ظاهر محصول را خواستند همین را بفرست.",
+      "feature_ids": [
+        "languages",
+        "overview",
+        "suite_overview"
+      ],
+      "topics": [
+        "logo",
+        "brand",
+        "config-builder"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "connection",
+      "path": "products/config-builder/media/01-connection.jpg",
+      "local_folder": "products/config-builder/media",
+      "note": "اتصال به پنل 3X-UI",
+      "ai_guide": "اتصال به پنل 3X-UI — برای سوال همین بخش همین عکس را بفرست.",
+      "feature_ids": [
+        "connection"
+      ],
+      "topics": [
+        "connection",
+        "config builder",
+        "3x-ui",
+        "کانفیگ"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "single",
+      "path": "products/config-builder/media/02-single.jpg",
+      "local_folder": "products/config-builder/media",
+      "note": "ساخت تکی کانفیگ",
+      "ai_guide": "ساخت تکی کانفیگ — برای سوال همین بخش همین عکس را بفرست.",
+      "feature_ids": [
+        "single_create"
+      ],
+      "topics": [
+        "single",
+        "config builder",
+        "3x-ui",
+        "کانفیگ"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "bulk",
+      "path": "products/config-builder/media/03-bulk.jpg",
+      "local_folder": "products/config-builder/media",
+      "note": "ساخت گروهی کانفیگ",
+      "ai_guide": "ساخت گروهی کانفیگ — برای سوال همین بخش همین عکس را بفرست.",
+      "feature_ids": [
+        "bulk_create"
+      ],
+      "topics": [
+        "bulk",
+        "config builder",
+        "3x-ui",
+        "کانفیگ"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "language",
+      "path": "products/config-builder/media/04-language.jpg",
+      "local_folder": "products/config-builder/media",
+      "note": "انتخاب زبان برنامه",
+      "ai_guide": "انتخاب زبان برنامه — برای سوال همین بخش همین عکس را بفرست.",
+      "feature_ids": [
+        "language"
+      ],
+      "topics": [
+        "language",
+        "config builder",
+        "3x-ui",
+        "کانفیگ"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "settings",
+      "path": "products/config-builder/media/05-settings.jpg",
+      "local_folder": "products/config-builder/media",
+      "note": "تنظیمات Config Builder",
+      "ai_guide": "تنظیمات Config Builder — برای سوال همین بخش همین عکس را بفرست.",
+      "feature_ids": [
+        "settings"
+      ],
+      "topics": [
+        "settings",
+        "config builder",
+        "3x-ui",
+        "کانفیگ"
+      ]
+    },
+    {
+      "role": "screenshot",
+      "slot": "contact",
+      "path": "products/config-builder/media/06-contact.jpg",
+      "local_folder": "products/config-builder/media",
+      "note": "تماس و پشتیبانی Config Builder",
+      "ai_guide": "تماس و پشتیبانی Config Builder — برای سوال همین بخش همین عکس را بفرست.",
+      "feature_ids": [
+        "contact"
+      ],
+      "topics": [
+        "contact",
+        "config builder",
+        "3x-ui",
+        "کانفیگ"
+      ]
+    }
+  ]
+}

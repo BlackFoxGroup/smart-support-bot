@@ -23,9 +23,12 @@ data/manager_lang.txt
 data/live_catalog/
 data/live_catalog/**
 
-# Product catalogs, guides, and screenshots stay off GitHub
-/products/
-knowledge/product_catalogs/*.json
+# Product catalogs + media ARE published (secret-free). Keep bak/tmp out.
+products/**/*.bak
+products/**/*.bak-*
+products/**/__pycache__/
+knowledge/product_catalogs/*.bak
+knowledge/product_catalogs/*.bak-*
 knowledge/product_catalogs.examples/
 knowledge/product_guides/*.md
 !knowledge/product_guides/README.md

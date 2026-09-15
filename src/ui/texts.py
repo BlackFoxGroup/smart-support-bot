@@ -344,7 +344,7 @@ def help_text(lang: Lang) -> str:
     name = get_bot_display_name()
     table = {
         "fa": (
-            f"من {name} هستم — پشتیبانی محصول VPS to VPN از Black Fox Group.\n\n"
+            f"من {name} هستم — دستیار پشتیبانی هوشمند Black Fox Group.\n\n"
             "• از منو کاتالوگ محصول را انتخاب کنید\n"
             "• داخل همان محصول، «سوال از AI» را بزنید (پاسخ‌ها برای همان دسته است)\n"
             "• برای منوی اصلی دستور /menu را بفرستید\n"
@@ -353,7 +353,7 @@ def help_text(lang: Lang) -> str:
             f"پشتیبانی: {SUPPORT_HANDLE}"
         ),
         "en": (
-            f"I'm {name} — VPS to VPN product support by Black Fox Group.\n\n"
+            f"I'm {name} — Black Fox Group smart support.\n\n"
             "• Open a product catalog from the menu\n"
             "• Inside that product, tap Ask AI (answers stay in that category)\n"
             "• /menu — main menu\n"
@@ -362,7 +362,7 @@ def help_text(lang: Lang) -> str:
             f"Support: {SUPPORT_HANDLE}"
         ),
         "ru": (
-            f"Я {name} — поддержка продукта VPS to VPN (Black Fox Group).\n\n"
+            f"Я {name} — умный помощник поддержки Black Fox Group.\n\n"
             "• Откройте каталог продукта в меню\n"
             "• Внутри продукта нажмите «Спросить AI» (ответы по этой категории)\n"
             "• /menu — главное меню\n"
@@ -371,7 +371,7 @@ def help_text(lang: Lang) -> str:
             f"Поддержка: {SUPPORT_HANDLE}"
         ),
         "zh": (
-            f"我是 {name} — Black Fox Group 的 VPS to VPN 产品支持。\n\n"
+            f"我是 {name} — Black Fox Group 的智能支持助手。\n\n"
             "• 从菜单打开产品目录\n"
             "• 在该产品内点「向 AI 提问」（仅回答该分类）\n"
             "• /menu — 主菜单\n"
@@ -412,6 +412,14 @@ MENU_ASK_AI_FOOTER: dict[Lang, str] = {
         "如需询问本产品分类，请点「向 AI 提问」；"
         "回答仅针对本目录。"
     ),
+}
+
+# Expert Installer catalog only
+MENU_ASK_AI_FOOTER_EXPERT: dict[Lang, str] = {
+    "fa": "برای پرسش های بیشتر از گزینه «سوال از AI» استفاده کنید.",
+    "en": "For more questions, use “Ask AI”.",
+    "ru": "Для дополнительных вопросов используйте «Спросить AI».",
+    "zh": "如需更多问题，请使用「向 AI 提问」。",
 }
 
 INTRO_ABOUT: dict[Lang, str] = {
@@ -861,32 +869,20 @@ def bot_intro(lang: Lang) -> str:
     name = get_bot_display_name()
     table = {
         "fa": (
-            f"من {name} هستم — دستیار پشتیبانی محصول VPS to VPN در تلگرام.\n"
-            "اکانت من: @BlackFox_Agent_Bot\n\n"
-            "محصول VPS to VPN از Black Fox Group یک نصب‌کننده عملیاتی برای راه‌اندازی و مدیریت پنل 3X-UI مبتنی بر Xray "
-            "روی VPS شماست (نه VPN مصرفی با دکمهٔ وصل شو).\n\n"
-            "هر سؤالی دارید از من بپرسید؛ از منوی پایین هم می‌توانید موضوع را انتخاب کنید."
+            f"من {name} هستم — دستیار پشتیبانی هوشمند Black Fox Group در تلگرام.\n"
+            "اکانت من: @BlackFox_Agent_Bot"
         ),
         "en": (
-            f"I'm {name} — the Telegram product support assistant for VPS to VPN.\n"
-            "My account: @BlackFox_Agent_Bot\n\n"
-            "VPS to VPN by Black Fox Group is an operations installer for the Xray-based 3X-UI panel on your VPS "
-            "(not a consumer “connect” VPN app).\n\n"
-            "Ask me anything — or pick a menu topic below."
+            f"I'm {name} - Black Fox Group's smart support assistant on Telegram.\n"
+            "My account: @BlackFox_Agent_Bot"
         ),
         "ru": (
-            f"Я {name} — помощник поддержки VPS to VPN в Telegram.\n"
-            "Мой аккаунт: @BlackFox_Agent_Bot\n\n"
-            "VPS to VPN (Black Fox Group) — операционный установщик панели 3X-UI на базе Xray на вашем VPS "
-            "(не бытовой VPN).\n\n"
-            "Спрашивайте меня о чём угодно — или выберите тему в меню."
+            f"Я {name} - умный помощник поддержки Black Fox Group в Telegram.\n"
+            "Мой аккаунт: @BlackFox_Agent_Bot"
         ),
         "zh": (
-            f"我是 {name} — VPS to VPN 的 Telegram 产品支持助手。\n"
-            "我的账号：@BlackFox_Agent_Bot\n\n"
-            "VPS to VPN（Black Fox Group）是用于在您的 VPS 上部署管理基于 Xray 的 3X-UI 面板的操作安装器"
-            "（不是消费级一键 VPN）。\n\n"
-            "有问题尽管问我，也可从下方菜单选择主题。"
+            f"我是 {name} - Black Fox Group 的智能支持助手（Telegram）。\n"
+            "我的账号：@BlackFox_Agent_Bot"
         ),
     }
     return table.get(lang, table["en"])

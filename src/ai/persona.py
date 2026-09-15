@@ -304,6 +304,12 @@ def looks_like_prompt_dump(text: str) -> bool:
         return False
     if "<!-- begin" in raw or "<!-- end" in raw:
         return True
+    if "catalog teaching for" in raw:
+        return True
+    if "do not invent steps not listed here" in raw:
+        return True
+    if raw.count("## ") >= 2 and ("هدف طراحی" in raw or "design goal" in raw):
+        return True
     hits = sum(1 for m in _PROMPT_DUMP_MARKERS if m in raw)
     return hits >= 2
 

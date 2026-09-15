@@ -56,8 +56,17 @@ _MENU_STATIC: dict[str, dict[Lang, str]] = {
 }
 
 
-def _with_ai_footer(body: str, lang: Lang) -> str:
-    footer = texts.t(texts.MENU_ASK_AI_FOOTER, lang)
+def _with_ai_footer(
+    body: str,
+    lang: Lang,
+    *,
+    product_id: str | None = None,
+) -> str:
+    pid = (product_id or "").strip()
+    if pid == "telegram-bot-expert-installer":
+        footer = texts.t(texts.MENU_ASK_AI_FOOTER_EXPERT, lang)
+    else:
+        footer = texts.t(texts.MENU_ASK_AI_FOOTER, lang)
     if footer in body:
         return body
     return f"{body.rstrip()}\n\n{footer}"
@@ -202,7 +211,7 @@ def setup_menu_router(
                     "Tap a key in this section for its guide and photo. "
                     "Keys that affect both Bot and Expert say so in their text."
                 )
-            body = _with_ai_footer(body, lang)
+            body = _with_ai_footer(body, lang, product_id=pid)
             await message.answer(
                 body,
                 reply_markup=keyboards.catalog_section_keyboard(lang, pid, section),
@@ -217,6 +226,7 @@ def setup_menu_router(
             body = _with_ai_footer(
                 product.menu_body(lang) if product else texts.t(texts.MAIN_MENU_HINT, lang),
                 lang,
+                product_id=product_id,
             )
             # All products (including VPS to VPN) use catalog feature keys.
             await messaging.answer_with_media(
@@ -238,7 +248,7 @@ def setup_menu_router(
                     None,
                 )
                 if feature:
-                    body = _with_ai_footer(feature_body(product, feature, lang), lang)
+                    body = _with_ai_footer(feature_body(product, feature, lang), lang, product_id=pid)
                     media = catalog_photos_for(
                         settings.project_root,
                         pid,

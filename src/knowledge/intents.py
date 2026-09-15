@@ -295,6 +295,106 @@ def looks_identity(text: str) -> bool:
     return _looks_identity(text)
 
 
+def looks_creator(text: str) -> bool:
+    """True when the user asks about Black Fox / the product creator."""
+    t = (text or "").lower().strip()
+    markers = (
+        "سازنده",
+        "کی ساخته",
+        "چه کسی ساخته",
+        "کیه ساخته",
+        "black fox group",
+        "بلک فاکس",
+        "blackfox",
+        "درباره سازنده",
+        "تیم سازنده",
+        "who made",
+        "who created",
+        "who built",
+        "creator",
+        "about the creator",
+        "кто создал",
+        "создатель",
+        "谁做的",
+        "创作者",
+    )
+    return any(m in t for m in markers)
+
+
+
+def looks_usage_howto(text: str) -> bool:
+    """True when the user asks how to use / operate a product section (any phrasing)."""
+    t = (text or "").lower().strip()
+    markers = (
+        "چطور",
+        "چگونه",
+        "چه جوری",
+        "چهجوری",
+        "نحوه",
+        "آموزش",
+        "اموزش",
+        "استفاده",
+        "چیکار کنم",
+        "چی کار کنم",
+        "چکار کنم",
+        "مراحل",
+        "قدم به قدم",
+        "گام به گام",
+        "راهنما",
+        "کمکم کن",
+        "کمک کن",
+        "نمیدونم",
+        "نمی‌دونم",
+        "نمیتونم",
+        "نمی‌تونم",
+        "کار نمیکنه",
+        "کار نمی‌کنه",
+        "گیر کردم",
+        "از کجا",
+        "کجا بزنم",
+        "کدام دکمه",
+        "کدوم دکمه",
+        "how to",
+        "howto",
+        "how do i",
+        "how can i",
+        "how does",
+        "tutorial",
+        "steps",
+        "usage",
+        "use the",
+        "help me",
+        "where do i",
+        "which button",
+        "как ",
+        "как пользоваться",
+        "обучение",
+        "помоги",
+        "怎么用",
+        "如何使用",
+        "教程",
+        "怎么办",
+    )
+    return any(m in t for m in markers)
+
+
+
+def detect_reply_lang(text: str, fallback: str = "en") -> str:
+    """Infer reply language from the question text (not profile preference)."""
+    raw = text or ""
+    fb = (fallback or "en").strip().lower()[:2] or "en"
+    if re.search(r"[\u0600-\u06FF]", raw):
+        return "fa"
+    if re.search(r"[\u0400-\u04FF]", raw):
+        return "ru"
+    if re.search(r"[\u4E00-\u9FFF]", raw):
+        return "zh"
+    # Latin / English question
+    if re.search(r"[A-Za-z]", raw):
+        return "en"
+    return fb if fb in {"fa", "en", "ru", "zh"} else "en"
+
+
 def _looks_identity(text: str) -> bool:
     t = (text or "").lower().strip()
     markers = (
