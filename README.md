@@ -57,6 +57,13 @@ The package is **raw source + product catalogs + `ai_profile.json`**. It does **
 
 Product Ask AI works from each product’s `catalog.json` + `ai_profile.json` alone.
 
+
+## Product AI profile (`ai_profile.json`)
+
+Each product folder includes a small `ai_profile.json` next to `catalog.json`. It tells Ask AI how to answer for **that product only**: stay in product scope, prefer catalog howtos, attach linked catalog photos when available, answer in the question’s language, and use optional aliases for paraphrased questions.
+
+Expert/Manager creates this file automatically when you add, save, or activate a catalog. You do not need the Black Fox shared AI knowledge databases for product support answers.
+
 ## Requirements
 
 - Python 3.11 or newer
@@ -78,6 +85,8 @@ The installer asks for the Linux server login and Telegram token. It then:
 2. installs the bot and Expert together in `/opt/smart-support` on the server;
 3. activates and verifies both services;
 4. opens the local Expert in the browser.
+
+This command always downloads the current `deploy/install-suite.ps1` from `main` and the latest public suite zip linked inside that script (currently **v2.3**).
 
 Python 3.11 or newer must be installed on Windows. No other terminal command is required.
 The local Expert runs without a console window and stops after its last browser page is closed.
@@ -184,6 +193,13 @@ Smart Support Bot and Manager are maintained by Black Fox Group.
 
 این بسته **سورس خام + کاتالوگ محصولات + `ai_profile.json`** است. پایگاه‌های آمادهٔ دانش هوش مصنوعی بلک‌فاکس (`AI_Knowledge_Base_Multilingual` و `AI_BOT_DATABASE`) و فایل‌های رسانه‌ای/اسکرین‌شات محصولات داخل بسته نیستند (رسانه از طریق Expert/Manager اضافه می‌شود). هیچ رمز، توکن، کلید API، نشانی سرور، نام کاربری، اطلاعات کاربران یا فایل نشست تلگرام داخل آن قرار ندارد. Ask AI محصول فقط با `catalog.json` و `ai_profile.json` همان محصول کار می‌کند.
 
+
+## پروفایل هوش مصنوعی محصول (`ai_profile.json`)
+
+کنار هر `catalog.json` یک فایل سبک `ai_profile.json` هم هست. این فایل فقط برای **همان محصول** به Ask AI می‌گوید: داخل محدودهٔ محصول بماند، از howto کاتالوگ استفاده کند، در صورت وجود عکس مرتبط بفرستد، به زبان سؤال جواب دهد، و در صورت نیاز از alias برای سؤال‌های پارافریز استفاده کند.
+
+Expert/Manager هنگام افزودن، ذخیره یا فعال‌سازی کاتالوگ این فایل را خودکار می‌سازد. برای پاسخ پشتیبانی محصول به پایگاه‌های مشترک دانش هوش مصنوعی بلک‌فاکس نیاز نیست.
+
 ## پیش‌نیازها
 
 - پایتون نسخه ۳.۱۱ یا جدیدتر
@@ -205,6 +221,8 @@ irm https://raw.githubusercontent.com/BlackFoxGroup/smart-support-bot/main/deplo
 ۲. ربات و Expert را در مسیر `/opt/smart-support` روی سرور نصب می‌کند.
 ۳. هر دو سرویس را فعال و بررسی می‌کند.
 ۴. Expert محلی را در مرورگر باز می‌کند.
+
+این دستور همیشه آخرین `deploy/install-suite.ps1` را از شاخهٔ `main` می‌گیرد و همان زیپ عمومی که داخل اسکریپت لینک شده (الان **نسخه ۲٫۳**) را نصب می‌کند.
 
 پایتون نسخه ۳.۱۱ یا جدیدتر باید روی ویندوز نصب باشد. دستور دیگری لازم نیست.
 برنامه Expert بدون پنجره ترمینال اجرا می‌شود و پس از بسته‌شدن آخرین صفحه مرورگر آن متوقف می‌شود.

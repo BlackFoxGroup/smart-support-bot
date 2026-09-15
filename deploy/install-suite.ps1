@@ -29,9 +29,16 @@ try {
     Invoke-WebRequest -UseBasicParsing -Uri $PackageUrl -OutFile $ZipPath
     Expand-Archive -Path $ZipPath -DestinationPath $TempDir -Force
 
+    # Prefer the versioned folder from the latest zip; fall back to any smart-support-suite-* extract.
     $SourceDir = Join-Path $TempDir "smart-support-suite-v2.3"
     if (-not (Test-Path (Join-Path $SourceDir "requirements.txt"))) {
-        throw "The downloaded package is invalid."
+        $found = Get-ChildItem -Path $TempDir -Directory -Filter "smart-support-suite-*" -ErrorAction SilentlyContinue |
+            Where-Object { Test-Path (Join-Path $_.FullName "requirements.txt") } |
+            Select-Object -First 1
+        if ($found) { $SourceDir = $found.FullName }
+    }
+    if (-not (Test-Path (Join-Path $SourceDir "requirements.txt"))) {
+        throw "The downloaded package is invalid (missing requirements.txt)."
     }
 
     New-Item -ItemType Directory -Path $InstallDir -Force | Out-Null
