@@ -50,7 +50,7 @@ Source: [github.com/BlackFoxGroup/smart-support-bot](https://github.com/BlackFox
 
 Download the public package:
 
-[smart-support-suite-v2.1.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.1.zip)
+[smart-support-suite-v2.2.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.2.zip)
 
 The package contains the raw source for the bot and Manager. It does not contain passwords, tokens, API keys, server addresses, usernames, user data, or Telegram session files.
 
@@ -176,7 +176,7 @@ Smart Support Bot and Manager are maintained by Black Fox Group.
 
 بسته عمومی را از اینجا دریافت کنید:
 
-[smart-support-suite-v2.1.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.1.zip)
+[smart-support-suite-v2.2.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.2.zip)
 
 این بسته شامل سورس خام ربات و Manager است. هیچ رمز، توکن، کلید API، نشانی سرور، نام کاربری، اطلاعات کاربران یا فایل نشست تلگرام داخل آن قرار ندارد.
 
