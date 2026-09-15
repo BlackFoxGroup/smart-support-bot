@@ -33,7 +33,7 @@
 </div>
 
 
-Smart Support Bot is a Telegram support bot that answers product questions from an active catalog. Smart Support Manager 2.1 is the companion interface for creating, editing, publishing, and managing those catalogs with an OpenAI-compatible service.
+Smart Support Bot is a Telegram support bot that answers product questions from an active catalog. Smart Support Manager 2.3 is the companion interface for creating, editing, publishing, and managing those catalogs with an OpenAI-compatible service.
 
 Both programs use the same product directory on the server:
 
@@ -50,7 +50,7 @@ Source: [github.com/BlackFoxGroup/smart-support-bot](https://github.com/BlackFox
 
 Download the public package:
 
-[smart-support-suite-v2.2.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.2.zip)
+[smart-support-suite-v2.3.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.3.zip)
 
 The package contains the raw source for the bot and Manager. It does not contain passwords, tokens, API keys, server addresses, usernames, user data, or Telegram session files.
 
@@ -159,7 +159,7 @@ Smart Support Bot and Manager are maintained by Black Fox Group.
 
 # ربات و مدیر پشتیبانی هوشمند
 
-ربات `Smart Support Bot` با استفاده از کاتالوگ فعال به پرسش‌های کاربران درباره محصول پاسخ می‌دهد. برنامه `Smart Support Manager 2.1` محیط ساخت، ویرایش و انتشار کاتالوگ است و می‌تواند برای این کار از سرویس‌های سازگار با OpenAI استفاده کند.
+ربات `Smart Support Bot` با استفاده از کاتالوگ فعال به پرسش‌های کاربران درباره محصول پاسخ می‌دهد. برنامه `Smart Support Manager 2.3` محیط ساخت، ویرایش و انتشار کاتالوگ است و می‌تواند برای این کار از سرویس‌های سازگار با OpenAI استفاده کند.
 
 ربات و Manager از یک مسیر مشترک روی سرور استفاده می‌کنند:
 
@@ -176,7 +176,7 @@ Smart Support Bot and Manager are maintained by Black Fox Group.
 
 بسته عمومی را از اینجا دریافت کنید:
 
-[smart-support-suite-v2.2.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.2.zip)
+[smart-support-suite-v2.3.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.3.zip)
 
 این بسته شامل سورس خام ربات و Manager است. هیچ رمز، توکن، کلید API، نشانی سرور، نام کاربری، اطلاعات کاربران یا فایل نشست تلگرام داخل آن قرار ندارد.
 

@@ -62,8 +62,8 @@ from src.operation_control import begin_operation, stop_all_operations
 HOST = "127.0.0.1"
 PORT = int(os.getenv("MANAGER_PORT") or "8765")
 APP_NAME = (os.getenv("MANAGER_NAME") or "Smart Support Manager").strip()
-MANAGER_VERSION = (os.getenv("MANAGER_VERSION") or "2.1").strip()
-BOT_VERSION = (os.getenv("BOT_VERSION") or "2.0").strip()
+MANAGER_VERSION = (os.getenv("MANAGER_VERSION") or "2.3").strip()
+BOT_VERSION = (os.getenv("BOT_VERSION") or "2.3").strip()
 _DESKTOP_MODE = (os.getenv("MANAGER_DESKTOP_SESSION") or "").strip() == "1"
 _DESKTOP_TIMER: threading.Timer | None = None
 _DESKTOP_LOCK = threading.Lock()

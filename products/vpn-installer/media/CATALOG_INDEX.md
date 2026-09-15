@@ -8,7 +8,7 @@ When the user asks to see or send a photo, the bot attaches the file;
 the AI only describes it and must not claim it cannot send files.
 
 ## vpn-installer — VPS to VPN — Black Fox Group
-photo_count: 47
+photo_count: 49
 folder: products/vpn-installer/media/
 - file: products/vpn-installer/media/01-product-logo.jpg
   slot: product-logo
@@ -62,27 +62,27 @@ folder: products/vpn-installer/media/
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/11-central-setup.png
   slot: central-setup
-  topics: central setup, vps to vpn, vpn installer
+  topics: central setup, vps to vpn, vpn installer, سرور مرکزی, central server
   note: راه‌اندازی سرور مرکزی. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/12-full-deploy.png
   slot: full-deploy
-  topics: full deploy, vps to vpn, vpn installer
+  topics: full deploy, vps to vpn, vpn installer, دیپلوی کامل, fulldeploy
   note: دیپلوی کامل. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/13-add-exit.png
   slot: add-exit
-  topics: add exit, vps to vpn, vpn installer
-  note: افزودن Exit Server. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.
+  topics: add exit, vps to vpn, vpn installer, exit server, exit servers, سرور خروجی, خروجی, ثبت خروج
+  note: اسکرین Add Exit / سرور خروجی. وقتی کاربر درباره ثبت Exit، سرور خروجی، Add Exit پرسید یا گفت عکس بفرست، همین فایل را بفرست. حداکثر ۶ Exit؛ نیاز به لایسنس مد کاری.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/14-add-node.png
   slot: add-node
-  topics: add node, vps to vpn, vpn installer
+  topics: add node, vps to vpn, vpn installer, نود, node server
   note: افزودن Node Server. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/15-add-tunnel.png
   slot: add-tunnel
-  topics: add tunnel, vps to vpn, vpn installer
+  topics: add tunnel, vps to vpn, vpn installer, تونل, tunnel server
   note: افزودن Tunnel Server. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/16-mesh-servers.png
@@ -107,7 +107,7 @@ folder: products/vpn-installer/media/
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/20-delete-exit-node.png
   slot: delete-exit-node
-  topics: delete exit node, vps to vpn, vpn installer
+  topics: delete exit node, vps to vpn, vpn installer, delete exit, حذف exit, حذف خروجی, delete node
   note: حذف Exit و Node. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/21-reset-servers.png
@@ -142,8 +142,8 @@ folder: products/vpn-installer/media/
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/27-panel-manager.png
   slot: panel-manager
-  topics: panel manager, vps to vpn, vpn installer
-  note: مدیریت پنل. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.
+  topics: panel manager, vps to vpn, vpn installer, مدیریت پنل, update panel, backup panel, restore panel, factory reset
+  note: اسکرین Panel manager / مدیریت پنل. وقتی کاربر مدیریت پنل، بکاپ پنل، آپدیت پنل یا ریست پنل خواست یا گفت عکس بفرست، همین فایل را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/28-restore-panel.png
   slot: restore-panel
@@ -244,4 +244,14 @@ folder: products/vpn-installer/media/
   slot: delete-history
   topics: delete history, vps to vpn, vpn installer
   note: حذف تاریخچه محلی. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.
+  access: Telegram sendPhoto from this path on the bot server
+- file: products/vpn-installer/media/21-add-exit-servers.png
+  slot: add-exit-servers
+  topics: add exit servers, exit servers list, سرور خروجی, لیست exit
+  note: اسکرین مکمل Add Exit (لیست سرورهای خروجی). همراه add-exit برای سوال ثبت Exit بفرست.
+  access: Telegram sendPhoto from this path on the bot server
+- file: products/vpn-installer/media/23-delete-exit-node-chooser.png
+  slot: delete-exit-node-chooser
+  topics: delete exit chooser, حذف exit, حذف node
+  note: اسکرین انتخاب Exit/Node قبل از حذف. همراه delete-exit-node بفرست.
   access: Telegram sendPhoto from this path on the bot server

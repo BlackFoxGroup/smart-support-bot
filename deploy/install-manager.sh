@@ -43,8 +43,8 @@ Environment="BOT_REMOTE_ROOT=${INSTALL_DIR}"
 Environment="BOT_SERVICE_NAME=smart-support-bot.service"
 Environment="MANAGER_LOCAL_BOT=1"
 Environment="MANAGER_NAME=Smart Support Manager"
-Environment="MANAGER_VERSION=2.1"
-Environment="BOT_VERSION=2.0"
+Environment="MANAGER_VERSION=2.3"
+Environment="BOT_VERSION=2.3"
 Environment="MANAGER_PORT=8766"
 Environment="MANAGER_CONFIG_DIR=${INSTALL_DIR}/data"
 ExecStart=${INSTALL_DIR}/.venv/bin/python -m src.manager
@@ -59,5 +59,5 @@ EOF
 systemctl daemon-reload
 systemctl enable --now "${SERVICE_NAME}.service"
 
-echo "Smart Support Manager 2.1 is listening on 127.0.0.1:8766."
+echo "Smart Support Manager 2.3 is listening on 127.0.0.1:8766."
 echo "Open a tunnel: ssh -L 8766:127.0.0.1:8766 USER@SERVER"

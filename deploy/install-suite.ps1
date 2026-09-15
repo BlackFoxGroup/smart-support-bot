@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$PackageUrl = "https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.1.zip"
+$PackageUrl = "https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.3.zip"
 $InstallDir = Join-Path $env:LOCALAPPDATA "SmartSupport"
 $TempDir = Join-Path $env:TEMP ("smart-support-" + [guid]::NewGuid())
 $ZipPath = Join-Path $TempDir "smart-support-suite.zip"
@@ -29,7 +29,7 @@ try {
     Invoke-WebRequest -UseBasicParsing -Uri $PackageUrl -OutFile $ZipPath
     Expand-Archive -Path $ZipPath -DestinationPath $TempDir -Force
 
-    $SourceDir = Join-Path $TempDir "smart-support-suite-v2.1"
+    $SourceDir = Join-Path $TempDir "smart-support-suite-v2.3"
     if (-not (Test-Path (Join-Path $SourceDir "requirements.txt"))) {
         throw "The downloaded package is invalid."
     }
@@ -148,8 +148,8 @@ save_sftp_settings(
     Write-Host "Installation finished. Starting Expert..." -ForegroundColor Green
     $env:BOT_ROOT = $InstallDir
     $env:MANAGER_NAME = "Smart Support Manager"
-    $env:MANAGER_VERSION = "2.1"
-    $env:BOT_VERSION = "2.0"
+    $env:MANAGER_VERSION = "2.3"
+    $env:BOT_VERSION = "2.3"
     $env:MANAGER_PORT = "8766"
     $env:MANAGER_DESKTOP_SESSION = "1"
     $VenvPythonw = Join-Path $InstallDir ".venv\Scripts\pythonw.exe"

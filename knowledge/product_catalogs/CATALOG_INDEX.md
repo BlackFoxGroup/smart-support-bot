@@ -12,52 +12,52 @@ photo_count: 9
 folder: products/agent-bot/media/
 - file: products/agent-bot/media/00-product-logo.png
   slot: product-logo
-  topics: logo, brand, agent-bot
+  topics: logo, brand, smart support bot, agent-bot
   note: لوگوی Smart Support Bot. وقتی لوگو یا ظاهر محصول را خواستند همین را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/agent-bot/media/01-manager-dashboard-overview.png
   slot: dashboard
   topics: dashboard, smart support manager, expert, manager
-  note: Manager dashboard: Quick guide and product cards
+  note: داشبورد Manager — وضعیت Draft/In use و میانبر Catalog/Products.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/agent-bot/media/02-contact-suite-versions.png
   slot: contact
-  topics: contact, smart support manager, expert, manager
-  note: Contact page with Expert and Bot versions
+  topics: contact, version, smart support manager, expert
+  note: صفحه Contact با نسخه Manager و Bot.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/agent-bot/media/03-catalog-editor.png
   slot: catalog-editor
-  topics: catalog editor, smart support manager, expert, manager
-  note: Catalog text editor and Use catalog in bot
+  topics: catalog editor, howto, smart support manager
+  note: ویرایشگر کاتالوگ و Use catalog in bot.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/agent-bot/media/04-products-mapping.png
   slot: products
-  topics: products, smart support manager, expert, manager
-  note: Products page with source and server paths
+  topics: products, paths, smart support manager
+  note: صفحه Products با مسیر عکس و سرور.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/agent-bot/media/05-catalog-photos.png
   slot: catalog-photos
-  topics: catalog photos, smart support manager, expert, manager
-  note: Catalog photos list with feature tags for AI
+  topics: catalog photos, feature tags, smart support manager
+  note: لیست عکس کاتالوگ با برچسب feature برای Ask AI.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/agent-bot/media/06-media-gallery.png
   slot: media
-  topics: media, smart support manager, expert, manager
-  note: Media gallery: analyze and send photos to catalog
+  topics: media gallery, send to catalog, smart support manager
+  note: گالری Media: انتخاب عکس و Send to catalog.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/agent-bot/media/07-upload-queue.png
   slot: upload_queue
-  topics: upload queue, smart support manager, expert, manager
-  note: Upload queue for batch photo processing
+  topics: upload queue, batch, smart support manager
+  note: صف آپلود برای پردازش دسته‌ای عکس.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/agent-bot/media/08-install-bot-and-expert.png
   slot: install_bot_expert
-  topics: install, smart support manager, expert, manager
-  note: Install bot and Expert in three steps
+  topics: install, expert, bot, activate, smart support manager
+  note: نصب ربات و Expert در سه مرحله.
   access: Telegram sendPhoto from this path on the bot server
 
 ## vpn-installer — VPS to VPN — Black Fox Group
-photo_count: 47
+photo_count: 49
 folder: products/vpn-installer/media/
 - file: products/vpn-installer/media/01-product-logo.jpg
   slot: product-logo
@@ -111,27 +111,27 @@ folder: products/vpn-installer/media/
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/11-central-setup.png
   slot: central-setup
-  topics: central setup, vps to vpn, vpn installer
+  topics: central setup, vps to vpn, vpn installer, سرور مرکزی, central server
   note: راه‌اندازی سرور مرکزی. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/12-full-deploy.png
   slot: full-deploy
-  topics: full deploy, vps to vpn, vpn installer
+  topics: full deploy, vps to vpn, vpn installer, دیپلوی کامل, fulldeploy
   note: دیپلوی کامل. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/13-add-exit.png
   slot: add-exit
-  topics: add exit, vps to vpn, vpn installer
-  note: افزودن Exit Server. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.
+  topics: add exit, vps to vpn, vpn installer, exit server, exit servers, سرور خروجی, خروجی, ثبت خروج
+  note: اسکرین Add Exit / سرور خروجی. وقتی کاربر درباره ثبت Exit، سرور خروجی، Add Exit پرسید یا گفت عکس بفرست، همین فایل را بفرست. حداکثر ۶ Exit؛ نیاز به لایسنس مد کاری.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/14-add-node.png
   slot: add-node
-  topics: add node, vps to vpn, vpn installer
+  topics: add node, vps to vpn, vpn installer, نود, node server
   note: افزودن Node Server. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/15-add-tunnel.png
   slot: add-tunnel
-  topics: add tunnel, vps to vpn, vpn installer
+  topics: add tunnel, vps to vpn, vpn installer, تونل, tunnel server
   note: افزودن Tunnel Server. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/16-mesh-servers.png
@@ -156,7 +156,7 @@ folder: products/vpn-installer/media/
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/20-delete-exit-node.png
   slot: delete-exit-node
-  topics: delete exit node, vps to vpn, vpn installer
+  topics: delete exit node, vps to vpn, vpn installer, delete exit, حذف exit, حذف خروجی, delete node
   note: حذف Exit و Node. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/21-reset-servers.png
@@ -191,8 +191,8 @@ folder: products/vpn-installer/media/
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/27-panel-manager.png
   slot: panel-manager
-  topics: panel manager, vps to vpn, vpn installer
-  note: مدیریت پنل. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.
+  topics: panel manager, vps to vpn, vpn installer, مدیریت پنل, update panel, backup panel, restore panel, factory reset
+  note: اسکرین Panel manager / مدیریت پنل. وقتی کاربر مدیریت پنل، بکاپ پنل، آپدیت پنل یا ریست پنل خواست یا گفت عکس بفرست، همین فایل را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/vpn-installer/media/28-restore-panel.png
   slot: restore-panel
@@ -294,6 +294,16 @@ folder: products/vpn-installer/media/
   topics: delete history, vps to vpn, vpn installer
   note: حذف تاریخچه محلی. اگر کاربر همین بخش را خواست یا گفت عکس بفرست، همین فایل را بفرست.
   access: Telegram sendPhoto from this path on the bot server
+- file: products/vpn-installer/media/21-add-exit-servers.png
+  slot: add-exit-servers
+  topics: add exit servers, exit servers list, سرور خروجی, لیست exit
+  note: اسکرین مکمل Add Exit (لیست سرورهای خروجی). همراه add-exit برای سوال ثبت Exit بفرست.
+  access: Telegram sendPhoto from this path on the bot server
+- file: products/vpn-installer/media/23-delete-exit-node-chooser.png
+  slot: delete-exit-node-chooser
+  topics: delete exit chooser, حذف exit, حذف node
+  note: اسکرین انتخاب Exit/Node قبل از حذف. همراه delete-exit-node بفرست.
+  access: Telegram sendPhoto from this path on the bot server
 
 ## telegram-bot-expert-installer — Telegram Bot Expert Installer
 photo_count: 7
@@ -339,36 +349,36 @@ photo_count: 7
 folder: products/config-builder/media/
 - file: products/config-builder/media/00-product-logo.png
   slot: product-logo
-  topics: logo, brand, config-builder
+  topics: logo, brand, config builder, config-builder
   note: لوگوی Config Builder. وقتی لوگو یا ظاهر محصول را خواستند همین را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/config-builder/media/01-connection.jpg
   slot: connection
-  topics: connection, config builder, 3x-ui, کانفیگ
+  topics: connection, connect, panel, 3x-ui, config builder, اتصال, پنل
   note: اتصال به پنل 3X-UI — برای سوال همین بخش همین عکس را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/config-builder/media/02-single.jpg
   slot: single
-  topics: single, config builder, 3x-ui, کانفیگ
+  topics: single, single create, ساخت تکی, config builder, qr
   note: ساخت تکی کانفیگ — برای سوال همین بخش همین عکس را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/config-builder/media/03-bulk.jpg
   slot: bulk
-  topics: bulk, config builder, 3x-ui, کانفیگ
+  topics: bulk, bulk create, ساخت گروهی, config builder
   note: ساخت گروهی کانفیگ — برای سوال همین بخش همین عکس را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/config-builder/media/04-language.jpg
   slot: language
-  topics: language, config builder, 3x-ui, کانفیگ
+  topics: language, زبان, config builder
   note: انتخاب زبان برنامه — برای سوال همین بخش همین عکس را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/config-builder/media/05-settings.jpg
   slot: settings
-  topics: settings, config builder, 3x-ui, کانفیگ
+  topics: settings, تنظیمات, config builder
   note: تنظیمات Config Builder — برای سوال همین بخش همین عکس را بفرست.
   access: Telegram sendPhoto from this path on the bot server
 - file: products/config-builder/media/06-contact.jpg
   slot: contact
-  topics: contact, config builder, 3x-ui, کانفیگ
+  topics: contact, support, تماس, config builder
   note: تماس و پشتیبانی Config Builder — برای سوال همین بخش همین عکس را بفرست.
   access: Telegram sendPhoto from this path on the bot server

@@ -315,6 +315,48 @@ def setup_chat_router(
                     project_root=settings.project_root,
                     limit=2,
                 )
+                # If prior answer matched a feature but forgot media_refs, resolve from catalog.
+                if not paths:
+                    feat_id = ""
+                    for ref in last.knowledge_refs or []:
+                        r = str(ref or "")
+                        prefix = f"feature:{pid}:"
+                        if r.startswith(prefix):
+                            feat_id = r[len(prefix):].strip()
+                            if feat_id:
+                                break
+                    prod = get_product(pid) if feat_id else None
+                    matched_feat = None
+                    if prod is not None and feat_id:
+                        for feat in prod.features or []:
+                            if isinstance(feat, dict) and str(feat.get("id") or "") == feat_id:
+                                matched_feat = feat
+                                break
+                    if matched_feat is None and prod is not None:
+                        # Fall back to paraphrase match on recent history / last answer context
+                        hist_q = ""
+                        for h in reversed(history[-6:] or []):
+                            if str(h.get("role") or "") == "user":
+                                cand = str(h.get("content") or "").strip()
+                                if cand and not wants_send_media(cand):
+                                    hist_q = cand
+                                    break
+                        if hist_q:
+                            hit = match_feature_for_query(
+                                hist_q, lang=lang, product_id=pid
+                            )
+                            if hit is not None:
+                                _c, matched_feat, _s = hit
+                                prod = _c
+                    if matched_feat is not None and prod is not None:
+                        paths = resolve_media_paths_for_query(
+                            text,
+                            project_root=settings.project_root,
+                            lang=lang,
+                            limit=2,
+                            feature=matched_feat,
+                            product=prod,
+                        )
             if paths:
                 caption = (
                     "تصویر همان بخشی که الان درباره‌اش صحبت شد."
@@ -679,13 +721,36 @@ def setup_chat_router(
             if ask_product
             else ""
         )
-        # Expert Installer ONLY: understand paraphrased questions and tutor from howto.
+        # Product-scoped usage tutor: paraphrases → closest catalog howto
+        # for ANY ask_product that has a feature catalog (not only Expert/VPS).
         expert_usage_block = ""
-        if ask_product == "telegram-bot-expert-installer":
+        _tutor_prod = get_product(ask_product) if ask_product else None
+        if ask_product and _tutor_prod is not None and (_tutor_prod.features or []):
             matched_howto = ""
             matched_title = ""
+            product_label = (
+                ((_tutor_prod.title or {}).get(lang) if _tutor_prod else None)
+                or ((_tutor_prod.title or {}).get("en") if _tutor_prod else None)
+                or (
+                    "VPS to VPN"
+                    if ask_product == "vpn-installer"
+                    else (
+                        "Expert Installer"
+                        if ask_product == "telegram-bot-expert-installer"
+                        else (
+                            "Config Builder"
+                            if ask_product == "config-builder"
+                            else (
+                                "Smart Support Bot"
+                                if ask_product == "agent-bot"
+                                else ask_product
+                            )
+                        )
+                    )
+                )
+            )
             hit = match_feature_for_query(
-                text, lang=lang, product_id="telegram-bot-expert-installer"
+                text, lang=lang, product_id=ask_product
             )
             if hit is not None:
                 _cat_hit, feat_hit, _score = hit
@@ -697,7 +762,7 @@ def setup_chat_router(
                 )
             want_tutor = looks_usage_howto(text) or bool(matched_howto)
             if not matched_howto and want_tutor:
-                prod = get_product("telegram-bot-expert-installer")
+                prod = get_product(ask_product)
                 if prod is not None:
                     chunks = []
                     for feat in prod.features or []:
@@ -710,15 +775,16 @@ def setup_chat_router(
                     matched_howto = "\n\n".join(chunks[:8])
             if (lang or "").startswith("fa"):
                 expert_usage_block = (
-                    "### Expert Installer intent + usage (ONLY this product)\n"
-                    "کاربر ممکن است سوال را با هر عبارتی بپرسد. اول مفهوم سوال را بفهم، "
-                    "بعد نزدیک‌ترین بخش کاتالوگ Expert را انتخاب کن و همان را جواب بده.\n"
-                    "اگر سوال دربارهٔ نحوهٔ کار / گیر کردن / از کجا بزنم است، مثل مربی جواب بده:\n"
+                    f"### {product_label} intent + usage (ONLY this product)\n"
+                    "کاربر ممکن است سوال را با هر عبارتی بپرسد. اول مفهوم و نیت سوال را عمیق بفهم، "
+                    f"بعد نزدیک‌ترین بخش کاتالوگ {product_label} را انتخاب کن و فقط همان را جواب بده.\n"
+                    "اگر سوال دربارهٔ نحوهٔ کار / گیر کردن / از کجا بزنم / ثبت سرور است، مثل همکار پشتیبانی دقیق جواب بده:\n"
                     "۱) این بخش چیست\n"
                     "۲) برای چه است\n"
-                    "۳) مراحل مرتب\n"
-                    "۴) یک نکته از کاتالوگ\n"
-                    "قدم اختراع نکن. فقط Expert.\n"
+                    "۳) مراحل مرتب با نام دکمه/صفحه\n"
+                    "۴) یک نکته، محدودیت یا اشتباه رایج از کاتالوگ\n"
+                    f"قدم اختراع نکن. ویژگی‌ای که در کاتالوگ نیست نساز. فقط {product_label}.\n"
+                    "اگر عکس در media index همان بخش هست، انکار نکن؛ ربات خودش می‌فرستد.\n"
                     + (
                         f"بخش تشخیص‌داده‌شده: {matched_title}\n"
                         if matched_title
@@ -728,12 +794,13 @@ def setup_chat_router(
                 )
             else:
                 expert_usage_block = (
-                    "### Expert Installer intent + usage (ONLY this product)\n"
-                    "Users phrase questions many ways. Infer the meaning first, "
-                    "map to the closest Expert catalog section, then answer that section.\n"
-                    "If it is about how to use / stuck / which button, reply as a tutor:\n"
-                    "1) what it is  2) what it is for  3) ordered steps  4) one catalog tip.\n"
-                    "Do not invent steps. Expert catalog only.\n"
+                    f"### {product_label} intent + usage (ONLY this product)\n"
+                    "Users phrase questions many ways. Infer intent carefully first, "
+                    f"map to the closest {product_label} catalog section, then answer only that section.\n"
+                    "If it is about how to use / stuck / which button / register a server, reply as a careful support teammate:\n"
+                    "1) what it is  2) what it is for  3) ordered UI steps  4) one limit/tip/common mistake from the catalog.\n"
+                    f"Do not invent steps or features. {product_label} catalog only.\n"
+                    "If the catalog media index lists a photo for that section, never deny it — the bot attaches files.\n"
                     + (
                         f"Detected section: {matched_title}\n"
                         if matched_title

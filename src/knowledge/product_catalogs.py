@@ -327,6 +327,171 @@ _EXPERT_FEATURE_ALIASES: dict[str, tuple[str, ...]] = {
     ),
 }
 
+# Paraphrase aliases for VPS to VPN (vpn-installer) — how users actually ask.
+_VPN_FEATURE_ALIASES: dict[str, tuple[str, ...]] = {
+    "languages": (
+        "زبان", "زبانها", "language", "locale",
+    ),
+    "overview": (
+        "معرفی", "overview", "vps to vpn چیست", "این برنامه چیه",
+    ),
+    "modes": (
+        "مدها", "حالت ها", "حالت‌ها", "basic pro ai", "modes",
+    ),
+    "basic_mode": (
+        "مد پایه", "بیسیک", "basic mode", "basic",
+    ),
+    "pro_mode": (
+        "پرو مد", "مد پرو", "pro mode", "pro license",
+    ),
+    "ai_pro_mode": (
+        "ای ای پرو", "ai pro", "مد هوش مصنوعی",
+    ),
+    "registration": (
+        "ثبت لایسنس", "لایسنس", "رجیستر", "registration", "device id", "فعال سازی لایسنس",
+    ),
+    "central_setup": (
+        "سرور مرکزی", "سنترال", "central setup", "central server", "راه اندازی مرکزی",
+    ),
+    "full_deploy": (
+        "دیپلوی کامل", "فول دیپلوی", "full deploy", "fulldeploy", "نصب کامل",
+    ),
+    "exit_servers": (
+        "سرور خروجی", "خروجی", "ثبت خروج", "ثبت سرور خروجی", "ادد اگزیت",
+        "add exit", "exit server", "exit servers", "register exit",
+        "как добавить exit", "добавить exit",
+    ),
+    "node_servers": (
+        "نود", "ادد نود", "add node", "node server", "سرور نود",
+    ),
+    "tunnel_servers": (
+        "تونل", "ادد تانل", "add tunnel", "tunnel server",
+    ),
+    "mesh": (
+        "مش", "mesh", "نقشه سرور", "توپولوژی",
+    ),
+    "connection_manager": (
+        "مدیریت اتصال", "کانکشن منیجر", "connection manager",
+    ),
+    "move_central": (
+        "جابجایی مرکزی", "انتقال مرکزی", "move central",
+    ),
+    "move_server": (
+        "انتقال سرور", "جابجایی سرور", "move server", "move to new server",
+    ),
+    "delete_servers": (
+        "حذف exit", "حذف نود", "حذف خروجی", "delete exit", "delete node",
+    ),
+    "reset_servers": (
+        "ریست سرور", "ریست همه", "reset all", "reset servers",
+    ),
+    "check_system": (
+        "بررسی سیستم", "چک سیستم", "check system", "آمادگی سیستم",
+    ),
+    "panel_inbound": (
+        "اینباند", "inbound", "پورت پنل", "پروتکل پنل",
+    ),
+    "panel_outbound": (
+        "اوتباند", "outbound",
+    ),
+    "panel_manager": (
+        "مدیریت پنل", "پنل منیجر", "panel manager", "آپدیت پنل", "بکاپ پنل",
+        "update panel", "backup panel",
+    ),
+    "restore_panel": (
+        "بازیابی پنل", "ریستور پنل", "restore panel",
+    ),
+    "factory_reset": (
+        "ریست کارخانه", "فکتوری ریست", "factory reset", "صفر کردن پنل",
+    ),
+    "domain_dns": (
+        "دامنه", "دی ان اس", "dns", "domain",
+    ),
+    "free_domain": (
+        "دامنه رایگان", "free domain", "ساب دامنه رایگان",
+    ),
+    "cdn": (
+        "cdn", "کلودفلر", "cloudflare", "ابرآروان", "اروان",
+    ),
+    "ip_access": (
+        "دسترسی ip", "آی پی اکسس", "ip access", "محدودیت ip",
+    ),
+    "proxy": (
+        "پروکسی", "proxy",
+    ),
+    "telegram_bot": (
+        "ربات تلگرام", "تلگرام بات", "telegram bot", "توکن ربات",
+    ),
+    "mirza_bot": (
+        "میرزا", "mirza",
+    ),
+    "smart_support": (
+        "اسمارت ساپورت", "smart support", "پشتیبانی هوشمند",
+    ),
+    "settings": (
+        "تنظیمات", "settings",
+    ),
+    "view": (
+        "نمای وضعیت", "وضعیت", "view", "status view",
+    ),
+    "contact": (
+        "تماس", "پشتیبانی", "contact",
+    ),
+    "delete_history": (
+        "حذف تاریخچه", "پاک کردن تاریخچه", "delete history", "delete local history",
+    ),
+}
+
+
+
+# Paraphrase aliases for Config Builder — how users actually ask.
+_CONFIG_BUILDER_FEATURE_ALIASES: dict[str, tuple[str, ...]] = {
+    "languages": ("زبان", "language", "locale"),
+    "connection": (
+        "اتصال", "وصل", "پنل", "connection", "connect", "3x-ui", "api key", "sub url",
+    ),
+    "single_create": (
+        "ساخت تکی", "تکی", "یک کانفیگ", "single", "qr", "لینک تکی",
+    ),
+    "bulk_create": (
+        "ساخت گروهی", "گروهی", "بالک", "bulk", "چند کانفیگ",
+    ),
+    "list_page": (
+        "لیست", "سابقه", "list", "history", "حذف از لیست",
+    ),
+    "language": ("زبان برنامه", "عوض کردن زبان", "language screen"),
+    "settings": ("تنظیمات", "پیشفرض", "settings", "defaults"),
+    "contact": ("تماس", "پشتیبانی", "contact", "support"),
+}
+
+# Paraphrase aliases for Smart Support Bot (agent-bot).
+_AGENT_BOT_FEATURE_ALIASES: dict[str, tuple[str, ...]] = {
+    "languages": ("زبان", "language", "locale"),
+    "ask_ai_design": ("سوال از ai", "ask ai", "پرسش از هوش", "چت هوش مصنوعی"),
+    "product_catalogs": ("کاتالوگ", "catalog", "منوی محصول"),
+    "product_isolation": ("جداسازی", "نشت", "isolation", "scope"),
+    "group_topics": ("گروه", "تاپیک", "topic", "group"),
+    "nightly_config": ("کانفیگ شبانه", "شبانه", "nightly"),
+    "social_news": ("اخبار", "خبر", "social news"),
+    "admin_stats": ("آمار", "لیست کاربران", "stats", "user list"),
+    "admin_settings": ("تنظیمات ادمین", "settings admin", "api"),
+    "multilingual": ("چندزبانه", "multilingual", "چهار زبان"),
+    "answer_memory": ("حافظه پاسخ", "answer memory", "memory"),
+    "media_photos": ("عکس آموزشی", "اسکرین", "screenshot", "media photos"),
+    "menu_structure": ("منوی اصلی", "ساختار منو", "menu"),
+    "support_handoff": ("ارجاع", "پشتیبانی انسانی", "handoff"),
+    "convo_analysis": ("تحلیل مکالمه", "conversation analysis"),
+    "suite_overview": ("بسته", "سوئیت", "manager و ربات", "suite"),
+    "manager_dashboard": ("داشبورد", "dashboard", "draft", "in use"),
+    "products_mapping": ("products", "مسیر محصول", "mapping"),
+    "catalog_editor": ("ویرایش کاتالوگ", "catalog editor", "use catalog"),
+    "catalog_photos": ("عکس کاتالوگ", "catalog photos", "feature tag"),
+    "media_gallery": ("گالری", "media gallery", "send to catalog"),
+    "upload_queue": ("صف آپلود", "upload queue", "process waiting"),
+    "install_bot_expert": ("نصب ربات", "نصب expert", "install bot", "activate"),
+    "suite_contact": ("نسخه", "contact", "irm", "دانلود"),
+}
+
 
 def match_feature_for_query(
     query: str,
@@ -350,7 +515,9 @@ def match_feature_for_query(
     q = _normalize_query(query)
     if len(q) < 2:
         return None
-    tokens = [t for t in re.findall(r"[\w\u0600-\u06ff]+", q) if len(t) >= 2]
+    # Strip Persian/Arabic/Latin punctuation so "کنم؟" does not become a bad token.
+    q_tok = re.sub(r"[؟?!.،,;:\"'\(\)\[\]{}]+", " ", q)
+    tokens = [t for t in re.findall(r"[\w\u0600-\u06ff]+", q_tok) if len(t) >= 2]
     best: tuple[ProductCatalog, dict[str, Any], float] | None = None
     for cat in catalogs:
         for feat in cat.features or []:
@@ -369,23 +536,49 @@ def match_feature_for_query(
                 score += 12.0
             if fid and fid in q:
                 score += 8.0
+            # Exact / near-exact title phrase in the question language
+            for title_val in (feat.get("title") or {}).values():
+                tnorm = _normalize_query(str(title_val or ""))
+                if tnorm and len(tnorm) >= 3 and tnorm in q:
+                    score += 10.0
+                    break
             for token in tokens:
                 if token in blob:
                     score += 1.5
                 if token in fid.replace(" ", ""):
                     score += 2.0
-            # Expert paraphrase aliases (how users actually ask)
+            # Product-scoped paraphrase aliases (how users actually ask)
+            alias_map: dict[str, tuple[str, ...]] = {}
             if cat.product_id == "telegram-bot-expert-installer":
-                for alias in _EXPERT_FEATURE_ALIASES.get(fid_raw, ()):
-                    a = _normalize_query(alias)
-                    if a and a in q:
-                        score += 7.0
-                    elif a and any(tok in a or a in tok for tok in tokens if len(tok) >= 3):
-                        score += 3.0
+                alias_map = _EXPERT_FEATURE_ALIASES
+            elif cat.product_id == "vpn-installer":
+                alias_map = _VPN_FEATURE_ALIASES
+            elif cat.product_id == "config-builder":
+                alias_map = _CONFIG_BUILDER_FEATURE_ALIASES
+            elif cat.product_id == "agent-bot":
+                alias_map = _AGENT_BOT_FEATURE_ALIASES
+            # Also accept per-feature aliases embedded in catalog JSON
+            raw_aliases = feat.get("aliases") or feat.get("ask_aliases") or []
+            extra_list: list[str] = []
+            if isinstance(raw_aliases, dict):
+                for v in raw_aliases.values():
+                    if isinstance(v, (list, tuple)):
+                        extra_list.extend(str(a) for a in v if a)
+                    elif v:
+                        extra_list.append(str(v))
+            elif isinstance(raw_aliases, (list, tuple)):
+                extra_list.extend(str(a) for a in raw_aliases if a)
+            for alias in tuple(alias_map.get(fid_raw, ())) + tuple(extra_list):
+                a = _normalize_query(alias)
+                if a and a in q:
+                    score += 7.0
+                elif a and any(tok in a or a in tok for tok in tokens if len(tok) >= 3):
+                    score += 3.0
             if score >= 3 and any(
                 w in q
                 for w in (
-                    "آموزش", "اموزش", "چطور", "چگونه", "استفاده", "نحوه",
+                    "آموزش", "اموزش", "چطور", "چگونه", "چه جوری", "چهجوری", "جوری",
+                    "استفاده", "نحوه", "ثبت کنم", "ثبت",
                     "how", "tutorial", "help", "کمک", "راهنما",
                     "как", "установить", "怎么",
                 )

@@ -299,8 +299,8 @@ def install_expert(
             'Environment="BOT_SERVICE_NAME=smart-support-bot.service"\n'
             'Environment="MANAGER_LOCAL_BOT=1"\n'
             'Environment="MANAGER_NAME=Smart Support Manager"\n'
-            'Environment="MANAGER_VERSION=2.1"\n'
-            'Environment="BOT_VERSION=2.0"\n'
+            'Environment="MANAGER_VERSION=2.3"\n'
+            'Environment="BOT_VERSION=2.3"\n'
             'Environment="MANAGER_PORT=8766"\n'
             f'Environment="MANAGER_CONFIG_DIR={REMOTE_ROOT}/data"\n'
             f"ExecStart={REMOTE_ROOT}/.venv/bin/python -m src.manager\n"

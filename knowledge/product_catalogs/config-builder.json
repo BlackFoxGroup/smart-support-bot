@@ -6,7 +6,7 @@
   "catalog_enabled": true,
   "menu_emoji": "🛠️",
   "menu_order": 30,
-  "updated_at": "2026-09-15T00:25:14Z",
+  "updated_at": "2026-09-15T12:59:54Z",
   "title": {
     "fa": "Config Builder",
     "en": "Config Builder",
@@ -77,10 +77,8 @@
       },
       "media_slot": "language",
       "howto": {
-        "fa": "هدف طراحی: بدانی Config Builder با چه زبان‌هایی کار می‌کند (فارسی، انگلیسی).\nرفتار: از تغییر زبان / تنظیمات زبان یکی از این‌ها را انتخاب کن: فارسی، انگلیسی.",
-        "en": "Design goal: Know which languages Config Builder supports (Persian, English).\nBehavior: Pick one of these in language settings: Persian, English.",
-        "ru": "Design goal: Know which languages Config Builder supports (Persian, English).\nBehavior: Pick one of these in language settings: Persian, English.",
-        "zh": "Design goal: Know which languages Config Builder supports (Persian, English).\nBehavior: Pick one of these in language settings: Persian, English."
+        "fa": "هدف طراحی: بدانی Config Builder با فارسی و انگلیسی کار می‌کند تا رابط را درست بچینی.\nعملکرد: از تغییر زبان یا تنظیمات زبان، فارسی یا انگلیسی را انتخاب کن. متن منوها همان لحظه عوض می‌شود. اگر جایی زبان قبلی ماند یک‌بار صفحه را ببند و دوباره باز کن. زبان فقط ظاهر را عوض می‌کند؛ اتصال پنل و کانفیگ‌های ساخته‌شده پاک نمی‌شوند.",
+        "en": "Design goal: Know Config Builder supports Persian and English so you can set the UI correctly.\nBehavior: In language change or language settings pick Persian or English. Menu text switches right away. If a screen sticks, close and reopen it once. Language only changes the UI — it does not wipe panel connection or built configs."
       },
       "summary": {
         "fa": "زبان‌ها: فارسی، انگلیسی",
@@ -99,10 +97,8 @@
       },
       "media_slot": "connection",
       "howto": {
-        "fa": "هدف طراحی: Config Builder به پنل 3X-UI وصل شود تا کانفیگ واقعی بسازد.\nعملکرد: آدرس پنل، کاربر و رمز را بزن؛ اگر API Key بدهی ساخت سریع‌تر می‌شود. Sub URL را از یک کانفیگ قبلی کپی کن تا دامنه درست تشخیص داده شود.",
-        "en": "Design goal: Connect Config Builder to a 3X-UI panel for real configs.\nBehavior: Enter panel URL, user and password; an API key speeds creation. Paste a prior Sub URL so the domain is detected correctly.",
-        "ru": "Design goal: Connect Config Builder to a 3X-UI panel for real configs.\nBehavior: Enter panel URL, user and password; an API key speeds creation. Paste a prior Sub URL so the domain is detected correctly.",
-        "zh": "Design goal: Connect Config Builder to a 3X-UI panel for real configs.\nBehavior: Enter panel URL, user and password; an API key speeds creation. Paste a prior Sub URL so the domain is detected correctly."
+        "fa": "هدف طراحی: Config Builder را به پنل 3X-UI وصل کنی تا کانفیگ واقعی بسازد، نه لینک ساختگی.\nعملکرد: صفحه Connection را باز کن. آدرس پنل، نام کاربری و رمز را وارد کن؛ اگر API Key داری وارد کن تا ساخت سریع‌تر شود. Sub URL را از یک کانفیگ قبلی کپی کن تا دامنه درست تشخیص داده شود، بعد Connect را بزن. اشتباه رایج: آدرس ناقص یا Sub URL خالی — بدون اتصال فعال، Single و Bulk کانفیگ واقعی روی پنل نمی‌سازند. رمز پنل را در چت عمومی نفرست.",
+        "en": "Design goal: Connect Config Builder to a 3X-UI panel so it builds real configs, not fake links.\nBehavior: Open Connection. Enter panel URL, username, and password; add an API key if you have one for faster creation. Paste a prior Sub URL so the domain is detected correctly, then tap Connect. Common mistake: incomplete URL or empty Sub URL — without an active connection, Single and Bulk will not create real panel configs. Never paste panel passwords in public chat."
       },
       "summary": {
         "fa": "ورود به پنل برای ساخت کانفیگ.",
@@ -110,7 +106,10 @@
         "ru": "Sign in to the panel to build configs.",
         "zh": "Sign in to the panel to build configs."
       },
-      "emoji": "🔌"
+      "emoji": "🔌",
+      "related_media_slots": [
+        "single"
+      ]
     },
     {
       "id": "single_create",
@@ -122,10 +121,8 @@
       },
       "media_slot": "single",
       "howto": {
-        "fa": "هدف طراحی: یک کانفیگ تمیز برای یک کاربر بسازی.\nعملکرد: گزینه‌ها را تنظیم کن و لینک یا QR را همان‌جا بگیر.",
-        "en": "Design goal: Build one clean config for one user.\nBehavior: Set the options and get the link or QR on the same screen.",
-        "ru": "Design goal: Build one clean config for one user.\nBehavior: Set the options and get the link or QR on the same screen.",
-        "zh": "Design goal: Build one clean config for one user.\nBehavior: Set the options and get the link or QR on the same screen."
+        "fa": "هدف طراحی: یک کانفیگ تمیز برای یک کاربر بسازی و لینک یا QR را همان‌جا بگیری.\nعملکرد: اول مطمئن شو Connection سبز/فعال است. بخش Single (ساخت تکی) را باز کن، گزینه‌های پروتکل و کاربر را تنظیم کن، بعد ساخت را بزن. لینک یا QR همان صفحه ظاهر می‌شود؛ می‌توانی کپی کنی یا برای مشتری بفرستی. اشتباه رایج: ساخت تکی قبل از اتصال پنل — اول Connection، بعد Single.",
+        "en": "Design goal: Build one clean config for one user and get the link or QR on the same screen.\nBehavior: Confirm Connection is active first. Open Single create, set protocol and user options, then build. The link or QR appears on the same screen — copy it or send it to the client. Common mistake: building before panel connection — connect first, then Single."
       },
       "summary": {
         "fa": "ساخت یک کانفیگ تکی.",
@@ -133,7 +130,10 @@
         "ru": "Create a single config.",
         "zh": "Create a single config."
       },
-      "emoji": "1️⃣"
+      "emoji": "1️⃣",
+      "related_media_slots": [
+        "connection"
+      ]
     },
     {
       "id": "bulk_create",
@@ -145,10 +145,8 @@
       },
       "media_slot": "bulk",
       "howto": {
-        "fa": "هدف طراحی: چند کانفیگ را یک‌جا برای چند کاربر بسازی.\nعملکرد: تعداد و الگو را بده تا لیست لینک‌ها آماده شود.",
-        "en": "Design goal: Create several configs in one pass.\nBehavior: Set count and pattern so the link list is ready.",
-        "ru": "Design goal: Create several configs in one pass.\nBehavior: Set count and pattern so the link list is ready.",
-        "zh": "Design goal: Create several configs in one pass.\nBehavior: Set count and pattern so the link list is ready."
+        "fa": "هدف طراحی: چند کانفیگ را یک‌جا برای چند کاربر بسازی تا کار تکراری نکنی.\nعملکرد: اول Connection را فعال کن. بخش Bulk (ساخت گروهی) را باز کن، تعداد و الگوی نام را بده، بعد ساخت را شروع کن. وقتی لیست لینک‌ها آماده شد کپی یا خروجی بگیر. اشتباه رایج: تعداد خیلی بزرگ بدون چک پنل — اول با تعداد کم تست کن، بعد بالا ببر. Bulk جایگزین Single برای یک کاربر نیست؛ برای یک نفر همان Single ساده‌تر است.",
+        "en": "Design goal: Create several configs in one pass so you do not repeat the same steps.\nBehavior: Activate Connection first. Open Bulk create, set count and name pattern, then start the build. When the link list is ready, copy or export it. Common mistake: huge counts without checking the panel — test with a small count first. Bulk is not a replacement for Single when you only need one user."
       },
       "summary": {
         "fa": "ساخت چند کانفیگ با هم.",
@@ -156,7 +154,10 @@
         "ru": "Create multiple configs together.",
         "zh": "Create multiple configs together."
       },
-      "emoji": "📦"
+      "emoji": "📦",
+      "related_media_slots": [
+        "connection"
+      ]
     },
     {
       "id": "list_page",
@@ -169,10 +170,8 @@
       },
       "media_slot": "",
       "howto": {
-        "fa": "هدف طراحی: سابقه کانفیگ‌هایی که با Config Builder روی همین دستگاه ساخته‌ای را ببینی و مدیریت کنی.\nعملکرد: تب List را باز کن. از منوی سه‌نقطه (یا انتخاب چندتایی) لینک را کپی کن، از پنل حذف کن (نیاز به اتصال فعال)، یا فقط از لیست محلی پاک کن. در نسخه فعلی ویرایش کانفیگ داخل اپ نیست.",
-        "en": "Design goal: Review and manage configs created with Config Builder on this device.\nBehavior: Open the List tab. From the three-dot menu (or multi-select) copy a link, delete from the panel (needs an active connection), or remove from the local list only. There is no in-app edit-config flow in the current release.",
-        "ru": "Design goal: Review and manage configs created with Config Builder on this device.\nBehavior: Open the List tab. From the three-dot menu (or multi-select) copy a link, delete from the panel (needs an active connection), or remove from the local list only. There is no in-app edit-config flow in the current release.",
-        "zh": "Design goal: Review and manage configs created with Config Builder on this device.\nBehavior: Open the List tab. From the three-dot menu (or multi-select) copy a link, delete from the panel (needs an active connection), or remove from the local list only. There is no in-app edit-config flow in the current release."
+        "fa": "هدف طراحی: سابقه کانفیگ‌هایی که با Config Builder روی همین دستگاه ساخته‌ای را ببینی و مدیریت کنی.\nعملکرد: تب List را باز کن تا کانفیگ‌های محلی دیده شوند. از منوی سه‌نقطه (یا انتخاب چندتایی) لینک را کپی کن، از پنل حذف کن (نیاز به اتصال فعال)، یا فقط از لیست محلی پاک کن. در نسخه فعلی ویرایش کانفیگ داخل اپ نیست — برای تغییر، کانفیگ جدید بساز. اشتباه رایج: حذف از لیست محلی را با حذف از پنل یکی دانستن.",
+        "en": "Design goal: Review and manage configs created with Config Builder on this device.\nBehavior: Open the List tab to see local configs. From the three-dot menu (or multi-select) copy a link, delete from the panel (needs an active connection), or remove from the local list only. There is no in-app edit-config flow in the current release — build a new config to change settings. Common mistake: treating local-list delete as panel delete."
       },
       "summary": {
         "fa": "تب List: سابقه محلی، کپی لینک، حذف از پنل یا از لیست.",
@@ -191,10 +190,8 @@
       },
       "media_slot": "language",
       "howto": {
-        "fa": "هدف طراحی: زبان رابط را با کاربر هماهنگ کنی.\nعملکرد: زبان را عوض کن؛ بقیه منوها همان ساختار را دارند.",
-        "en": "Design goal: Match the UI language to the user.\nBehavior: Switch language; the rest of the menus keep the same structure.",
-        "ru": "Design goal: Match the UI language to the user.\nBehavior: Switch language; the rest of the menus keep the same structure.",
-        "zh": "Design goal: Match the UI language to the user.\nBehavior: Switch language; the rest of the menus keep the same structure."
+        "fa": "هدف طراحی: زبان رابط Config Builder را با کاربر هماهنگ کنی بدون به‌هم‌ریختن اتصال.\nعملکرد: از صفحه Language یا تنظیمات زبان، فارسی یا انگلیسی را انتخاب کن. بقیه منوها همان ساختار را دارند و فقط متن عوض می‌شود. اگر بعد از تغییر زبان Connection قطع به نظر رسید، یک‌بار وضعیت اتصال را چک کن — معمولاً فقط برچسب‌ها عوض شده‌اند.",
+        "en": "Design goal: Match the Config Builder UI language to the user without breaking the connection.\nBehavior: From Language or language settings pick Persian or English. Other menus keep the same structure; only the text changes. If Connection looks odd after a language switch, recheck connection status once — usually only labels changed."
       },
       "summary": {
         "fa": "تغییر زبان برنامه.",
@@ -214,10 +211,8 @@
       },
       "media_slot": "settings",
       "howto": {
-        "fa": "هدف طراحی: رفتار پیش‌فرض ساخت کانفیگ را یک‌بار درست بچینی.\nعملکرد: مقادیر پیش‌فرض و ترجیح‌های ساخت را از این صفحه ذخیره کن.",
-        "en": "Design goal: Set default config-building behavior once.\nBehavior: Save defaults and build preferences on this screen.",
-        "ru": "Design goal: Set default config-building behavior once.\nBehavior: Save defaults and build preferences on this screen.",
-        "zh": "Design goal: Set default config-building behavior once.\nBehavior: Save defaults and build preferences on this screen."
+        "fa": "هدف طراحی: رفتار پیش‌فرض ساخت کانفیگ را یک‌بار درست بچینی تا هر بار از صفر شروع نکنی.\nعملکرد: صفحه Settings را باز کن، مقادیر پیش‌فرض و ترجیح‌های ساخت را تنظیم کن و ذخیره بزن. این پیش‌فرض‌ها روی Single و Bulk بعدی اثر می‌گذارند؛ اتصال پنل را از اینجا قطع نکن — اتصال در Connection است. اشتباه رایج: انتظار داشتن که Settings خودش به پنل وصل شود.",
+        "en": "Design goal: Set default config-building behavior once so you do not start from scratch every time.\nBehavior: Open Settings, set defaults and build preferences, then save. Those defaults apply to later Single and Bulk runs; they do not replace panel connection — that stays under Connection. Common mistake: expecting Settings to connect to the panel by itself."
       },
       "summary": {
         "fa": "تنظیمات پیش‌فرض Config Builder.",
@@ -237,10 +232,8 @@
       },
       "media_slot": "contact",
       "howto": {
-        "fa": "هدف طراحی: اگر جایی گیر کردی سریع به پشتیبانی برسی.\nعملکرد: از این صفحه راه‌های تماس را باز کن.",
-        "en": "Design goal: Reach support quickly when stuck.\nBehavior: Open contact options from this page.",
-        "ru": "Design goal: Reach support quickly when stuck.\nBehavior: Open contact options from this page.",
-        "zh": "Design goal: Reach support quickly when stuck.\nBehavior: Open contact options from this page."
+        "fa": "هدف طراحی: اگر جایی در اتصال یا ساخت کانفیگ گیر کردی سریع به پشتیبانی برسی.\nعملکرد: صفحه Contact را باز کن و راه‌های تماس را ببین. برای آموزش همین محصول اول «سوال از AI» را بزن؛ اگر مدرک کافی نبود از همین صفحه به پشتیبانی انسانی برو. قیمت را از این صفحه نخوان. برای پرسش‌های بیشتر درباره همین محصول از گزینه «سوال از AI» استفاده کنید.",
+        "en": "Design goal: Reach support quickly when connection or config building gets stuck.\nBehavior: Open Contact and review the contact options. For teaching questions about this product, try Ask AI first; if evidence is weak, use this page for human support. Do not take prices from this screen. For more questions about this product, use Ask AI."
       },
       "summary": {
         "fa": "پشتیبانی Config Builder.",
@@ -261,12 +254,12 @@
       "ai_guide": "لوگوی Config Builder. وقتی لوگو یا ظاهر محصول را خواستند همین را بفرست.",
       "feature_ids": [
         "languages",
-        "overview",
-        "suite_overview"
+        "connection"
       ],
       "topics": [
         "logo",
         "brand",
+        "config builder",
         "config-builder"
       ]
     },
@@ -282,9 +275,12 @@
       ],
       "topics": [
         "connection",
-        "config builder",
+        "connect",
+        "panel",
         "3x-ui",
-        "کانفیگ"
+        "config builder",
+        "اتصال",
+        "پنل"
       ]
     },
     {
@@ -299,9 +295,10 @@
       ],
       "topics": [
         "single",
+        "single create",
+        "ساخت تکی",
         "config builder",
-        "3x-ui",
-        "کانفیگ"
+        "qr"
       ]
     },
     {
@@ -316,9 +313,9 @@
       ],
       "topics": [
         "bulk",
-        "config builder",
-        "3x-ui",
-        "کانفیگ"
+        "bulk create",
+        "ساخت گروهی",
+        "config builder"
       ]
     },
     {
@@ -329,13 +326,13 @@
       "note": "انتخاب زبان برنامه",
       "ai_guide": "انتخاب زبان برنامه — برای سوال همین بخش همین عکس را بفرست.",
       "feature_ids": [
-        "language"
+        "language",
+        "languages"
       ],
       "topics": [
         "language",
-        "config builder",
-        "3x-ui",
-        "کانفیگ"
+        "زبان",
+        "config builder"
       ]
     },
     {
@@ -350,9 +347,8 @@
       ],
       "topics": [
         "settings",
-        "config builder",
-        "3x-ui",
-        "کانفیگ"
+        "تنظیمات",
+        "config builder"
       ]
     },
     {
@@ -367,9 +363,9 @@
       ],
       "topics": [
         "contact",
-        "config builder",
-        "3x-ui",
-        "کانفیگ"
+        "support",
+        "تماس",
+        "config builder"
       ]
     }
   ]
