@@ -53,7 +53,7 @@ Download the public package:
 
 [smart-support-suite.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite.zip)
 
-Download filename stays `smart-support-suite.zip` (no version in the name). App version is still shown inside Expert/Bot (currently 2.3).
+Download filename stays `smart-support-suite.zip`. App version is still shown inside Expert/Bot (currently 2.3).
 
 The package is **raw source + empty `products/` template + `ai_profile` support**. It does **not** include Black Fox (or any vendor) product catalogs. It does **not** include Black Fox ready-made AI knowledge databases (`AI_Knowledge_Base_Multilingual`, `AI_BOT_DATABASE`), product screenshot media (add those via Expert/Manager), passwords, tokens, API keys, server addresses, usernames, user data, or Telegram session files.
 
@@ -66,7 +66,7 @@ Persian section title below: «پروفایل هوش مصنوعی محصول».
 
 Each product folder includes a small `ai_profile.json` next to `catalog.json`. It tells Ask AI how to answer for **that product only**: stay in product scope, prefer catalog howtos, attach linked catalog photos when available, answer in the question’s language, and use optional aliases for paraphrased questions.
 
-Expert/Manager creates this file automatically when you add, save, or activate a catalog. You do not need the Black Fox shared AI knowledge databases for product support answers.
+Expert/Manager creates this file automatically when you add, save, or activate a catalog.
 
 ## Requirements
 
@@ -158,14 +158,8 @@ AI_API_KEY=replace-with-your-api-key
 AI_MODEL=replace-with-your-model
 ```
 
-Manager stores settings locally after Save. New values replace old values. Keep `.env`, Manager settings, runtime JSON files, and Telegram sessions out of Git.
+Manager stores settings locally after Save. New values replace old values.
 
-## Security
-
-- Never publish `.env`.
-- Never add `data/`, saved Manager credentials, or Telegram `.session` files to a release.
-- Review a public archive before upload.
-- Replace a token immediately if it was ever committed or shared.
 
 ## License and credit
 
@@ -195,7 +189,7 @@ Smart Support Bot and Manager are maintained by Black Fox Group.
 
 [smart-support-suite.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite.zip)
 
-نام فایل دانلود `smart-support-suite.zip` است (بدون شماره نسخه در نام). شماره نسخه داخل Expert/ربات نمایش داده می‌شود (الان ۲٫۳).
+نام فایل دانلود `smart-support-suite.zip` است. شماره نسخه داخل Expert/ربات نمایش داده می‌شود (الان ۲٫۳).
 
 این بسته **سورس خام + قالب خالی `products/` + پشتیبانی `ai_profile`** است و **کاتالوگ محصولات بلک‌فاکس (یا هر فروشندهٔ دیگر) داخل آن نیست**. پایگاه‌های آمادهٔ دانش هوش مصنوعی بلک‌فاکس (`AI_Knowledge_Base_Multilingual` و `AI_BOT_DATABASE`) و فایل‌های رسانه‌ای/اسکرین‌شات محصولات داخل بسته نیستند (رسانه از طریق Expert/Manager اضافه می‌شود). هیچ رمز، توکن، کلید API، نشانی سرور، نام کاربری، اطلاعات کاربران یا فایل نشست تلگرام داخل آن قرار ندارد. Ask AI محصول فقط با `catalog.json` و `ai_profile.json` همان محصول کار می‌کند.
 
@@ -212,7 +206,7 @@ Smart Support Bot and Manager are maintained by Black Fox Group.
 - به زبان خود سؤال جواب دهد
 - در صورت نیاز از نام‌های جایگزین (alias) برای سؤال‌های پارافریز استفاده کند
 
-برنامهٔ Expert / Manager هنگام افزودن، ذخیره یا فعال‌سازی کاتالوگ این فایل را خودکار می‌سازد. برای پاسخ پشتیبانی محصول، به پایگاه‌های مشترک دانش هوش مصنوعی بلک‌فاکس نیاز نیست.
+برنامهٔ Expert / Manager هنگام افزودن، ذخیره یا فعال‌سازی کاتالوگ این فایل را خودکار می‌سازد.
 
 ## پیش‌نیازها
 
@@ -304,14 +298,8 @@ AI_API_KEY=replace-with-your-api-key
 AI_MODEL=replace-with-your-model
 ```
 
-اطلاعات ثبت‌شده در Manager پس از ذخیره روی همان رایانه باقی می‌ماند. اطلاعات جدید جای اطلاعات قبلی را می‌گیرد. فایل `.env`، تنظیمات Manager، فایل‌های اجرایی داخل `data/` و نشست تلگرام را در Git قرار ندهید.
+اطلاعات ثبت‌شده در Manager پس از ذخیره روی همان رایانه باقی می‌ماند. اطلاعات جدید جای اطلاعات قبلی را می‌گیرد.
 
-## نکات امنیتی
-
-- فایل `.env` را منتشر نکنید.
-- پوشه `data/`، اطلاعات ذخیره‌شده Manager و فایل‌های `.session` را داخل نسخه عمومی نگذارید.
-- فایل ZIP را پیش از انتشار بررسی کنید.
-- توکنی را که قبلاً ثبت یا منتشر شده است فوراً عوض کنید.
 
 ## سازنده
 
