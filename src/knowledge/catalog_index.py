@@ -108,6 +108,59 @@ def listed_image_paths(project_root: Path, product_id: str, *, limit: int = 8) -
     return out[: max(1, limit)]
 
 
+def catalog_photos_for(
+    project_root: Path,
+    product_id: str,
+    *,
+    feature_id: str = "",
+    media_slot: str = "",
+    limit: int = 2,
+) -> list[Path]:
+    """Catalog photos for a product or one feature. Empty when catalog is off or nothing matches."""
+    from src.knowledge.product_catalogs import get_product
+
+    pid = (product_id or "").strip()
+    prod = get_product(pid)
+    if prod is None or not prod.catalog_enabled:
+        return []
+    root = project_root.resolve()
+    fid = (feature_id or "").strip()
+    want_slot = (media_slot or "").strip()
+    if not want_slot and fid:
+        for feat in prod.features or []:
+            if str(feat.get("id") or "").strip() == fid:
+                want_slot = str(feat.get("media_slot") or "").strip()
+                break
+    out: list[Path] = []
+    seen: set[str] = set()
+    for media in prod.media or []:
+        if not isinstance(media, dict):
+            continue
+        rel = str(media.get("path") or "").strip().replace("\\", "/")
+        if not rel:
+            continue
+        fids = [str(x).strip() for x in (media.get("feature_ids") or []) if str(x).strip()]
+        slot = str(media.get("slot") or "").strip()
+        if fid or want_slot:
+            if fid and (fid in fids or slot == fid):
+                pass
+            elif want_slot and (slot == want_slot or want_slot in fids):
+                pass
+            else:
+                continue
+        elif slot and slot not in {"overview", "product", "ui", "menu", "product-logo", "app-icon", "brand-logo", "hero"}:
+            continue
+        path = (root / rel).resolve()
+        key = str(path).lower()
+        if key in seen or not path.is_file():
+            continue
+        seen.add(key)
+        out.append(path)
+        if len(out) >= max(1, limit):
+            break
+    return out
+
+
 def build_catalog_index_markdown(*, product_id: str | None = None) -> str:
     """Human/AI readable index of catalog photos and how the bot sends them."""
     catalogs = get_product_catalogs()

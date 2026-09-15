@@ -21,7 +21,7 @@ _DEFAULT_CREATOR = {
     "site": "https://foxnext.net",
     "channel": "@blackFoxVPNN",
     "group": "@Black_Fox_Group",
-    "github": "https://github.com/balckfoxgroup?tab=repositories",
+    "github": "https://github.com/BlackFoxGroup",
     "footer_fa": "",
 }
 

@@ -265,7 +265,11 @@ def parse_feature_action(action: str | None) -> tuple[str, str] | None:
 
 def feature_label(product: ProductCatalog, feature: dict[str, Any], lang: str) -> str:
     title = (feature.get("title") or {}).get(lang) or (feature.get("title") or {}).get("en") or feature.get("id")
-    return str(title)
+    title = str(title or "").strip()
+    emoji = str(feature.get("emoji") or "").strip()
+    if emoji and not title.startswith(emoji):
+        return f"{emoji} {title}".strip()
+    return title
 
 
 def feature_body(product: ProductCatalog, feature: dict[str, Any], lang: str) -> str:

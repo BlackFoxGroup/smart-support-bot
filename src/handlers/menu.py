@@ -15,7 +15,9 @@ from src.knowledge.product_catalogs import (
     parse_feature_action,
     parse_product_action,
 )
-from src.knowledge.catalog_rag import retrieve_catalog_context
+from src.ui.keyboards import parse_section_action
+from src.ui.media import menu_image_path
+from src.knowledge.catalog_index import catalog_photos_for
 from src.storage.metrics import MetricsStore
 from src.storage.users import UserStore
 from src.ui import keyboards, messaging, texts
@@ -83,7 +85,10 @@ def setup_menu_router(
             return
 
         lang = await users.get_lang(uid, user.language_code)
-        action = keyboards.resolve_menu_action(message.text, lang)
+        current_product = await users.get_current_product(uid)
+        action = keyboards.resolve_menu_action(
+            message.text, lang, current_product_id=current_product
+        )
         if not action:
             # Not a resolvable menu label — let other routers (Ask AI / admin) handle it.
             from aiogram.dispatcher.event.bases import SkipHandler
@@ -165,6 +170,32 @@ def setup_menu_router(
             )
             return
 
+        # Smart Support Bot section headers
+        sec = parse_section_action(action)
+        if sec:
+            pid, section = sec
+            await users.set_current_product(uid, pid)
+            labels = keyboards.catalog_section_labels(lang)
+            title = labels.get(section, section)
+            if (lang or "").startswith("fa"):
+                body = (
+                    f"{title}\n\n"
+                    "کلیدهای همین بخش را بزن تا راهنما و عکس همان قسمت بیاید. "
+                    "اگر یک قابلیت روی ربات و Expert با هم اثر دارد، داخل متن همان کلید نوشته شده است."
+                )
+            else:
+                body = (
+                    f"{title}\n\n"
+                    "Tap a key in this section for its guide and photo. "
+                    "Keys that affect both Bot and Expert say so in their text."
+                )
+            body = _with_ai_footer(body, lang)
+            await message.answer(
+                body,
+                reply_markup=keyboards.catalog_section_keyboard(lang, pid, section),
+            )
+            return
+
         # Product hubs
         product_id = parse_product_action(action)
         if product_id:
@@ -174,13 +205,13 @@ def setup_menu_router(
                 product.menu_body(lang) if product else texts.t(texts.MAIN_MENU_HINT, lang),
                 lang,
             )
-            if product_id == "vpn-installer":
-                await message.answer(body, reply_markup=keyboards.installer_keyboard(lang))
-            else:
-                await message.answer(
-                    body,
-                    reply_markup=keyboards.catalog_product_keyboard(lang, product_id),
-                )
+            # All products (including VPS to VPN) use catalog feature keys.
+            await messaging.answer_with_media(
+                message,
+                body,
+                images=catalog_photos_for(settings.project_root, product_id),
+                reply_markup=keyboards.catalog_product_keyboard(lang, product_id),
+            )
             return
 
         # Catalog feature detail (Config Builder / Agent Bot)
@@ -195,26 +226,20 @@ def setup_menu_router(
                 )
                 if feature:
                     body = _with_ai_footer(feature_body(product, feature, lang), lang)
-                    # Attach related teaching screenshots when catalog has them.
-                    q = str(
-                        (feature.get("title") or {}).get(lang)
-                        or (feature.get("title") or {}).get("en")
-                        or feature.get("id")
-                        or ""
+                    media = catalog_photos_for(
+                        settings.project_root,
+                        pid,
+                        feature_id=fid,
+                        media_slot=str(feature.get("media_slot") or "").strip(),
                     )
-                    media = retrieve_catalog_context(
-                        q,
-                        lang=lang,
-                        project_root=settings.project_root,
-                        limit_features=1,
-                        limit_media=2,
-                    ).media_paths
-                    await messaging.answer_with_media(
-                        message,
-                        body,
-                        images=media,
-                        reply_markup=keyboards.catalog_product_keyboard(lang, pid),
-                    )
+                    if media:
+                        await messaging.answer_with_media(
+                            message,
+                            body,
+                            images=media,
+                        )
+                    else:
+                        await message.answer(body)
                     return
             await message.answer(
                 texts.t(texts.MAIN_MENU_HINT, lang),
@@ -239,14 +264,33 @@ def setup_menu_router(
         else:
             body = texts.t(texts.MAIN_MENU_HINT, lang)
 
+        image = menu_image_path(action, lang)
+        images = [image] if image is not None else []
+
         # Installer topics stay inside installer hub keyboard
         if keyboards.is_installer_topic(action):
-            await message.answer(body, reply_markup=keyboards.installer_keyboard(lang))
+            if images:
+                await messaging.answer_with_media(
+                    message,
+                    body,
+                    images=images,
+                    reply_markup=keyboards.installer_keyboard(lang),
+                )
+            else:
+                await message.answer(body, reply_markup=keyboards.installer_keyboard(lang))
             return
 
-        await message.answer(
-            body,
-            reply_markup=await _menu_kb(),
-        )
+        if images:
+            await messaging.answer_with_media(
+                message,
+                body,
+                images=images,
+                reply_markup=await _menu_kb(),
+            )
+        else:
+            await message.answer(
+                body,
+                reply_markup=await _menu_kb(),
+            )
 
     return router

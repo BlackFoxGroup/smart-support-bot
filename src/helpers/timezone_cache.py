@@ -16,7 +16,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 # Sealed digest with LF-normalized line endings, stable on Windows and Linux.
-_EXPECTED = "d02a60765eacb591a39ce030aa205e92922ebea50854a38026b2a1fdd219b00c"
+_EXPECTED = "4f99f86a875a5a89107d6c8f81eb07e7242070f01cf36469d52ceac01bb20f7e"
 
 
 def _digest(path: Path) -> str:

@@ -166,32 +166,88 @@ def installer_keyboard(lang: Lang) -> ReplyKeyboardMarkup:
     )
 
 
+def _pair_feature_rows(product, feats: list, lang: Lang) -> list[list[KeyboardButton]]:
+    rows: list[list[KeyboardButton]] = []
+    i = 0
+    while i < len(feats):
+        left = feats[i]
+        left_label = feature_label(product, left, lang)
+        if i + 1 < len(feats):
+            right = feats[i + 1]
+            right_label = feature_label(product, right, lang)
+            rows.append(
+                [
+                    KeyboardButton(text=left_label),
+                    KeyboardButton(text=right_label),
+                ]
+            )
+            i += 2
+        else:
+            rows.append([KeyboardButton(text=left_label)])
+            i += 1
+    return rows
+
+
+def section_action_id(product_id: str, section: str) -> str:
+    return f"psec:{product_id}:{section}"
+
+
+def parse_section_action(action: str | None) -> tuple[str, str] | None:
+    raw = (action or "").strip()
+    if not raw.startswith("psec:"):
+        return None
+    parts = raw.split(":", 2)
+    if len(parts) != 3:
+        return None
+    _, product_id, section = parts
+    product_id = product_id.strip()
+    section = section.strip()
+    if not product_id or not section:
+        return None
+    return product_id, section
+
+
+def catalog_section_labels(lang: Lang) -> dict[str, str]:
+    if (lang or "").startswith("fa"):
+        return {
+            "bot": "📘 کاتالوگ ربات",
+            "expert": "🧰 کاتالوگ Expert",
+            "shared": "🔗 مشترک ربات و Expert",
+        }
+    return {
+        "bot": "📘 Bot catalog",
+        "expert": "🧰 Expert catalog",
+        "shared": "🔗 Shared bot + Expert",
+    }
+
+
 def catalog_product_keyboard(lang: Lang, product_id: str) -> ReplyKeyboardMarkup:
-    """Ask AI first, then feature buttons from a product catalog + back to main."""
+    """Product hub root keyboard.
+
+    Smart Support Bot shows only 4 main keys (Ask AI + 3 section hubs).
+    Other products list Ask AI + all feature keys.
+    """
     product = get_product(product_id)
-    rows: list[list[KeyboardButton]] = [
-        [KeyboardButton(text=_label("ask_ai", lang))],
-    ]
+    if product_id == "agent-bot":
+        labels = catalog_section_labels(lang)
+        rows: list[list[KeyboardButton]] = [
+            [KeyboardButton(text=_label("ask_ai", lang))],
+            [KeyboardButton(text=labels["bot"])],
+            [KeyboardButton(text=labels["expert"])],
+            [KeyboardButton(text=labels["shared"])],
+            [KeyboardButton(text=_label("home", lang))],
+        ]
+        return ReplyKeyboardMarkup(
+            keyboard=rows,
+            resize_keyboard=True,
+            one_time_keyboard=False,
+            is_persistent=True,
+            input_field_placeholder=product.label(lang) if product else "Product",
+        )
+
+    rows = [[KeyboardButton(text=_label("ask_ai", lang))]]
     if product:
-        # Pair features two-per-row when possible
-        feats = list(product.features or [])
-        i = 0
-        while i < len(feats):
-            left = feats[i]
-            left_label = feature_label(product, left, lang)
-            if i + 1 < len(feats):
-                right = feats[i + 1]
-                right_label = feature_label(product, right, lang)
-                rows.append(
-                    [
-                        KeyboardButton(text=left_label),
-                        KeyboardButton(text=right_label),
-                    ]
-                )
-                i += 2
-            else:
-                rows.append([KeyboardButton(text=left_label)])
-                i += 1
+        rows.extend(_pair_feature_rows(product, list(product.features or []), lang))
     rows.append([KeyboardButton(text=_label("home", lang))])
     return ReplyKeyboardMarkup(
         keyboard=rows,
@@ -200,6 +256,34 @@ def catalog_product_keyboard(lang: Lang, product_id: str) -> ReplyKeyboardMarkup
         is_persistent=True,
         input_field_placeholder=product.label(lang) if product else "Product",
     )
+
+
+def catalog_section_keyboard(lang: Lang, product_id: str, section: str) -> ReplyKeyboardMarkup:
+    """Submenu for one Smart Support Bot section; back returns to product root (4 keys)."""
+    product = get_product(product_id)
+    labels = catalog_section_labels(lang)
+    back = product.label(lang) if product else _label("home", lang)
+    rows: list[list[KeyboardButton]] = [
+        [KeyboardButton(text=_label("ask_ai", lang))],
+    ]
+    if product:
+        feats = [
+            f
+            for f in (product.features or [])
+            if isinstance(f, dict) and str(f.get("section") or "bot").strip() == section
+        ]
+        rows.extend(_pair_feature_rows(product, feats, lang))
+    rows.append([KeyboardButton(text=back)])
+    rows.append([KeyboardButton(text=_label("home", lang))])
+    title = labels.get(section, section)
+    return ReplyKeyboardMarkup(
+        keyboard=rows,
+        resize_keyboard=True,
+        one_time_keyboard=False,
+        is_persistent=True,
+        input_field_placeholder=title,
+    )
+
 
 
 def modes_keyboard(lang: Lang) -> ReplyKeyboardMarkup:
@@ -253,24 +337,31 @@ def resolve_lang_button(text: str | None) -> Lang | None:
     return LANG_BUTTON_TO_CODE.get(text.strip())
 
 
-def resolve_menu_action(text: str | None, lang: Lang) -> str | None:
-    """Map a reply-keyboard press to menu action for the user's language."""
+def resolve_menu_action(
+    text: str | None,
+    lang: Lang,
+    *,
+    current_product_id: str | None = None,
+) -> str | None:
+    """Map a reply-keyboard press to menu action for the user's language.
+
+    When the user is inside a product hub, that product's feature labels win
+    over same-looking global menu labels and other product catalogs.
+    """
     if not text:
         return None
     needle = text.strip()
-    for action, table in _MENU_ACTION_TABLES.items():
-        if texts.t(table, lang) == needle:
-            return action
-    for action, table in _MENU_ACTION_TABLES.items():
-        for code in texts.SUPPORTED:
-            if texts.t(table, code) == needle:
-                return action
-    # Product hub buttons
-    for product in get_product_catalogs():
-        for code in texts.SUPPORTED:
-            if product.label(code) == needle:
-                return product_action_id(product.product_id)
-        # Feature buttons inside product hubs
+    current = (current_product_id or "").strip()
+
+    # Section headers inside Smart Support Bot
+    for code in texts.SUPPORTED:
+        labels = catalog_section_labels(code)
+        for section, title in labels.items():
+            if title == needle:
+                pid = current or "agent-bot"
+                return section_action_id(pid, section)
+
+    def _match_product_features(product) -> str | None:
         for feat in product.features or []:
             fid = str(feat.get("id") or "").strip()
             if not fid:
@@ -278,6 +369,38 @@ def resolve_menu_action(text: str | None, lang: Lang) -> str | None:
             for code in texts.SUPPORTED:
                 if feature_label(product, feat, code) == needle:
                     return feature_action_id(product.product_id, fid)
+        return None
+
+    # 1) Prefer the open product hub (prevents Config Builder «تماس/تنظیمات» → VPS)
+    if current:
+        product = get_product(current)
+        if product:
+            hit = _match_product_features(product)
+            if hit:
+                return hit
+            for code in texts.SUPPORTED:
+                if product.label(code) == needle:
+                    return product_action_id(product.product_id)
+
+    # 2) Global menu labels (Ask AI / Home / installer topics / …)
+    for action, table in _MENU_ACTION_TABLES.items():
+        if texts.t(table, lang) == needle:
+            return action
+    for action, table in _MENU_ACTION_TABLES.items():
+        for code in texts.SUPPORTED:
+            if texts.t(table, code) == needle:
+                return action
+
+    # 3) Other product hubs + features
+    for product in get_product_catalogs():
+        if current and product.product_id == current:
+            continue
+        for code in texts.SUPPORTED:
+            if product.label(code) == needle:
+                return product_action_id(product.product_id)
+        hit = _match_product_features(product)
+        if hit:
+            return hit
     return None
 
 
@@ -327,6 +450,10 @@ __all__ = [
     "modes_keyboard",
     "parse_feature_action",
     "parse_product_action",
+    "parse_section_action",
+    "section_action_id",
+    "catalog_section_labels",
+    "catalog_section_keyboard",
     "remove_keyboard",
     "resolve_lang_button",
     "resolve_menu_action",
