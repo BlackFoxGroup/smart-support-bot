@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "product_id": "agent-bot",
+  "reply_rules": {
+    "stay_in_product": true,
+    "use_howto": true,
+    "attach_catalog_media": true,
+    "language_from_question": true
+  },
+  "aliases": {
+    "fa": [
+      "اسمارت ساپورت",
+      "پرسش از هوش مصنوعی",
+      "کاتالوگ",
+      "اکسپرت",
+      "منیجر",
+      "ربات",
+      "پشتیبانی"
+    ],
+    "en": [
+      "smart support bot",
+      "ask ai",
+      "product catalogs",
+      "expert",
+      "manager",
+      "agent bot",
+      "@BlackFox_Agent_Bot",
+      "blackfox agent",
+      "bot",
+      "catalog photos",
+      "install expert",
+      "smart support manager",
+      "support",
+      "telegram"
+    ]
+  },
+  "notes": "Scope: Smart Support Bot / Agent Bot only. Prefer catalog for Ask AI, catalogs, Expert, Manager."
+}

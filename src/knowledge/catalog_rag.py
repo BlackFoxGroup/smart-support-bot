@@ -796,6 +796,23 @@ def retrieve_catalog_context(
     """Retrieve related catalog sections + only relevant images for a user question."""
     search_query = f"{prior_text} {query}".strip() if (prior_text or "").strip() else query
     expanded = expand_query(search_query)
+    profile = None
+    profile_rules = None
+    pid_early = (product_id or "").strip()
+    if pid_early:
+        try:
+            from src.knowledge.ai_profile import (
+                expand_with_profile_aliases,
+                load_ai_profile,
+                reply_rules as _profile_reply_rules,
+            )
+            kr = project_root / "knowledge"
+            profile = load_ai_profile(kr, pid_early)
+            profile_rules = _profile_reply_rules(profile)
+            expanded = expand_with_profile_aliases(expanded, profile)
+        except Exception:
+            profile = None
+            profile_rules = None
     educational = is_educational_question(query) or is_educational_question(search_query)
     send_now = wants_send_media(query)
     from src.knowledge.catalog_index import wants_overview_ui
@@ -1138,6 +1155,8 @@ def retrieve_catalog_context(
         and ui_intent
         and not (is_capability_yesno(query) and not educational and not send_now and not dominant_cluster)
     )
+    if profile_rules is not None and not profile_rules.get("attach_catalog_media", True):
+        attach_media = False
     if needs_clarification or not attach_media:
         media_paths = []
         picked_media: list[CatalogUnit] = []

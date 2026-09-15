@@ -29,6 +29,12 @@ def write_catalog(knowledge_root: Path, product_id: str, data: dict[str, Any]) -
     path = product_json_path(knowledge_root, product_id)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    try:
+        from src.knowledge.ai_profile import ensure_ai_profile
+
+        ensure_ai_profile(knowledge_root, product_id, catalog_data=data)
+    except Exception:  # noqa: BLE001
+        pass
     load_product_catalogs(knowledge_root)
 
 

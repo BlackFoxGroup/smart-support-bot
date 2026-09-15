@@ -176,6 +176,17 @@ def activate_version(knowledge_root: Path, data_dir: Path, product_id: str, vers
             "source_section": "catalog",
         },
     )
+    try:
+        from src.knowledge.ai_profile import ensure_ai_profile
+        from src.knowledge.product_catalogs import load_product_raw
+
+        ensure_ai_profile(
+            knowledge_root,
+            product_id,
+            catalog_data=load_product_raw(knowledge_root, product_id),
+        )
+    except Exception:
+        pass
     return {"ok": True, "version": version, "status": "ACTIVE"}
 
 

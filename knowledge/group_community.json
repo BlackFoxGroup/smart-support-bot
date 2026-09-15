@@ -1,0 +1,49 @@
+{
+  "source": "https://t.me/Black_Fox_Group",
+  "fetched_note": "Public post history was not readable from this network (forum group; MTProto timed out). Used official group metadata + current product facts. Price posts and outdated two-mode marketing are excluded by policy.",
+  "group": {
+    "title": "BlackFox Group",
+    "username": "Black_Fox_Group",
+    "url": "https://t.me/Black_Fox_Group",
+    "description": "BlackFox Vpn Android & BlackFox VPN installer — support: @HiBlackFoxVpn"
+  },
+  "contacts": {
+    "human_support": "@HiBlackFoxVpn",
+    "group": "@Black_Fox_Group",
+    "group_url": "https://t.me/Black_Fox_Group",
+    "site": "https://foxnext.net"
+  },
+  "group_chat_id": -1003997592487,
+  "forum_topics": {
+    "fa": null,
+    "en": 814,
+    "ru": 816,
+    "zh": 824
+  },
+  "product_points": [
+    "Black Fox offers Windows VPN Installer (ops toolkit) and Android companion apps.",
+    "Working modes are Basic, Pro, and AI Pro (three modes; not the old two-mode marketing).",
+    "Basic free ops: Setup Central, Connect SSH, Full Deploy.",
+    "Pro and AI Pro are different licenses — Pro ≠ AI Pro.",
+    "Max 6 exit servers and 6 nodes.",
+    "Never invent prices. Share purchase/contact links only when the user asks."
+  ],
+  "reply_snippets": {
+    "fa": [
+      "محصول شامل نصب‌کننده ویندوز و اپ اندروید است؛ مدها: Basic / Pro / AI Pro.",
+      "حداکثر ۶ Exit و ۶ Node (فقط وقتی کاربر درباره محدودیت بپرسد)."
+    ],
+    "en": [
+      "Product includes Windows Installer and Android apps; modes: Basic / Pro / AI Pro.",
+      "Max 6 exits and 6 nodes (mention only when the user asks about limits)."
+    ],
+    "ru": [
+      "Продукт: Windows Installer и Android; режимы Basic / Pro / AI Pro.",
+      "Макс. 6 Exit и 6 Node (упоминать только по запросу о лимитах)."
+    ],
+    "zh": [
+      "产品含 Windows 安装器与 Android；模式：Basic / Pro / AI Pro。",
+      "最多 6 个 Exit 与 6 个 Node（仅在用户询问限额时说明）。"
+    ]
+  }
+}

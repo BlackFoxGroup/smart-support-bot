@@ -404,6 +404,12 @@ async def build_one_catalog(
     path = product_json_path(knowledge_root, product_id)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+    try:
+        from src.knowledge.ai_profile import ensure_ai_profile
+
+        ensure_ai_profile(knowledge_root, product_id, catalog_data=data)
+    except Exception:  # noqa: BLE001
+        logger.exception("ensure_ai_profile failed for %s", product_id)
     # Keep a copy inside the inbox folder too
     (folder / f"{product_id}.catalog.json").write_text(
         json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8"

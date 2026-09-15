@@ -40,6 +40,7 @@ Both programs use the same product directory on the server:
 ```text
 /opt/smart-support/products/<product-id>/
 ├── catalog.json
+├── ai_profile.json
 └── media/
 ```
 
@@ -52,7 +53,9 @@ Download the public package:
 
 [smart-support-suite-v2.3.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.3.zip)
 
-The package contains the raw source for the bot and Manager. It does not contain passwords, tokens, API keys, server addresses, usernames, user data, or Telegram session files.
+The package is **raw source + product catalogs + `ai_profile.json`**. It does **not** include Black Fox ready-made AI knowledge databases (`AI_Knowledge_Base_Multilingual`, `AI_BOT_DATABASE`), product screenshot media (add those via Expert/Manager), passwords, tokens, API keys, server addresses, usernames, user data, or Telegram session files.
+
+Product Ask AI works from each product’s `catalog.json` + `ai_profile.json` alone.
 
 ## Requirements
 
@@ -166,6 +169,7 @@ Smart Support Bot and Manager are maintained by Black Fox Group.
 ```text
 /opt/smart-support/products/<product-id>/
 ├── catalog.json
+├── ai_profile.json
 └── media/
 ```
 
@@ -178,7 +182,7 @@ Smart Support Bot and Manager are maintained by Black Fox Group.
 
 [smart-support-suite-v2.3.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.3.zip)
 
-این بسته شامل سورس خام ربات و Manager است. هیچ رمز، توکن، کلید API، نشانی سرور، نام کاربری، اطلاعات کاربران یا فایل نشست تلگرام داخل آن قرار ندارد.
+این بسته **سورس خام + کاتالوگ محصولات + `ai_profile.json`** است. پایگاه‌های آمادهٔ دانش هوش مصنوعی بلک‌فاکس (`AI_Knowledge_Base_Multilingual` و `AI_BOT_DATABASE`) و فایل‌های رسانه‌ای/اسکرین‌شات محصولات داخل بسته نیستند (رسانه از طریق Expert/Manager اضافه می‌شود). هیچ رمز، توکن، کلید API، نشانی سرور، نام کاربری، اطلاعات کاربران یا فایل نشست تلگرام داخل آن قرار ندارد. Ask AI محصول فقط با `catalog.json` و `ai_profile.json` همان محصول کار می‌کند.
 
 ## پیش‌نیازها
 

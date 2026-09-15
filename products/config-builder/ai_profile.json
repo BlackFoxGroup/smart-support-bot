@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "product_id": "config-builder",
+  "reply_rules": {
+    "stay_in_product": true,
+    "use_howto": true,
+    "attach_catalog_media": true,
+    "language_from_question": true
+  },
+  "aliases": {
+    "fa": [
+      "کانفیگ",
+      "ساخت کانفیگ",
+      "کیوآر",
+      "گروهی",
+      "لیست کانفیگ",
+      "حذف کانفیگ",
+      "لیست",
+      "صفحه لیست"
+    ],
+    "en": [
+      "config builder",
+      "3x-ui",
+      "qr",
+      "bulk",
+      "config list",
+      "delete config",
+      "panel",
+      "client config",
+      "list"
+    ]
+  },
+  "notes": "Scope: Config Builder only. Prefer howto for connection, single/bulk create, list, QR, language."
+}

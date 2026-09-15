@@ -43,6 +43,11 @@ from src.knowledge.ai_memory import (
     memory_prompt_block,
     product_memory_has_content,
 )
+from src.knowledge.ai_profile import (
+    ai_profile_prompt_block,
+    load_ai_profile,
+    reply_rules as ai_reply_rules,
+)
 from src.knowledge.catalog_index import wants_send_media
 from src.knowledge.catalog_rag import retrieve_catalog_context
 from src.knowledge.response_bundle import (
@@ -383,6 +388,11 @@ def setup_chat_router(
             return
 
         operator_style = behavior_rules_text(settings.knowledge_root, ask_product)
+        ai_profile = (
+            load_ai_profile(settings.knowledge_root, ask_product) if ask_product else None
+        )
+        profile_rules = ai_reply_rules(ai_profile) if ask_product else ai_reply_rules(None)
+        profile_block = ai_profile_prompt_block(ai_profile) if ask_product else ""
         # Product-scoped Ask AI must not reuse answers from another catalog.
         mem_hit = None if ask_product else memory.lookup(text, lang=lang)
         if (
@@ -449,7 +459,11 @@ def setup_chat_router(
             ]
         bundle = _bundle_from_retrieval(ask_product or "", text, retrieval)
         media_paths = []
-        if ask_product and getattr(retrieval, "attach_media", False):
+        if (
+            ask_product
+            and getattr(retrieval, "attach_media", False)
+            and profile_rules.get("attach_catalog_media", True)
+        ):
             media_paths = existing_media_paths(
                 bundle.media_refs,
                 product_id=ask_product or "",
@@ -475,7 +489,9 @@ def setup_chat_router(
                     feature=matched_feat,
                     product=matched_cat,
                 )
-                want_media = bool(feat_paths) and (
+                want_media = bool(feat_paths) and profile_rules.get(
+                    "attach_catalog_media", True
+                ) and (
                     getattr(retrieval, "attach_media", False)
                     or wants_send_media(text)
                     or looks_usage_howto(text)
@@ -633,7 +649,7 @@ def setup_chat_router(
 
         def _user_facing_fallback() -> str:
             # Prefer a single feature howto in the question language (no bilingual dump).
-            if ask_product:
+            if ask_product and profile_rules.get("use_howto", True):
                 hit = match_feature_for_query(text, lang=lang, product_id=ask_product)
                 if hit is not None:
                     _c, feat, _s = hit
@@ -715,9 +731,10 @@ def setup_chat_router(
         history_section = history_blob or "(none)"
         product_scope = (
             f"Product catalog scope: {ask_product}\n"
-            "Answer ONLY from this product's catalog and this product's AI_BEHAVIOR.md.\n"
+            "Answer ONLY from this product's catalog, ai_profile.json, and this product's AI_BEHAVIOR.md.\n"
             "If those sources lack the fact, say you do not know. "
-            "Do not use another product catalog. Do not invent steps.\n\n"
+            "Do not use another product catalog. Do not invent steps.\n"
+            + (profile_block + "\n\n" if profile_block else "\n")
             if ask_product
             else ""
         )
@@ -725,7 +742,12 @@ def setup_chat_router(
         # for ANY ask_product that has a feature catalog (not only Expert/VPS).
         expert_usage_block = ""
         _tutor_prod = get_product(ask_product) if ask_product else None
-        if ask_product and _tutor_prod is not None and (_tutor_prod.features or []):
+        if (
+            ask_product
+            and profile_rules.get("use_howto", True)
+            and _tutor_prod is not None
+            and (_tutor_prod.features or [])
+        ):
             matched_howto = ""
             matched_title = ""
             product_label = (

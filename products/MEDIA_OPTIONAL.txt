@@ -1,0 +1,3 @@
+Product screenshots under products/<id>/media/ are optional.
+Add them via Smart Support Expert / Manager after install.
+They are excluded from the public raw suite zip to keep the download small.

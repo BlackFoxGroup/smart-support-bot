@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "product_id": "project-agent-hub",
+  "reply_rules": {
+    "stay_in_product": true,
+    "use_howto": true,
+    "attach_catalog_media": true,
+    "language_from_question": true
+  },
+  "aliases": {
+    "fa": [
+      "Project Agent Hub"
+    ],
+    "en": [
+      "Project Agent Hub",
+      "agent hub"
+    ]
+  },
+  "notes": "Minimal stub — product catalog mostly empty; keep replies scoped and honest about limited catalog content."
+}

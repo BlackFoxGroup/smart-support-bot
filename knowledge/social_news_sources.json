@@ -1,0 +1,402 @@
+[
+  {
+    "kind": "telegram",
+    "name": "BBC فارسی",
+    "url": "https://t.me/s/BBCPersian"
+  },
+  {
+    "kind": "telegram",
+    "name": "ایران اینترنشنال",
+    "url": "https://t.me/s/iranintltv"
+  },
+  {
+    "kind": "telegram",
+    "name": "منوتو",
+    "url": "https://t.me/s/Manototv"
+  },
+  {
+    "kind": "telegram",
+    "name": "صدای آمریکا فارسی",
+    "url": "https://t.me/s/FarsiVOA"
+  },
+  {
+    "kind": "telegram",
+    "name": "دیجیاتو",
+    "url": "https://t.me/s/Digiato"
+  },
+  {
+    "kind": "telegram",
+    "name": "زومیت",
+    "url": "https://t.me/s/theZoomit"
+  },
+  {
+    "kind": "telegram",
+    "name": "پیوست",
+    "url": "https://t.me/s/peivast"
+  },
+  {
+    "kind": "telegram",
+    "name": "رادیو فردا",
+    "url": "https://t.me/s/radiofarda"
+  },
+  {
+    "kind": "telegram",
+    "name": "دویچه‌وله فارسی",
+    "url": "https://t.me/s/dw_Farsi"
+  },
+  {
+    "kind": "telegram",
+    "name": "یورونیوز فارسی",
+    "url": "https://t.me/s/euronewspe"
+  },
+  {
+    "kind": "telegram",
+    "name": "گزارش‌های اینترنت ایران",
+    "url": "https://t.me/s/IRVIVPN"
+  },
+  {
+    "kind": "telegram",
+    "name": "اخبار فیلترینگ",
+    "url": "https://t.me/s/filtereshekan"
+  },
+  {
+    "kind": "telegram",
+    "name": "فیلترینگ نیوز",
+    "url": "https://t.me/s/FilteringNews"
+  },
+  {
+    "kind": "telegram",
+    "name": "نت‌بلاک",
+    "url": "https://t.me/s/NetBlocks"
+  },
+  {
+    "kind": "telegram",
+    "name": "ایران‌وایر",
+    "url": "https://t.me/s/IranWireFA"
+  },
+  {
+    "kind": "telegram",
+    "name": "همشهری آنلاین",
+    "url": "https://t.me/s/hamshahrionline"
+  },
+  {
+    "kind": "telegram",
+    "name": "ایسنا",
+    "url": "https://t.me/s/isna94"
+  },
+  {
+    "kind": "telegram",
+    "name": "ایرنا",
+    "url": "https://t.me/s/IRNAirna"
+  },
+  {
+    "kind": "telegram",
+    "name": "فارس",
+    "url": "https://t.me/s/farsna"
+  },
+  {
+    "kind": "telegram",
+    "name": "تسنیم",
+    "url": "https://t.me/s/tasnimnews"
+  },
+  {
+    "kind": "telegram",
+    "name": "خبر آنلاین",
+    "url": "https://t.me/s/khabaronline_ir"
+  },
+  {
+    "kind": "telegram",
+    "name": "عصر ایران",
+    "url": "https://t.me/s/asriran_official"
+  },
+  {
+    "kind": "telegram",
+    "name": "انتخاب",
+    "url": "https://t.me/s/entekhab_ir"
+  },
+  {
+    "kind": "telegram",
+    "name": "رادیو زمانه",
+    "url": "https://t.me/s/RadioZamaneh"
+  },
+  {
+    "kind": "telegram",
+    "name": "ایندیپندنت فارسی",
+    "url": "https://t.me/s/independentfarsi"
+  },
+  {
+    "kind": "telegram",
+    "name": "مهر نیوز",
+    "url": "https://t.me/s/mehrnews"
+  },
+  {
+    "kind": "telegram",
+    "name": "ایلنا",
+    "url": "https://t.me/s/ilnanews"
+  },
+  {
+    "kind": "telegram",
+    "name": "تابناک",
+    "url": "https://t.me/s/tabnak"
+  },
+  {
+    "kind": "telegram",
+    "name": "اقتصاد آنلاین",
+    "url": "https://t.me/s/EghtesadOnline"
+  },
+  {
+    "kind": "telegram",
+    "name": "جماران",
+    "url": "https://t.me/s/jamarannews"
+  },
+  {
+    "kind": "rss",
+    "name": "IRNA رسمی",
+    "url": "https://www.irna.ir/rss"
+  },
+  {
+    "kind": "rss",
+    "name": "IRNA IT",
+    "url": "https://www.irna.ir/rss/tp/14"
+  },
+  {
+    "kind": "rss",
+    "name": "ISNA رسمی",
+    "url": "https://www.isna.ir/rss"
+  },
+  {
+    "kind": "rss",
+    "name": "ISNA Science",
+    "url": "https://www.isna.ir/rss/tp/24"
+  },
+  {
+    "kind": "rss",
+    "name": "Mehr News",
+    "url": "https://www.mehrnews.com/rss"
+  },
+  {
+    "kind": "rss",
+    "name": "Mehr News IT",
+    "url": "https://www.mehrnews.com/rss/tp/7"
+  },
+  {
+    "kind": "rss",
+    "name": "Tasnim News",
+    "url": "https://www.tasnimnews.com/fa/rss/feed"
+  },
+  {
+    "kind": "rss",
+    "name": "Tasnim Society",
+    "url": "https://www.tasnimnews.com/fa/rss/service/2"
+  },
+  {
+    "kind": "rss",
+    "name": "Fars News",
+    "url": "https://www.farsnews.ir/rss"
+  },
+  {
+    "kind": "rss",
+    "name": "YJC",
+    "url": "https://www.yjc.ir/fa/rss/allnews"
+  },
+  {
+    "kind": "rss",
+    "name": "YJC Technology",
+    "url": "https://www.yjc.ir/fa/rss/8"
+  },
+  {
+    "kind": "rss",
+    "name": "Tabnak",
+    "url": "https://www.tabnak.ir/fa/rss/allnews"
+  },
+  {
+    "kind": "rss",
+    "name": "Khabar Online",
+    "url": "https://www.khabaronline.ir/rss"
+  },
+  {
+    "kind": "rss",
+    "name": "Khabar Online Tech",
+    "url": "https://www.khabaronline.ir/rss/tp/6"
+  },
+  {
+    "kind": "rss",
+    "name": "Hamshahri",
+    "url": "https://www.hamshahrionline.ir/rss"
+  },
+  {
+    "kind": "rss",
+    "name": "Hamshahri Science",
+    "url": "https://www.hamshahrionline.ir/rss/tp/14"
+  },
+  {
+    "kind": "rss",
+    "name": "Asr Iran",
+    "url": "https://www.asriran.com/fa/rss/allnews"
+  },
+  {
+    "kind": "rss",
+    "name": "Entekhab",
+    "url": "https://www.entekhab.ir/fa/rss/allnews"
+  },
+  {
+    "kind": "rss",
+    "name": "Zoomit",
+    "url": "https://www.zoomit.ir/feed/"
+  },
+  {
+    "kind": "rss",
+    "name": "Digiato",
+    "url": "https://digiato.com/feed"
+  },
+  {
+    "kind": "rss",
+    "name": "Peivast",
+    "url": "https://peivast.com/feed"
+  },
+  {
+    "kind": "rss",
+    "name": "ITNA",
+    "url": "https://www.itna.ir/fa/feeds/"
+  },
+  {
+    "kind": "rss",
+    "name": "ICTNA",
+    "url": "https://www.ictna.ir/fa/feeds/"
+  },
+  {
+    "kind": "rss",
+    "name": "BBC Persian",
+    "url": "https://feeds.bbci.co.uk/persian/rss.xml"
+  },
+  {
+    "kind": "rss",
+    "name": "Radio Farda",
+    "url": "https://www.radiofarda.com/api/zqyoeavvvj"
+  },
+  {
+    "kind": "rss",
+    "name": "DW Persian",
+    "url": "https://rss.dw.com/rdf/rss-fa-all"
+  },
+  {
+    "kind": "rss",
+    "name": "BBC News World",
+    "url": "https://feeds.bbci.co.uk/news/world/rss.xml"
+  },
+  {
+    "kind": "rss",
+    "name": "BBC News Middle East",
+    "url": "https://feeds.bbci.co.uk/news/world/middle_east/rss.xml"
+  },
+  {
+    "kind": "rss",
+    "name": "BBC News Technology",
+    "url": "https://feeds.bbci.co.uk/news/technology/rss.xml"
+  },
+  {
+    "kind": "rss",
+    "name": "Al Jazeera",
+    "url": "https://www.aljazeera.com/xml/rss/all.xml"
+  },
+  {
+    "kind": "rss",
+    "name": "The Guardian World",
+    "url": "https://www.theguardian.com/world/rss"
+  },
+  {
+    "kind": "rss",
+    "name": "The Guardian Technology",
+    "url": "https://www.theguardian.com/technology/rss"
+  },
+  {
+    "kind": "rss",
+    "name": "CNN Top Stories",
+    "url": "http://rss.cnn.com/rss/edition.rss"
+  },
+  {
+    "kind": "rss",
+    "name": "CNN Technology",
+    "url": "http://rss.cnn.com/rss/edition_technology.rss"
+  },
+  {
+    "kind": "rss",
+    "name": "France24 EN",
+    "url": "https://www.france24.com/en/rss"
+  },
+  {
+    "kind": "rss",
+    "name": "DW English",
+    "url": "https://rss.dw.com/rdf/rss-en-all"
+  },
+  {
+    "kind": "rss",
+    "name": "NYTimes Technology",
+    "url": "https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml"
+  },
+  {
+    "kind": "rss",
+    "name": "NYTimes World",
+    "url": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml"
+  },
+  {
+    "kind": "rss",
+    "name": "Washington Post Technology",
+    "url": "https://feeds.washingtonpost.com/rss/business/technology"
+  },
+  {
+    "kind": "rss",
+    "name": "NetBlocks Reports",
+    "url": "https://netblocks.org/reports/feed"
+  },
+  {
+    "kind": "rss",
+    "name": "Cloudflare Blog",
+    "url": "https://blog.cloudflare.com/rss/"
+  },
+  {
+    "kind": "rss",
+    "name": "The Verge",
+    "url": "https://www.theverge.com/rss/index.xml"
+  },
+  {
+    "kind": "rss",
+    "name": "TechCrunch",
+    "url": "https://techcrunch.com/feed/"
+  },
+  {
+    "kind": "rss",
+    "name": "Ars Technica",
+    "url": "https://feeds.arstechnica.com/arstechnica/index"
+  },
+  {
+    "kind": "rss",
+    "name": "Wired",
+    "url": "https://www.wired.com/feed/rss"
+  },
+  {
+    "kind": "reddit",
+    "name": "Reddit r/iran",
+    "url": "https://www.reddit.com/r/iran/new.json?limit=40"
+  },
+  {
+    "kind": "reddit",
+    "name": "Reddit r/NewIran",
+    "url": "https://www.reddit.com/r/NewIran/new.json?limit=40"
+  },
+  {
+    "kind": "reddit",
+    "name": "Reddit r/technology",
+    "url": "https://www.reddit.com/r/technology/new.json?limit=30"
+  },
+  {
+    "kind": "hn",
+    "name": "HN (Iran internet)",
+    "url": "https://hn.algolia.com/api/v1/search?tags=story&query=Iran%20internet%20censorship"
+  },
+  {
+    "kind": "hn",
+    "name": "HN (Iran filtering)",
+    "url": "https://hn.algolia.com/api/v1/search?tags=story&query=Iran%20filtering"
+  }
+]

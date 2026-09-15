@@ -969,6 +969,12 @@ def update_product_fields(
     if menu_order is not None:
         data["menu_order"] = int(menu_order)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    try:
+        from src.knowledge.ai_profile import ensure_ai_profile
+
+        ensure_ai_profile(knowledge_root, str(data.get("product_id") or product_id), catalog_data=data)
+    except Exception:  # noqa: BLE001
+        logger.exception("ensure_ai_profile failed for %s", product_id)
     load_product_catalogs(knowledge_root)
     from src.knowledge.refresh import notify_knowledge_changed
 
@@ -1063,6 +1069,12 @@ def save_product_raw(knowledge_root: Path, product_id: str, data: dict[str, Any]
         path = product_json_path(knowledge_root, product_id)
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    try:
+        from src.knowledge.ai_profile import ensure_ai_profile
+
+        ensure_ai_profile(knowledge_root, product_id, catalog_data=data)
+    except Exception:  # noqa: BLE001
+        logger.exception("ensure_ai_profile failed for %s", product_id)
     load_product_catalogs(knowledge_root)
     from src.knowledge.refresh import notify_knowledge_changed
 
@@ -1081,6 +1093,12 @@ def ensure_product_asset_dirs(project_root: Path, knowledge_root: Path, product_
     media = product_media_dir(project_root, product_id)
     inbox = knowledge_root / "catalog_inbox" / slugify_product_id(product_id)
     inbox.mkdir(parents=True, exist_ok=True)
+    try:
+        from src.knowledge.ai_profile import ensure_ai_profile
+
+        ensure_ai_profile(knowledge_root, product_id)
+    except Exception:  # noqa: BLE001
+        logger.exception("ensure_ai_profile failed for %s", product_id)
     return media
 
 

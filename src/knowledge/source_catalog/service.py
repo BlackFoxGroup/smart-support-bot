@@ -105,6 +105,13 @@ def dashboard(project_root: Path, knowledge_root: Path, data_dir: Path) -> dict[
 
 def set_catalog_enabled(knowledge_root: Path, product_id: str, enabled: bool) -> None:
     update_product_fields(knowledge_root, product_id, catalog_enabled=enabled)
+    if enabled:
+        try:
+            from src.knowledge.ai_profile import ensure_ai_profile
+
+            ensure_ai_profile(knowledge_root, product_id)
+        except Exception:
+            pass
 
 
 def source_root_for(data_dir: Path, product_id: str) -> Path | None:

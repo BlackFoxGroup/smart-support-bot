@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "product_id": "vpn-installer",
+  "reply_rules": {
+    "stay_in_product": true,
+    "use_howto": true,
+    "attach_catalog_media": true,
+    "language_from_question": true
+  },
+  "aliases": {
+    "fa": [
+      "وی پی اس",
+      "نصب پنل",
+      "مش",
+      "دامنه",
+      "سی دی ان",
+      "بکاپ",
+      "خروجی",
+      "بیسیک",
+      "پرو",
+      "ای آی پرو",
+      "وی‌پی‌اس",
+      "پنل",
+      "مد پایه",
+      "پایه"
+    ],
+    "en": [
+      "vps to vpn",
+      "panel",
+      "mesh",
+      "domain",
+      "cdn",
+      "backup",
+      "basic mode",
+      "pro mode",
+      "ai pro",
+      "exit node",
+      "vpn installer",
+      "VPS to VPN — Black Fox Group",
+      "basic",
+      "pro",
+      "exit",
+      "node",
+      "modes"
+    ]
+  },
+  "notes": "Scope: VPS to VPN installer only. Prefer catalog howto + screenshots for modes, mesh, domain, CDN, backup, panel."
+}

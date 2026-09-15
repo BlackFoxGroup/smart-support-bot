@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "product_id": "telegram-bot-expert-installer",
+  "reply_rules": {
+    "stay_in_product": true,
+    "use_howto": true,
+    "attach_catalog_media": true,
+    "language_from_question": true
+  },
+  "aliases": {
+    "fa": [
+      "اکسپرت",
+      "نصب ربات",
+      "سلامت",
+      "بکاپ ربات",
+      "لاگ",
+      "داشبورد",
+      "تلگرام",
+      "لاگ ربات"
+    ],
+    "en": [
+      "expert installer",
+      "install bot",
+      "health check",
+      "backup",
+      "logs",
+      "dashboard",
+      "telegram bot expert installer",
+      "telegram bot"
+    ]
+  },
+  "notes": "Scope: Telegram Bot Expert Installer only. Prefer howto for install, health, backup, logs, dashboard."
+}
