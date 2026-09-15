@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "product_id": "example",
+  "reply_rules": {
+    "stay_in_product": true,
+    "use_howto": true,
+    "attach_catalog_media": true,
+    "language_from_question": true
+  },
+  "aliases": {"fa": [], "en": []},
+  "notes": "Replace this example by creating a real product in Expert/Manager."
+}

@@ -51,9 +51,11 @@ Source: [github.com/BlackFoxGroup/smart-support-bot](https://github.com/BlackFox
 
 Download the public package:
 
-[smart-support-suite-v2.3.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.3.zip)
+[smart-support-suite.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite.zip)
 
-The package is **raw source + product catalogs + `ai_profile.json`**. It does **not** include Black Fox ready-made AI knowledge databases (`AI_Knowledge_Base_Multilingual`, `AI_BOT_DATABASE`), product screenshot media (add those via Expert/Manager), passwords, tokens, API keys, server addresses, usernames, user data, or Telegram session files.
+Download filename stays `smart-support-suite.zip` (no version in the name). App version is still shown inside Expert/Bot (currently 2.3).
+
+The package is **raw source + empty `products/` template + `ai_profile` support**. It does **not** include Black Fox (or any vendor) product catalogs. It does **not** include Black Fox ready-made AI knowledge databases (`AI_Knowledge_Base_Multilingual`, `AI_BOT_DATABASE`), product screenshot media (add those via Expert/Manager), passwords, tokens, API keys, server addresses, usernames, user data, or Telegram session files.
 
 Product Ask AI works from each product’s `catalog.json` + `ai_profile.json` alone.
 
@@ -95,7 +97,7 @@ The local Expert runs without a console window and stops after its last browser 
 
 1. Extract the ZIP.
 2. Install Python 3.11 or newer on Windows.
-3. Double-click `Start-Smart-Support-Manager-v2.bat`. The first run installs the required Python packages.
+3. Double-click `Start-Smart-Support-Manager.bat`. The first run installs the required Python packages.
 4. Open the Install bot page.
 5. Select the local bot and Expert folder, then enter the server login and Telegram token.
 6. Choose `Polling` for a simple installation, or `Webhook` when a public HTTPS reverse proxy is already configured.
@@ -109,7 +111,7 @@ The bot and Expert are stored together in `/opt/smart-support`. After the succes
 Start Manager by double-clicking:
 
 ```text
-Start-Smart-Support-Manager-v2.bat
+Start-Smart-Support-Manager.bat
 ```
 
 Manager opens at `http://127.0.0.1:8766`. No terminal command is required after Python is installed.
@@ -189,9 +191,11 @@ Smart Support Bot and Manager are maintained by Black Fox Group.
 
 بسته عمومی را از اینجا دریافت کنید:
 
-[smart-support-suite-v2.3.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.3.zip)
+[smart-support-suite.zip](https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite.zip)
 
-این بسته **سورس خام + کاتالوگ محصولات + `ai_profile.json`** است. پایگاه‌های آمادهٔ دانش هوش مصنوعی بلک‌فاکس (`AI_Knowledge_Base_Multilingual` و `AI_BOT_DATABASE`) و فایل‌های رسانه‌ای/اسکرین‌شات محصولات داخل بسته نیستند (رسانه از طریق Expert/Manager اضافه می‌شود). هیچ رمز، توکن، کلید API، نشانی سرور، نام کاربری، اطلاعات کاربران یا فایل نشست تلگرام داخل آن قرار ندارد. Ask AI محصول فقط با `catalog.json` و `ai_profile.json` همان محصول کار می‌کند.
+نام فایل دانلود `smart-support-suite.zip` است (بدون شماره نسخه در نام). شماره نسخه داخل Expert/ربات نمایش داده می‌شود (الان ۲٫۳).
+
+این بسته **سورس خام + قالب خالی `products/` + پشتیبانی `ai_profile`** است و **کاتالوگ محصولات بلک‌فاکس (یا هر فروشندهٔ دیگر) داخل آن نیست**. پایگاه‌های آمادهٔ دانش هوش مصنوعی بلک‌فاکس (`AI_Knowledge_Base_Multilingual` و `AI_BOT_DATABASE`) و فایل‌های رسانه‌ای/اسکرین‌شات محصولات داخل بسته نیستند (رسانه از طریق Expert/Manager اضافه می‌شود). هیچ رمز، توکن، کلید API، نشانی سرور، نام کاربری، اطلاعات کاربران یا فایل نشست تلگرام داخل آن قرار ندارد. Ask AI محصول فقط با `catalog.json` و `ai_profile.json` همان محصول کار می‌کند.
 
 
 ## پروفایل هوش مصنوعی محصول (`ai_profile.json`)
@@ -231,7 +235,7 @@ irm https://raw.githubusercontent.com/BlackFoxGroup/smart-support-bot/main/deplo
 
 ۱. فایل ZIP را استخراج کنید.
 ۲. پایتون نسخه ۳.۱۱ یا جدیدتر را روی ویندوز نصب کنید.
-۳. روی `Start-Smart-Support-Manager-v2.bat` دوبار کلیک کنید. برنامه در اولین اجرا بسته‌های لازم را نصب می‌کند.
+۳. روی `Start-Smart-Support-Manager.bat` دوبار کلیک کنید. برنامه در اولین اجرا بسته‌های لازم را نصب می‌کند.
 ۴. صفحه نصب ربات را باز کنید.
 ۵. مسیر پوشه محلی ربات و Expert را انتخاب کنید و اطلاعات ورود سرور و توکن تلگرام را وارد کنید.
 ۶. برای نصب ساده `Polling` را انتخاب کنید. حالت `Webhook` به دامنه عمومی HTTPS و پراکسی آماده نیاز دارد.
@@ -245,7 +249,7 @@ irm https://raw.githubusercontent.com/BlackFoxGroup/smart-support-bot/main/deplo
 برای اجرای Manager روی فایل زیر دوبار کلیک کنید:
 
 ```text
-Start-Smart-Support-Manager-v2.bat
+Start-Smart-Support-Manager.bat
 ```
 
 صفحه Manager در `http://127.0.0.1:8766` باز می‌شود. پس از نصب پایتون، نیازی به اجرای دستور ترمینال نیست.

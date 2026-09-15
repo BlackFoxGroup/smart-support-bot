@@ -1,0 +1,9 @@
+{
+  "schema_version": 2,
+  "catalog_id": "example",
+  "product_id": "example",
+  "enabled": false,
+  "title": {"fa": "نمونه محصول", "en": "Example product"},
+  "short_summary": {"fa": "فقط نمونه خالی برای ساختار پوشه.", "en": "Empty sample for folder layout only."},
+  "features": []
+}

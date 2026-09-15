@@ -1,9 +1,6 @@
-# Product catalogs (empty by default)
+# Product catalog mirrors
 
-This folder starts **empty** on a fresh install.
+Expert/Manager can mirror active `products/<id>/catalog.json` files here for Ask AI.
 
-Add products from Telegram Settings → **نام محصولات / Products**, or drop JSON files here and restart/reload.
-
-Each file: `<product_id>.json` with `enabled`, `menu_emoji`, `title`, `short_summary`, `long_summary`, optional `features`.
-
-Example (reference only): see `../product_catalogs.examples/`.
+The public package ships without Black Fox (or any vendor) product catalogs.
+After you create catalogs locally or on your server, mirrors appear here when activated.

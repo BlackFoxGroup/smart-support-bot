@@ -1,6 +1,6 @@
 $ErrorActionPreference = "Stop"
 
-$PackageUrl = "https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite-v2.3.zip"
+$PackageUrl = "https://github.com/BlackFoxGroup/smart-support-bot/raw/main/downloads/smart-support-suite.zip"
 $InstallDir = Join-Path $env:LOCALAPPDATA "SmartSupport"
 $TempDir = Join-Path $env:TEMP ("smart-support-" + [guid]::NewGuid())
 $ZipPath = Join-Path $TempDir "smart-support-suite.zip"
@@ -30,7 +30,7 @@ try {
     Expand-Archive -Path $ZipPath -DestinationPath $TempDir -Force
 
     # Prefer the versioned folder from the latest zip; fall back to any smart-support-suite-* extract.
-    $SourceDir = Join-Path $TempDir "smart-support-suite-v2.3"
+    $SourceDir = Join-Path $TempDir "smart-support-suite"
     if (-not (Test-Path (Join-Path $SourceDir "requirements.txt"))) {
         $found = Get-ChildItem -Path $TempDir -Directory -Filter "smart-support-suite-*" -ErrorAction SilentlyContinue |
             Where-Object { Test-Path (Join-Path $_.FullName "requirements.txt") } |
