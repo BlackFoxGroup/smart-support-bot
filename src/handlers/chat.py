@@ -235,6 +235,7 @@ def setup_chat_router(
                 None,
             )
             if row is None or row.get("enabled", True) is False:
+                await users.set_ask_ai(user.id, False)
                 await message.answer(
                     "این محصول دیگر در دسترس نیست. از منو دوباره «سوال از AI» را برای یک محصول فعال بزنید."
                     if (lang or "").startswith("fa")
@@ -373,9 +374,10 @@ def setup_chat_router(
         ):
             clarify = str(retrieval.clarifying_question)
             try:
-                await wait.edit_text(clarify)
+                await wait.delete()
             except Exception:  # noqa: BLE001
-                await message.answer(clarify, reply_markup=ask_kb)
+                pass
+            await message.answer(clarify, reply_markup=ask_kb)
             await users.append_chat(user.id, "user", text)
             await users.append_chat(user.id, "assistant", clarify)
             await metrics.record_answered(referred_support=False, ai_solved=False)
@@ -394,9 +396,10 @@ def setup_chat_router(
             and match.clarifying_question
         ):
             try:
-                await wait.edit_text(match.clarifying_question)
+                await wait.delete()
             except Exception:  # noqa: BLE001
-                await message.answer(match.clarifying_question, reply_markup=ask_kb)
+                pass
+            await message.answer(match.clarifying_question, reply_markup=ask_kb)
             await users.append_chat(user.id, "user", text)
             await users.append_chat(user.id, "assistant", match.clarifying_question)
             await metrics.record_answered(referred_support=False, ai_solved=False)
@@ -635,9 +638,13 @@ def setup_chat_router(
                     )
                 else:
                     try:
-                        await wait.edit_text(texts.t(texts.AI_ERROR, lang))
+                        await wait.delete()
                     except Exception:  # noqa: BLE001
-                        await message.answer(texts.t(texts.AI_ERROR, lang))
+                        pass
+                    await message.answer(
+                        texts.t(texts.AI_ERROR, lang),
+                        reply_markup=ask_kb,
+                    )
                     return
 
         safe = prepare_user_reply(answer)
@@ -744,9 +751,10 @@ def setup_chat_router(
             source = "catalog+md"
         stages.mark("ai_and_safety")
         try:
-            await wait.edit_text(final)
+            await wait.delete()
         except Exception:
-            await message.answer(final, reply_markup=ask_kb)
+            pass
+        await message.answer(final, reply_markup=ask_kb)
         stages.mark("send_text")
         if ask_product and media_paths and getattr(retrieval, "attach_media", False):
             try:

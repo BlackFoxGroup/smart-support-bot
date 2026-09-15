@@ -26,6 +26,12 @@ logger = logging.getLogger(__name__)
 # Concept aliases → boost matching without per-question hardcoding.
 # Keys are normalized (lower, ZWNJ stripped). Values are tokens merged into the query.
 TOPIC_ALIASES: dict[str, tuple[str, ...]] = {
+    "مد پایه": ("basic_mode", "basic", "modes", "basic mode"),
+    "پایه": ("basic_mode", "basic", "modes", "basic mode"),
+    "basic mode": ("basic_mode", "basic", "modes", "مد پایه", "پایه"),
+    "basic": ("basic_mode", "modes", "مد پایه"),
+    "مد بیسیک": ("basic_mode", "basic", "modes"),
+    "بیسیک": ("basic_mode", "basic", "modes"),
     "پیکربندی": ("configure", "panel", "configure_panel", "inbound", "outbound", "config"),
     "پیکربندی پنل": ("configure_panel", "configure", "panel", "inbound", "outbound"),
     "کانفیگ": ("configure", "configure_panel", "config", "panel"),

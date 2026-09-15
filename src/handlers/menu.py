@@ -95,6 +95,19 @@ def setup_menu_router(
 
             raise SkipHandler()
 
+        # Sticky Ask AI: stay until user explicitly leaves via home/lang/contact
+        # or a product hub key. Feature/section/installer labels typed as text
+        # must go to Ask AI, not steal the session.
+        if await users.is_ask_ai(uid):
+            from aiogram.dispatcher.event.bases import SkipHandler
+
+            if action == "ask_ai":
+                pass  # re-prompt below
+            elif action in {"lang", "home", "contact"} or parse_product_action(action):
+                pass  # intentional leave — handle below
+            else:
+                raise SkipHandler()
+
         if action == "lang":
             await users.set_ask_ai(uid, False)
             await send_language_picker(message, users)
