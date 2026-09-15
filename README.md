@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Logo.jpg" alt="Black Fox Group Logo" width="96">
+  <img src="Smart Support Bot.png" alt="Black Fox Group Logo" width="96">
 </p>
 
 <h1 align="center"> Smart Support Bot and Manager</h1>
