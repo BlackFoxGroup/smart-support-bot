@@ -159,8 +159,30 @@ async def run_nightly_subscription_job(
 
     while True:
         schedule = None
+        chat_id_preview = ""
         if bot_settings is not None:
             schedule = await bot_settings.effective_nightly_times(settings)
+            chat_id_preview = await bot_settings.effective_nightly_chat_id(settings)
+
+        # Inactive / no enabled config slot: do not fall back to env 21:00 default.
+        if bot_settings is not None and (not (schedule or "").strip() or not (chat_id_preview or "").strip()):
+            log.info(
+                "Nightly config skipped: no enabled config slot with schedule+destination "
+                "(schedule=%r chat=%r); recheck in 1h",
+                schedule,
+                chat_id_preview,
+            )
+            from src.job_status import record_job
+
+            record_job(
+                settings.data_dir,
+                "nightly_config",
+                ok=True,
+                detail="skipped: config slot disabled or incomplete",
+            )
+            await asyncio.sleep(3600)
+            continue
+
         nxt = _next_run_iran(settings, schedule_times=schedule)
         wait_seconds = max(1, int((nxt - datetime.now(IRAN_TZ)).total_seconds()))
         log.info("Nightly subscription job scheduled for %s (in %ss)", nxt.isoformat(), wait_seconds)
@@ -168,8 +190,21 @@ async def run_nightly_subscription_job(
 
         try:
             if bot_settings is not None:
-                base, token, inbound_ids = await bot_settings.effective_panel(settings)
+                # Re-check after sleep — admin may have disabled the slot meanwhile
+                schedule_now = await bot_settings.effective_nightly_times(settings)
                 chat_id = await bot_settings.effective_nightly_chat_id(settings)
+                if not (schedule_now or "").strip() or not (chat_id or "").strip():
+                    log.info("Nightly config aborted at fire time: slot disabled or incomplete")
+                    from src.job_status import record_job
+
+                    record_job(
+                        settings.data_dir,
+                        "nightly_config",
+                        ok=True,
+                        detail="skipped at fire: config slot disabled or incomplete",
+                    )
+                    continue
+                base, token, inbound_ids = await bot_settings.effective_panel(settings)
                 template = await bot_settings.effective_nightly_template()
             else:
                 from src.storage.bot_settings import parse_inbound_ids
@@ -179,6 +214,13 @@ async def run_nightly_subscription_job(
                 inbound_ids = parse_inbound_ids(settings.panel_inbound_ids)
                 chat_id = settings.nightly_support_chat_id
                 template = None
+
+            if not (chat_id or "").strip():
+                log.info("Nightly config skipped: empty chat_id")
+                from src.job_status import record_job
+
+                record_job(settings.data_dir, "nightly_config", ok=True, detail="skipped: empty chat_id")
+                continue
 
             panel = PanelClient(base_url=base, api_token=token)
             created = await panel.add_client_10gb(inbound_ids=inbound_ids)
