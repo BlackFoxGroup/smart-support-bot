@@ -1353,6 +1353,25 @@ async def run_social_news_job(
             times_raw = await bot_settings.effective_social_times(settings)
             chat_id = await bot_settings.effective_social_chat_id(settings)
             rules = await bot_settings.effective_social_rules()
+        # Disabled / incomplete news slot: never fall back to env 10:00,17:00 defaults
+        if bot_settings is not None and (
+            not (times_raw or "").strip() or not str(chat_id or "").strip()
+        ):
+            log.info(
+                "Social news idle: news slot disabled or incomplete (times=%r chat=%r); recheck in 1h",
+                times_raw,
+                chat_id,
+            )
+            from src.job_status import record_job
+
+            record_job(
+                settings.data_dir,
+                "social_news",
+                ok=True,
+                detail="skipped: news slot disabled or incomplete",
+            )
+            await asyncio.sleep(3600)
+            continue
         hhmm = _parse_times(times_raw)
         log.info("Social news scheduler active (times=%s sources=%d)", hhmm, len(sources))
         now = datetime.now(IRAN_TZ)

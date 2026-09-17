@@ -583,16 +583,16 @@ class BotSettingsStore:
                 cur.rules_prompt = s0.rules_prompt
                 if s0.chat_id:
                     cur.chat_id = s0.chat_id
-            # Channel news/config mirrors for job helpers
+            # Channel news/config mirrors for job helpers (enabled slots only)
             if key == "channel":
                 for s in cur.slots:
-                    if s.kind == "config" and s.schedule_times:
+                    if s.kind == "config" and s.enabled and s.schedule_times:
                         cur.schedule_times = s.schedule_times
                         if s.message_template:
                             cur.message_template = s.message_template
                         if s.chat_id:
                             cur.chat_id = s.chat_id
-                    if s.kind == "news" and s.schedule_times:
+                    if s.kind == "news" and s.enabled and s.schedule_times:
                         if s.chat_id:
                             cur.chat_id = cur.chat_id or s.chat_id
             # Account section never stores news
@@ -639,37 +639,41 @@ class BotSettingsStore:
             return panel
 
     async def effective_nightly_chat_id(self, settings: Settings) -> str:
+        """Destination only from an *enabled* config slot. Never inherit from a disabled slot."""
         t = await self.get_target("channel")
         config_slots = [s for s in t.slots if s.kind == "config"]
-        for s in config_slots:
-            if s.enabled:
-                cid = (s.chat_id or t.chat_id or "").strip()
-                if cid:
-                    return cid
-        if config_slots:
-            # Config slot(s) exist but none enabled → do not post
+        active = [s for s in config_slots if s.enabled]
+        if not active:
+            # No enabled config slot → do not post (even if legacy target chat_id exists)
             return ""
-        return (t.chat_id or settings.nightly_support_chat_id).strip()
+        for s in active:
+            cid = (s.chat_id or "").strip()
+            if cid:
+                return cid
+        # Enabled slot(s) with empty per-slot chat → allow target-level chat_id only
+        return (t.chat_id or "").strip()
 
     async def effective_nightly_times(self, settings: Settings) -> str:
+        """Schedule only from an *enabled* config slot that has times. Never use disabled slot times."""
         t = await self.get_target("channel")
         config_slots = [s for s in t.slots if s.kind == "config"]
-        for s in config_slots:
-            if s.enabled and s.schedule_times:
-                return s.schedule_times.strip()
-        if config_slots and not any(s.enabled for s in config_slots):
+        active = [s for s in config_slots if s.enabled]
+        if not active:
             return ""
-        for s in config_slots:
-            if s.schedule_times:
+        for s in active:
+            if (s.schedule_times or "").strip():
                 return s.schedule_times.strip()
-        return (t.schedule_times or settings.nightly_iran_time.strftime("%H:%M")).strip()
+        # Enabled but no schedule → do not fall back to disabled slots or env default
+        return ""
 
     async def effective_nightly_template(self) -> str:
+        """Template only from an *enabled* config slot. Empty means job uses built-in default only if posting."""
         t = await self.get_target("channel")
         for s in t.slots:
-            if s.kind == "config" and s.message_template:
+            if s.kind == "config" and s.enabled and s.message_template:
                 return s.message_template.strip()
-        return (t.message_template or DEFAULT_NIGHTLY_TEMPLATE).strip()
+        # No enabled template → empty (caller must not post when slot inactive)
+        return ""
 
     async def effective_social_chat_id(self, settings: Settings) -> str:
         """News posts always target Channel (never personal Account)."""
@@ -693,25 +697,22 @@ class BotSettingsStore:
     async def effective_social_times(self, settings: Settings) -> str:
         channel = await self.get_target("channel")
         news_slots = [s for s in channel.slots if s.kind == "news"]
-        for s in news_slots:
-            if s.enabled and s.schedule_times:
-                return s.schedule_times.strip()
-        if news_slots and not any(s.enabled for s in news_slots):
+        active = [s for s in news_slots if s.enabled]
+        if not active:
             return ""
-        for s in news_slots:
-            if s.schedule_times:
+        for s in active:
+            if (s.schedule_times or "").strip():
                 return s.schedule_times.strip()
-        return (settings.social_news_times or "10:00,17:00").strip()
+        # Enabled news slot(s) without times → do not use disabled slots or env defaults
+        return ""
 
     async def effective_social_rules(self) -> str:
         channel = await self.get_target("channel")
         for s in channel.slots:
             if s.kind == "news" and s.enabled and s.rules_prompt:
                 return s.rules_prompt.strip()
-        for s in channel.slots:
-            if s.kind == "news" and s.rules_prompt:
-                return s.rules_prompt.strip()
-        return DEFAULT_SOCIAL_RULES.strip()
+        # No enabled news rules → empty (do not reuse disabled-slot or default rules for a dead slot)
+        return ""
 
     async def effective_test_chat_id(self, settings: Settings) -> str:
         t = await self.get_target("test")
